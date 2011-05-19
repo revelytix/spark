@@ -9,12 +9,19 @@
   </parent>
 
   <groupId>spark</groupId>
-  <artifactId>spark-api</artifactId>
+  <artifactId>spark-spi</artifactId>
+
   <packaging>jar</packaging>
+  <name>spark-spi - SPARQL client connection SPI</name>
+  <description>Defines optional utilities and base classes to make building implementations of the API easier.</description>
 
-  <name>spark-api - SPARQL client connection API</name>
-  <description>Defines a Java client-side connection-oriented API for accessing sparql endpoints ala JDBC.</description>
-
+  <dependencies>
+    <dependency>
+      <groupId>spark</groupId>
+      <artifactId>spark-api</artifactId>
+      <version>${spark-version}</version>
+    </dependency>
+  </dependencies>
 </project>
 
 

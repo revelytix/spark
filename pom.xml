@@ -28,7 +28,13 @@
 
   <modules>
     <module>spark-api</module>
+    <module>spark-spi</module>
   </modules>
+
+  <properties>
+    <spark-version>0.0.1-SNAPSHOT</spark-version>
+    <sherpa-version>0.0.1-SNAPSHOT</sherpa-version>
+  </properties>
 
   <dependencyManagement>
     <dependencies>
