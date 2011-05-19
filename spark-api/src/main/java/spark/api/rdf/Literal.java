@@ -1,10 +1,3 @@
-package spark.api.rdf;
-
-public interface Literal extends RDFNode {
-  String getLexical();
-  
-}
-
 /*
  * Copyright 2011 Revelytix Inc.
  *
@@ -20,3 +13,9 @@ public interface Literal extends RDFNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package spark.api.rdf;
+
+public interface Literal extends RDFNode {
+  String getLexical();
+  
+}

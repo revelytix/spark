@@ -1,9 +1,3 @@
-package spark.api.rdf;
-
-public interface RDFNode {
-
-}
-
 /*
  * Copyright 2011 Revelytix Inc.
  *
@@ -19,3 +13,8 @@ public interface RDFNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package spark.api.rdf;
+
+public interface RDFNode {
+
+}

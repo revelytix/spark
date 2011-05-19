@@ -1,14 +1,3 @@
-package spark.api.rdf;
-
-public interface PlainLiteral extends Literal {
-
-  /**
-   * Return the language tag, such as "en" or "es".  If no language tag is present, return null.
-   * @return Language tag or null
-   */
-  String getLanguage();
-}
-
 /*
  * Copyright 2011 Revelytix Inc.
  *
@@ -24,3 +13,13 @@ public interface PlainLiteral extends Literal {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package spark.api.rdf;
+
+public interface PlainLiteral extends Literal {
+
+  /**
+   * Return the language tag, such as "en" or "es".  If no language tag is present, return null.
+   * @return Language tag or null
+   */
+  String getLanguage();
+}

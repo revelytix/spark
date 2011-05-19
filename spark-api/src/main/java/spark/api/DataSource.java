@@ -1,17 +1,3 @@
-package spark.api;
-
-/**
- * Actual implementations of this will be a JavaBean pattern
- * that provides getter/setter methods for specifying source-specific
- * properties.
- *
- */
-public interface DataSource {
-  /* this is a bean, fill in your own data source props */
-  
-  Connection getConnection(Credentials creds);
-}
-
 /*
  * Copyright 2011 Revelytix Inc.
  *
@@ -27,3 +13,16 @@ public interface DataSource {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package spark.api;
+
+/**
+ * Actual implementations of this will be a JavaBean pattern
+ * that provides getter/setter methods for specifying source-specific
+ * properties.
+ *
+ */
+public interface DataSource {
+  /* this is a bean, fill in your own data source props */
+  
+  Connection getConnection(Credentials creds);
+}

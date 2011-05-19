@@ -1,16 +1,3 @@
-package spark.api.rdf;
-
-import java.net.URI;
-
-public interface NamedNode extends Resource {
-
-  /**
-   * Gets a wrapped URI.
-   */
-  URI getURI();
-
-}
-
 /*
  * Copyright 2011 Revelytix Inc.
  *
@@ -26,3 +13,15 @@ public interface NamedNode extends Resource {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package spark.api.rdf;
+
+import java.net.URI;
+
+public interface NamedNode extends Resource {
+
+  /**
+   * Gets a wrapped URI.
+   */
+  URI getURI();
+
+}

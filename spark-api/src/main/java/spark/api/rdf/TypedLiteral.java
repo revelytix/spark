@@ -1,12 +1,3 @@
-package spark.api.rdf;
-
-import java.net.URI;
-
-public interface TypedLiteral extends Literal {
-
-  public URI getDataType();
-}
-
 /*
  * Copyright 2011 Revelytix Inc.
  *
@@ -22,3 +13,11 @@ public interface TypedLiteral extends Literal {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package spark.api.rdf;
+
+import java.net.URI;
+
+public interface TypedLiteral extends Literal {
+
+  public URI getDataType();
+}

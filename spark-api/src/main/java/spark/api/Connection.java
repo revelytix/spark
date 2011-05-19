@@ -1,19 +1,3 @@
-package spark.api;
-
-import java.io.Closeable;
-
-public interface Connection extends Closeable {
-
-  boolean isClosed();
-  
-  DataSource getDataSource();
-  
-  ServiceDescription getDescription();
-  
-  Command createCommand(String commandString);
-  
-}
-
 /*
  * Copyright 2011 Revelytix Inc.
  *
@@ -29,3 +13,18 @@ public interface Connection extends Closeable {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package spark.api;
+
+import java.io.Closeable;
+
+public interface Connection extends Closeable {
+
+  boolean isClosed();
+  
+  DataSource getDataSource();
+  
+  ServiceDescription getDescription();
+  
+  Command createCommand(String commandString);
+  
+}

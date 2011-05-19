@@ -1,14 +1,3 @@
-package spark.api.rdf;
-
-public interface Triple {
-
-  public Resource getSubject();
-  
-  public NamedNode getPredicate();
-  
-  public RDFNode getObject();
-}
-
 /*
  * Copyright 2011 Revelytix Inc.
  *
@@ -24,3 +13,13 @@ public interface Triple {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package spark.api.rdf;
+
+public interface Triple {
+
+  public Resource getSubject();
+  
+  public NamedNode getPredicate();
+  
+  public RDFNode getObject();
+}

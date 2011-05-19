@@ -1,17 +1,3 @@
-package spark.api;
-
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-
-public interface ServiceDescription {
-
-  List<URI> getNamedGraphs();
-  Map<URI, String> getFeatures();
-  // ...
-  
-}
-
 /*
  * Copyright 2011 Revelytix Inc.
  *
@@ -27,3 +13,16 @@ public interface ServiceDescription {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package spark.api;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+
+public interface ServiceDescription {
+
+  List<URI> getNamedGraphs();
+  Map<URI, String> getFeatures();
+  // ...
+  
+}
