@@ -7,6 +7,8 @@
   <packaging>pom</packaging>
   <name>sparql-api - repository parent module</name>
   <description>Parent module for all of the sparql-api modules that makes up spark and sherpa.</description>
+  <url>https://github.com/revelytix/sparql-api</url>
+  <inceptionYear>2011</inceptionYear>
 
   <build>
     <pluginManagement>
@@ -28,13 +30,15 @@
     <module>spark-api</module>
   </modules>
 
-  <dependencies>
-  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+    </dependencies>
+  </dependencyManagement>
 
 </project>
 
 <!--
-   Copyright [yyyy] [name of copyright owner]
+   Copyright 2011 Revelytix Inc.
  
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
