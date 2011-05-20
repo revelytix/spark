@@ -1,0 +1,74 @@
+{	"namespace": "sherpa.protocol",
+	"protocol": "Query",
+	
+	"types": [{"name": "IRI",
+		       "type": "record",
+		       "fields": [{"name": "iri", "type": "string"}]},
+		       
+		      {"name": "BNode",
+		       "type": "record",
+		       "fields": [{"name": "label", "type": "string"}]},
+		       
+		      {"name": "PlainLiteral",
+		       "type": "record",
+		       "fields": [{"name": "lexical", "type": "string"},
+		          	      {"name": "language", "type": "string"}]},
+
+		      {"name": "TypedLiteral",
+			   "type": "record",
+			   "fields": [{"name": "lexical", "type": "string"},
+				          {"name": "datatype", "type": "IRI"}]},
+
+              {"name": "QueryRequest",
+   		       "type": "record",
+   		       "fields": [{"name": "sparql", "type": "string"},
+   		                  {"name": "parameters", "type": {"type":"map", "values": "string"}},
+       			  		  {"name": "properties", "type": {"type":"map", "values": "string"}}]},
+   		                     	          
+			  {"name": "QueryResponse",
+			   "type": "record",
+			   "fields": [{"name": "queryId", "type": "string"},
+			              {"name": "vars", "type": [{"type":"array", "items": "string"}, "null"]}]},
+			              
+	          {"name": "DataRequest",
+		           "type": "record",
+		           "fields": [{"name": "queryId", "type": "string"},
+		                      {"name": "startRow", "type": "int"},
+		                      {"name": "maxSize", "type": "int"}]},
+			  
+	          {"name": "DataResponse",
+	           "type": "record",
+	           "fields": [{"name": "queryId", "type": "string"},
+	           			  {"name": "startRow", "type": "int"},
+	           			  {"name": "more", "type": "boolean"},
+	           			  {"name": "data", "type": {"type":"array", "items": 
+	           			    {"type": "array", 
+	           				"items": ["IRI", "BNode", "PlainLiteral", "TypedLiteral", "string", "boolean", "int", "long", "float", "double", "null"]}}}]},
+	           			  
+	          {"name": "ReasonCode",
+	           "type": "enum",
+	           "symbols": ["Close", "Cancel", "Timeout", "Error"]},
+	          
+	           
+	          {"name": "ErrorResponse", 
+	           "type": "error",
+	           "fields": [{"name": "code", "type": "ReasonCode"},
+	                      {"name": "message", "type": ["string", "null"]}]}
+	           ],
+    
+    "messages": {
+		"query": {
+			"doc": "Initial query request",
+			"request": [{"name": "query", "type": "QueryRequest"}],
+			"response": "QueryResponse",
+			"errors": ["ErrorResponse"]
+		},
+				
+		"data": {
+			"doc": "Data response from server to client",
+			"request": [{"name": "data", "type": "DataRequest"}],
+			"response": "DataResponse",
+			"errors": ["ErrorResponse"]
+		}
+	}
+}
