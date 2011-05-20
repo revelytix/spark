@@ -29,6 +29,8 @@
   <modules>
     <module>spark-api</module>
     <module>spark-spi</module>
+    <module>spark-protocol</module>
+    <module>sherpa-protocol</module>
   </modules>
 
   <properties>
