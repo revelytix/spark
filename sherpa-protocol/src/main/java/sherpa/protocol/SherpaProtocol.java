@@ -14,7 +14,7 @@ public class SherpaProtocol {
   static {
     
     try {
-      InputStream schemaStream = SherpaProtocol.class.getResourceAsStream("/sherpa/protocol/sherpa.js");
+      InputStream schemaStream = SherpaProtocol.class.getResourceAsStream("/sherpa/protocol/sherpa.avpr");
       Reader schemaReader = new InputStreamReader(schemaStream);
       BufferedReader bufferedReader = new BufferedReader(schemaReader);
       StringBuilder schema = new StringBuilder();
