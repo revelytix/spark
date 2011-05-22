@@ -38,7 +38,7 @@
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
-      <artifactId>clojure-contribu</artifactId>
+      <artifactId>clojure-contrib</artifactId>
       <version>1.2.0</version>
     </dependency>
     <dependency>
