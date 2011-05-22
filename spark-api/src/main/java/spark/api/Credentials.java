@@ -15,6 +15,9 @@
  */
 package spark.api;
 
+/**
+ * A marker interface for connection credentials.
+ */
 public interface Credentials {
 
 }

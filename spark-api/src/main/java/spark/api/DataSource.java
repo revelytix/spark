@@ -16,13 +16,18 @@
 package spark.api;
 
 /**
- * Actual implementations of this will be a JavaBean pattern
- * that provides getter/setter methods for specifying source-specific
- * properties.
- *
+ * Entry point for working with the Spark API.  The DataSource 
+ * is a factory for connections and implementations should use standard
+ * JavaBean patterns to specify any necessary connection properties 
+ * (host, port, etc).
  */
 public interface DataSource {
-  /* this is a bean, fill in your own data source props */
-  
+
+  /**
+   * Create (or prepare) a Connection using the specified Credentials.
+   * 
+   * @param creds The connections credentials (user, password, certificate, etc)
+   * @return The connection
+   */
   Connection getConnection(Credentials creds);
 }

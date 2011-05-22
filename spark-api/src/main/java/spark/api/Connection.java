@@ -17,14 +17,35 @@ package spark.api;
 
 import java.io.Closeable;
 
+/**
+ * A connection to a SPARQL processor.  Connections can be used to 
+ * create commands, get metadata, or be closed. 
+ */
 public interface Connection extends Closeable {
 
+  /**
+   * Is this connection closed?
+   * @return True if closed
+   */
   boolean isClosed();
   
+  /**
+   * Get the DataSource which created this connection.
+   * @return Originating DataSource
+   */  
   DataSource getDataSource();
   
+  /**
+   * Get the service description metadata for this connection.
+   * @return The service description metadata
+   */
   ServiceDescription getDescription();
   
+  /**
+   * Create a command for executing SPARQL statements.
+   * @param commandString The SPARQL statement
+   * @return The command
+   */
   Command createCommand(String commandString);
   
 }

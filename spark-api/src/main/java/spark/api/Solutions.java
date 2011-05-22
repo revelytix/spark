@@ -27,9 +27,18 @@ import spark.api.rdf.NamedNode;
 import spark.api.rdf.Literal;
 import spark.api.rdf.RDFNode;
 
+/**
+ * Cursored access to a sequence of SPARQL solutions.  Each solution consists 
+ * of a set of variables and values.  Variables may be unbound in a solution - how 
+ * this is perceived in the accessors depends on the method and is documented in
+ * the method.
+ */
 public interface Solutions extends CursoredResult<Map<String,RDFNode>> {
   
-  // Metadata 
+  /**
+   * Get all variables possible in these solutions.
+   * @return List of variable names
+   */
   List<String> getVariables();
   
   // Generic data access as map or node from the current solution
@@ -66,6 +75,7 @@ public interface Solutions extends CursoredResult<Map<String,RDFNode>> {
   RDFNode getBinding(String variable);
     
   // Generic node access, may fail if var is wrong type
+  
   NamedNode getNamedNode(String variable) throws SparqlException;
   BlankNode getBlankNode(String variable) throws SparqlException;
   Literal getLiteral(String variable) throws SparqlException;
