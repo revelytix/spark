@@ -10,6 +10,32 @@
   <url>https://github.com/revelytix/sparql-api</url>
   <inceptionYear>2011</inceptionYear>
 
+  <scm>
+    <connection>scm:git:https://github.com/revelytix/sparql-api</connection>
+    <url>https://github.com/revelytix/sparql-api</url>
+  </scm>
+
+  <organization>
+    <name>Revelytix Inc.</name>
+    <url>http://revelytix.com</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>amiller</id>
+      <name>Alex Miller</name>
+      <email>amiller@revelytix.com</email>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -39,11 +65,6 @@
     <spark-version>0.0.1-SNAPSHOT</spark-version>
     <sherpa-version>0.0.1-SNAPSHOT</sherpa-version>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-    </dependencies>
-  </dependencyManagement>
 
 </project>
 
