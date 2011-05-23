@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>sparql-api repository</title>
+</head>
+<body>
+<p>The sparql-api repository contains open-source SPARQL-related projects.</p>
+
+<h2>Spark</h2>
+
+<p>Spark is a Java SPARQL API.</p>
+
+<p>Jena and Sesame are popular open-source Java frameworks for working with RDF and SPARQL, however these frameworks tend to be both too much and not enough for some common needs.  Both frameworks provide the ability to model RDF datasets, import/export a variety of formats, plug in custom storage engines, and execute queries over models with those storage engines. </p>
+
+<p>After working with Jena, Sesame, a variety or triple stores, and our own SPARQL products, we concluded that what was missing is a JDBC-style interface for connection-oriented access to a remote SPARQL processor.  Jena and Sesame both open up storage APIs (for potentially remote stores) but this is at a lower level - the client API is assumed to work at the levels of graphs.  The SPARQL HTTP protocol is widely used and supported but offers no client programming API, does not support connection-oriented use cases, and relies on results sent in a text form (usually XML or JSON) so is not as performant as triple-store specific APIs.</p>
+
+<p>In light of this gap, Spark is:</p> 
+<ul>
+<li>Connection-oriented so connections can hold the state of our interaction</li>
+<li>Client-server to leverage either ubiquiutous SPARQL endpoints or custom SPARQL processor APIs</li>
+<li>Interface-oriented and system-agnostic so one API can be used for many SPARQL processors and communication protocols</li>
+<li>A query API, NOT a graph API, focusing on cursored access to results</li>
+<li>Lightweight RDF data API</li>
+<li>[work in progress] A metadata API, defining a common way to retrieve metadata from SPARQL processors</li>
+<li>[future] Able to support updates and transactions</li>
+</ul>
+
+<p>Spark consists of the following sub-projects (each is a jar artifact):</p>
+<ul>
+<li>spark:spark-api - the API, only interfaces</li>
+<li>spark:spark-spi - the implementation SPI, including helpful (but not required) classes to implement the API</li>
+<li>spark:spark-protocol - an implementation of the spark-api for accessing SPARQL endpoints over HTTP</li>
+</ul>
+
+<h2>Sherpa</h2>
+
+<p>Sherpa is a high-performance, language-agnostic, binary protocol for SPARQL processor communication.  It aims to avoid the costs associated with the SPARQL Protocol (text-based, single-shot RPC style) and provide an alternative.  Sherpa uses Avro to define the protocol and provide interop for multiple languages.  Avro currently supports Java, C, C++, C#, Ruby, Python, and PHP.</p>
+
+<p>Sherpa consists of the following sub-projects (each is a jar artifact):</p>
+<ul>
+<li>sherpa:sherpa-protocol - the protocol definition and generated Java bindings</li>
+<li>sherpa:sherpa-java - an implementation of the Spark client API using Sherpa as the protocol</li>
+<li>sherpa:sherpa-clojure - a lightweight query api in Clojure using Sherpa and a framework for writing a Sherpa server in Clojure</li>
+</ul>
+
+</body>
+</html>
