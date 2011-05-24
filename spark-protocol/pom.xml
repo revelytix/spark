@@ -2,22 +2,46 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>sparql-api</groupId>
-    <artifactId>sparql-api-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent>
-
   <groupId>spark</groupId>
   <artifactId>spark-protocol</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
 
   <packaging>jar</packaging>
   <name>spark-protocol - SPARQL client implementation of the SPARQL protocol</name>
   <description>Defines an implementation of the spark-api that uses the SPARQL protocol to query remote SPARQL endpoints
                via HTTP.</description>
+  <url>https://github.com/revelytix/sparql-api</url>
+  <inceptionYear>2011</inceptionYear>
+
+  <scm>
+    <connection>scm:git:https://github.com/revelytix/sparql-api</connection>
+    <url>https://github.com/revelytix/sparql-api</url>
+  </scm>
+
+  <organization>
+    <name>Revelytix Inc.</name>
+    <url>http://revelytix.com</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>amiller</id>
+      <name>Alex Miller</name>
+      <email>amiller@revelytix.com</email>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
   <properties>
     <http-version>4.0.1</http-version>
+    <spark-version>${project.version}</spark-version>
   </properties>
 
   <dependencies>
