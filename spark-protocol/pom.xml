@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>spark</groupId>
+  <groupId>com.revelytix</groupId>
   <artifactId>spark-protocol</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
@@ -46,12 +46,12 @@
 
   <dependencies>
     <dependency>
-      <groupId>spark</groupId>
+      <groupId>com.revelytix</groupId>
       <artifactId>spark-api</artifactId>
       <version>${spark-version}</version>
     </dependency>
     <dependency>
-      <groupId>spark</groupId>
+      <groupId>com.revelytix</groupId>
       <artifactId>spark-spi</artifactId>
       <version>${spark-version}</version>
     </dependency>

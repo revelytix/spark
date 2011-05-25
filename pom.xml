@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>sparql-api</groupId>
-  <artifactId>sparql-api-parent</artifactId>
+  <groupId>com.revelytix</groupId>
+  <artifactId>sparql-api</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>sparql-api - repository parent module</name>
-  <description>Parent module for all of the sparql-api modules that makes up spark and sherpa.</description>
+  <name>sparql-api - repository multi-module</name>
+  <description>Multi-module for all of the sparql-api modules that makes up spark and sherpa.</description>
   <url>https://github.com/revelytix/sparql-api</url>
   <inceptionYear>2011</inceptionYear>
 
