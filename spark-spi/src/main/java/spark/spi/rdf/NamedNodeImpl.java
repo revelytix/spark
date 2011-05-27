@@ -19,10 +19,19 @@ import java.net.URI;
 
 import spark.api.rdf.NamedNode;
 
+/**
+ * Basic implementation of {@link NamedNode}. 
+ * 
+ * toString as:  <http://foo>  
+ */
 public class NamedNodeImpl implements NamedNode {
 
   private final URI uri;
   
+  /**
+   * Construct a new NamedNodeImpl with a URI.
+   * @param uri URI
+   */
   public NamedNodeImpl(URI uri) {
     if(uri == null) {
       throw new NullPointerException();

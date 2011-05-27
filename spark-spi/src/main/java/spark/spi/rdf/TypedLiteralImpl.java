@@ -19,12 +19,31 @@ import java.net.URI;
 
 import spark.api.rdf.TypedLiteral;
 
+/**
+ * Basic implementation of {@link TypedLiteral}.
+ * 
+ * toString as: "25"^^<http://www.w3.org/2001/XMLSchema#int>
+ */
 public class TypedLiteralImpl implements TypedLiteral {
 
   private final String lexical;
   private final URI dataType;
   
+  /**
+   * Construct a TypedLiteralImpl with a lexical representation and dataType, 
+   * both required.
+   * @param lexical Lexical representation, must be non-null
+   * @param dataType XSD data type, must be non-null
+   * @throws NullPointerException If parameters are null
+   */
   public TypedLiteralImpl(String lexical, URI dataType) {
+    if(lexical == null) {
+      throw new NullPointerException("Plain literals must have non-null lexical values.");
+    }
+    if(dataType == null) {
+      throw new NullPointerException("Plain literals must have non-null data types.");
+    }
+
     this.lexical = lexical;
     this.dataType = dataType;
   }
@@ -70,6 +89,7 @@ public class TypedLiteralImpl implements TypedLiteral {
     return true;
   }
 
+  @Override
   public String toString() {
     return "\"" + lexical + "\"^^<" + dataType.toString() + ">";
   }

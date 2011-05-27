@@ -23,6 +23,11 @@ import spark.api.Command;
 import spark.api.Connection;
 import spark.api.rdf.RDFNode;
 
+/**
+ * Base implementation for implementors of {@link Command}.  This class manages the 
+ * Connection that created the Command, the command string, a closed flag, a timeout,
+ * and the binding list.
+ */
 public abstract class BaseCommand implements Command {
 
   // immutable
@@ -36,6 +41,11 @@ public abstract class BaseCommand implements Command {
   // mutable, protected by "this" lock 
   private List<Map<String, RDFNode>> bindings;
   
+  /**
+   * Construct a BaseCommand with the source Connection and command string.
+   * @param connection Connection that created this Command
+   * @param command Command string this Command represents
+   */
   public BaseCommand(Connection connection, String command) {
     this.connection = connection;
     this.command = command;

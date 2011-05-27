@@ -17,11 +17,22 @@ package spark.spi.rdf;
 
 import spark.api.rdf.PlainLiteral;
 
+/**
+ * Basic implementation of {@link PlainLiteral}.
+ * 
+ * toString as:  "lexical-rep" or "lexical-rep"@en
+ */
 public class PlainLiteralImpl implements PlainLiteral {
 
   private final String lexical;
   private final String language;
 
+  /**
+   * Construct a PlainLiteralImpl with a lexical representation and an optional language tag
+   * @param lexical Lexical representation, cannot be null
+   * @param language Language tag, may be null
+   * @throws NullPointerException If lexical is null
+   */
   public PlainLiteralImpl(String lexical, String language) {
     if(lexical == null) {
       throw new NullPointerException("Plain literals must have non-null lexical values.");
@@ -30,6 +41,11 @@ public class PlainLiteralImpl implements PlainLiteral {
     this.language = language;
   }
   
+  /**
+   * Construct a PlainLiteralImpl with a lexical representation but no language tag.
+   * @param lexical Lexial representation, required
+   * @throws NullPointerException If lexical is null
+   */
   public PlainLiteralImpl(String lexical) {
     this(lexical, null);
   }
@@ -75,7 +91,8 @@ public class PlainLiteralImpl implements PlainLiteral {
     return true;
   }
 
+  @Override
   public String toString() {
-    return "\"" + this.lexical + "\"" + (language != null ? "@" + language: "");
+    return "\"" + this.lexical + "\"" + (language != null ? "@" + language : "");
   }
 }

@@ -17,10 +17,19 @@ package spark.spi.rdf;
 
 import spark.api.rdf.BlankNode;
 
+/**
+ * Basic implementation of {@link BlankNode}.
+ * 
+ * toString as:  _:label
+ */
 public class BlankNodeImpl implements BlankNode {
 
   private final String label;
   
+  /**
+   * Construct a new BlankNode with a label
+   * @param label
+   */
   public BlankNodeImpl(String label) {
     this.label = label;
   }

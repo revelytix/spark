@@ -20,11 +20,19 @@ import java.io.IOException;
 import spark.api.Connection;
 import spark.api.DataSource;
 
+/**
+ * Base class for implementors of {@link Connection}.  This class manages a source DataSource
+ * and a closed flag. 
+ */
 public abstract class BaseConnection implements Connection {
 
   private final DataSource dataSource;
   private volatile boolean closed = false;
 
+  /**
+   * Construct a BaseConnection with the source dataSource.
+   * @param dataSource The creator of this connection
+   */
   public BaseConnection(DataSource dataSource) {
     this.dataSource = dataSource;
   }
