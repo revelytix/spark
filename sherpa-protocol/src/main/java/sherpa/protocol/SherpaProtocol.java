@@ -8,7 +8,13 @@ import java.io.Reader;
 
 import org.apache.avro.Protocol;
 
+/**
+ * A convenient class to handle reading and parsing the Sherpa protocol definition.
+ */
 public class SherpaProtocol {
+  /**
+   * The Avro representation of the Sherpa protocol.
+   */
   public static final Protocol PROTOCOL;
 
   static {
