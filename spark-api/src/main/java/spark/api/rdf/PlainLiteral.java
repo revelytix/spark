@@ -15,6 +15,9 @@
  */
 package spark.api.rdf;
 
+/**
+ * Represents an RDF plain literal, which has an optional language tag.  
+ */
 public interface PlainLiteral extends Literal {
 
   /**

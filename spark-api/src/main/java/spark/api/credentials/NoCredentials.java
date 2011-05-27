@@ -17,8 +17,15 @@ package spark.api.credentials;
 
 import spark.api.Credentials;
 
+/**
+ * A Credentials implementation when no credentials are necessary.  One common 
+ * use for this is when accessing a public SPARQL endpoint.
+ */
 public final class NoCredentials implements Credentials {
 
+  /**
+   * The shared stateless instance.
+   */
   public static NoCredentials INSTANCE = new NoCredentials();
   
   private NoCredentials() {}

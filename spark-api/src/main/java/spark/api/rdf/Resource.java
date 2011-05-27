@@ -15,6 +15,9 @@
  */
 package spark.api.rdf;
 
+/**
+ * Super-interface for all RDF "resources".
+ */
 public interface Resource extends RDFNode {
 
 }

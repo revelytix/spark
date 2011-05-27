@@ -17,10 +17,15 @@ package spark.api.rdf;
 
 import java.net.URI;
 
+/**
+ * Represents "named" RDF resources, most commonly represented as a URI.
+ * 
+ * IRIs are not currently handled explicitly in the interface.
+ */
 public interface NamedNode extends Resource {
 
   /**
-   * Gets a wrapped URI.
+   * Gets the URI for the named resource
    */
   URI getURI();
 

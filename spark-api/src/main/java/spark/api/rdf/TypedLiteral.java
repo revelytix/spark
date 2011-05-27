@@ -17,7 +17,17 @@ package spark.api.rdf;
 
 import java.net.URI;
 
+import spark.api.uris.XsdTypes;
+
+/**
+ * Represents an RDF typed literal, which has a lexical representation and an 
+ * XSD data type.  Constants for the standard XSD types are defined in {@link XsdTypes}.
+ */
 public interface TypedLiteral extends Literal {
 
+  /**
+   * Get the XSD data type for this typed literal
+   * @return The XSD URI
+   */
   public URI getDataType();
 }

@@ -15,6 +15,9 @@
  */
 package spark.api.rdf;
 
+/**
+ * Super-interface for all RDF node types.
+ */
 public interface RDFNode {
 
 }

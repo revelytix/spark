@@ -51,7 +51,17 @@ import spark.api.rdf.RDFNode;
  * used to attempt the conversion and simplify your access code (with the caveat
  * that if you are incorrect in your knowledge an exception will be thrown).</p>
  * <ul>
- * <li></li>
+ * <li>{@link #getNamedNode(String)}</li>
+ * <li>{@link #getBlankNode(String)}</li>
+ * <li>{@link #getLiteral(String)}</li>
+ * <li>{@link #getURI(String)}</li>
+ * <li>{@link #getString(String)}</li>
+ * <li>{@link #getInt(String)}</li>
+ * <li>{@link #getBoolean(String)}</li>
+ * <li>{@link #getFloat(String)}</li>
+ * <li>{@link #getDouble(String)}</li>
+ * <li>{@link #getInteger(String)}</li>
+ * <li>{@link #getDateTime(String)}</li>
  * </ul>
  */
 public interface Solutions extends CursoredResult<Map<String,RDFNode>> {

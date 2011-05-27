@@ -15,7 +15,15 @@
  */
 package spark.api.rdf;
 
+/**
+ * Represents an RDF literal value.
+ */
 public interface Literal extends RDFNode {
+  
+  /**
+   * The lexical representation of the literal.
+   * @return The lexical representation, should never be null
+   */
   String getLexical();
   
 }

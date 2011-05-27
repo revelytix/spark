@@ -15,23 +15,42 @@
  */
 package spark.api.exception;
 
+/**
+ * A generic exception indicating an error in the Spark api. 
+ */
 public class SparqlException extends RuntimeException {
 
   private static final long serialVersionUID = -7174855352655879684L;
 
+  /**
+   * Construct a default exception
+   */
   public SparqlException() {
     super();
   }
 
-  public SparqlException(String arg0, Throwable arg1) {
-    super(arg0, arg1);
+  /**
+   * Construct an exception with a message and a chained Throwable
+   * @param message Message
+   * @param throwable Chained throwable
+   */
+  public SparqlException(String message, Throwable throwable) {
+    super(message, throwable);
   }
 
-  public SparqlException(String arg0) {
-    super(arg0);
+  /**
+   * Construct an exception with a message.
+   * @param message Message
+   */
+  public SparqlException(String message) {
+    super(message);
   }
 
-  public SparqlException(Throwable arg0) {
-    super(arg0);
+  /**
+   * Construct an exception with a chained Throwable.
+   * @param throwable Chained throwable
+   */
+  public SparqlException(Throwable throwable) {
+    super(throwable);
   }  
 }

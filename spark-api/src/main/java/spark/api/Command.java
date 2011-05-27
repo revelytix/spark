@@ -21,29 +21,91 @@ import java.util.Map;
 
 import spark.api.rdf.RDFNode;
 
+/**
+ * Represents a SPARQL command for execution.  Commands are created from a {@link Connection} and returns
+ * a {@link Result} when executed.
+ */
 public interface Command extends Closeable {
 
+  /**
+   * Is the command closed?
+   * @return True if closed
+   */
   boolean isClosed();
   
+  /**
+   * Get the connection from whence this came.
+   * @return The source connection
+   */
   Connection getConnection();
+  
+  /**
+   * Get the command string this command will execute.
+   * @return The command string
+   */
   String getCommand();
 
   // Timeouts and cancellations
 
+  /**
+   * Constant specifying no timeout, for use with {@link #setTimeout(long)}
+   */
   public static final long NO_TIMEOUT = 0L;
+  
+  /**
+   * Set the command timeout in seconds or {@link #NO_TIMEOUT} for none.
+   * @param seconds Timeout in seconds
+   */
   void setTimeout(long seconds);
+  
+  /**
+   * Get the command timeout in seconds.
+   * @return Timeout in seconds
+   */
   long getTimeout();
+  
+  /**
+   * Cancel execution of this command.
+   */
   void cancel();
   
   // Preparation and batching 
   
+  /**
+   * Add parameter bindings prior to the execution of this command.  The Map
+   * will contain variable names as keys and rdf data as values.
+   * @param binding A set of bindings from variable to value
+   */
   void addParameterBindings(Map<String, RDFNode> binding);
+  
+  /**
+   * Get all parameter bindings that have been added.
+   * @return A series of parameter bindings from variable to value
+   */
   List<Map<String, RDFNode>> getBindings();
+  
+  /**
+   * Clear all parameter bindings
+   */
   void clearBindings();
     
   // Execute 
   
+  /**
+   * Execute the command and return the natural result style depending on the command.
+   * @return The result of execution
+   */
   Result execute();
-  Solutions executeQuery();  
+  
+  /**
+   * Execute a SELECT query and return a Solutions result.
+   * @return The result solutions
+   */
+  Solutions executeQuery();
+  
+  /**
+   * Execute an ASK query and return either true or false.
+   * @return The result of the ASK
+   */
   boolean executeAsk();
 }

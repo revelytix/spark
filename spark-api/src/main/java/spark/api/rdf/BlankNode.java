@@ -15,7 +15,14 @@
  */
 package spark.api.rdf;
 
+/**
+ * Represents an RDF blank node, which is an anonymous resource.
+ */
 public interface BlankNode extends Resource {
 
+  /**
+   * Blank node label
+   * @return Blank node label
+   */
   String getLabel(); 
 }

@@ -20,14 +20,42 @@ import spark.api.rdf.RDFNode;
 import spark.api.rdf.Resource;
 import spark.api.rdf.Triple;
 
+/**
+ * <p>Cursored access to a sequence of triples.  Each triple consists 
+ * of a subject, predicate, and object</p>
+ * 
+ * <p>For the current triple under the cursor, these generic methods 
+ * can be used to inspect the solution:</p>
+ * <ul>
+ * <li>{@link #getTriple()} - return a Triple with SPO</li>
+ * <li>{@link #getSubject()} - just subject</li>
+ * <li>{@link #getPredicate()} - just predicate</li>
+ * <li>{@link #getObject()} - just object</li>
+ * </ul>
+ */
 public interface Triples extends CursoredResult<Triple> {
 
-  // Generic data access as map or node from the current solution
+  /**
+   * Get the triple at the cursor.
+   * @return Current triple
+   */
   Triple getTriple();
   
-  // Get parts of the current triple
-  
+  /**
+   * Get the subject for the triple at the cursor.
+   * @return The subject
+   */
   Resource getSubject();
+  
+  /**
+   * Get the predicate for the triple at the cursor.
+   * @return The predicate
+   */
   NamedNode getPredicate();
+
+  /**
+   * Get the object for the triple at the cursor.
+   * @return The object
+   */
   RDFNode getObject();  
 }

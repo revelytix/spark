@@ -17,9 +17,15 @@ package spark.api;
 
 import java.io.Closeable;
 
-
+/**
+ * When a Command is executed, a Result is returned.
+ */
 public interface Result extends Closeable {
 
+  /**
+   * Is this result closed?
+   * @return True if closed
+   */
   boolean isClosed();
   
   /**

@@ -19,6 +19,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * TBD
+ */
 public interface ServiceDescription {
 
   List<URI> getNamedGraphs();
