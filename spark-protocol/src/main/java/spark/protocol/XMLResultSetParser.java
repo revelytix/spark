@@ -94,7 +94,6 @@ public class XMLResultSetParser extends DefaultHandler {
   /**
    * Create a result from a string.
    * @param s The string containing the result set.
-   * @param statement The statement that created this data.
    */
   public XMLResultSetParser(String s) throws SparqlException, IOException {
     this(new ByteArrayInputStream(s.getBytes("UTF-8")));
@@ -103,7 +102,6 @@ public class XMLResultSetParser extends DefaultHandler {
   /**
    * Create a result set from an InputStream.
    * @param is The input stream with the results.
-   * @param statement The statement that created this data.
    */
   public XMLResultSetParser(InputStream is) throws SparqlException, IOException {
     try {
