@@ -20,6 +20,9 @@ import spark.api.Credentials;
 import spark.api.ServiceDescription;
 import spark.spi.BaseConnection;
 
+/**
+ * A sparql API Connection connected to a SPARQL endpoint.
+ */
 public class ProtocolConnection extends BaseConnection implements Connection {
 
   ProtocolConnection(ProtocolDataSource dataSource, Credentials creds) {

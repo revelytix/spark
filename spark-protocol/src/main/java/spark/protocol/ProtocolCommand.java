@@ -23,6 +23,9 @@ import spark.api.exception.SparqlException;
 import spark.spi.BaseCommand;
 import spark.spi.SolutionSet;
 
+/**
+ * A SPARQL API Command for executing commands to the SPARQL endpoint.
+ */
 public class ProtocolCommand extends BaseCommand {
   
   ProtocolCommand(ProtocolConnection connection, String command) {

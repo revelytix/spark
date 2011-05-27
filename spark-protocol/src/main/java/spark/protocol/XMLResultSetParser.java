@@ -46,7 +46,7 @@ import spark.spi.rdf.TypedLiteralImpl;
 /**
  * Contains the results of a query operation.
  */
-public class XMLResultSetParser extends DefaultHandler {
+class XMLResultSetParser extends DefaultHandler {
 
   public enum Element { SPARQL, HEAD, RESULTS, VARIABLE, LINK, RESULT, BINDING, URI, LITERAL, BNODE, BOOLEAN };
 
