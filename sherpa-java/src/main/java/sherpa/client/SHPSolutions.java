@@ -15,6 +15,9 @@
  */
 package sherpa.client;
 
+/**
+ * Represents a Solutions implementation.
+ */
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
@@ -41,6 +44,11 @@ public class SHPSolutions extends BaseResults implements Solutions {
 
   private final QueryManager queryMgr;
   
+  /**
+   * Construct an SHPSolutions where 
+   * @param command
+   * @param queryMgr
+   */
   public SHPSolutions(SHPCommand command, QueryManager queryMgr) {
     super(command);
     this.queryMgr = queryMgr;    
