@@ -12,6 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 (ns sherpa.sherpa-server
+  (:use [sherpa.avro-utils :only (to-map avro-record)])
   (:import [org.apache.avro.ipc SaslSocketServer]
            [java.net InetAddress InetSocketAddress]
            [sherpa.protocol SherpaProtocol]
@@ -26,21 +27,32 @@
 
 (def DEFAULT-PORT 41414)
 
+(defmulti sherpa-rpc (fn [msg listener protocol request] msg))
+(defmethod sherpa-rpc :default [msg listener protocol request]
+           (throw (avro-record protocol "ErrorResponse" {:code nil ;; TODO use ReasonCode enumeration for Error
+                                                         :message (str "Unknown message type: " msg)})))
+
+(defmacro add-rpc [msg return-type]
+  `(defmethod sherpa-rpc ~msg [m# listener# protocol# request#]
+              (avro-record protocol# ~return-type
+                           ((symbol ~msg) listener# protocol# (to-map protocol# request#)))))
+
+(add-rpc "query" "QueryResponse")
+(add-rpc "data" "DataResponse")
+(add-rpc "cancel" "CloseResponse")
+(add-rpc "close" "CloseResponse")
+
 (defn responder
   "Adapter a SherpaListener into an Avro Responder."
   [listener protocol]
   (ClojureResponder. protocol
                      (reify MessageResponder
                             (respond [this msg request]
-                                     (try 
-                                       (case (.getName msg)
-                                             "query" (query listener protocol request)
-                                             "data" (data listener protocol request)
-                                             "cancel" (cancel listener protocol request)
-                                             "close" (close listener protocol request)
-                                             (throw (RuntimeException. "Unknown message: " (.getName msg))))
+                                     (try
+                                       (sherpa-rpc (.getName msg) listener protocol request)
                                        (catch Throwable t
                                          (do (.printStackTrace t)
+                                             ;; TODO throw ErrorResponse
                                              (throw t))))))))
 
 (defn run-sherpa
