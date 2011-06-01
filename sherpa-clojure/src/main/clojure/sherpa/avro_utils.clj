@@ -3,7 +3,12 @@
   (:import [org.apache.avro.generic GenericData$Record]))
 
 (defn avro-record
-  "Convert from a map of vars and values to an Avro generic record of the specified type in the protocol."
+  "Convert from a Clojure map of vars and values to an Avro generic
+   record of the specified type in the protocol.
+
+     protocol - Avro Protocol instance
+     type - name of the Avro record in the protocol
+     vars - a Clojure map with keyword keys that match the record field names"
   [protocol type vars]
   (let [schema (.getType protocol type)
         rec (GenericData$Record. schema)]
@@ -17,18 +22,15 @@
         (.put rec field v)))
     rec))
 
-;; copied from internal Revelytix utils
-(defn- mapmap
-  [kf vf s]
-  (zipmap (map kf s)
-          (map vf s)))
-
 (defn to-map
-  "Convert from an Avro generic record to a map keyed by keywords based on the record field names."
+  "Convert from an Avro generic record to a map keyed by keywords based
+   on the record field names.
+
+     protocol - Avro Protocol instance
+     avro-record - Avro record instance"
   [protocol avro-record]
   (let [schema (.getSchema avro-record)
         fields (.getFields schema)
         field-names (map #(.name %) fields)]
-    (println "fields=" fields)
-    (println "field-names=" field-names)
-    (mapmap #(keyword %) #(.get avro-record %) field-names)))
+    (zipmap (map keyword field-names)
+            (map #(.get avro-record %) field-names))))

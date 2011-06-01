@@ -7,13 +7,6 @@
            [sherpa.protocol SherpaProtocol]
    [sherpa.protocol Query QueryRequest DataRequest QueryResponse DataResponse ErrorResponse ReasonCode IRI]))
 
-
-
-(deftest test-to-map
-  (let [m {:sparql "foo" :parameters {} :properties {:timeout "60"}}]
-    (is (= m (to-map SherpaProtocol/PROTOCOL
-                     (avro-record SherpaProtocol/PROTOCOL "QueryRequest" m))))))
-
 (defn iri
   [protocol iri]
   (avro-record protocol "IRI" {:iri iri}))
@@ -70,11 +63,6 @@
         (avro-record protocol "ErrorResponse"
                      {:code ReasonCode/Error
                       :message "Invalid request for rows outside the result set."})))))
-
-(comment
-  (deftest test-batch
-    (let [protocol SherpaProtocol/PROTOCOL]
-      (is (= (avro-record protocol "DataResponse"))))))
 
 (defn dummy-server
   "Implement a dummy Sherpa server that returns a fixed result set of size rows."
