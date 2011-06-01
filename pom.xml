@@ -10,6 +10,11 @@
   <url>https://github.com/revelytix/sparql-api</url>
   <inceptionYear>2011</inceptionYear>
 
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 
   <scm>
     <connection>scm:git:https://github.com/revelytix/sparql-api</connection>
