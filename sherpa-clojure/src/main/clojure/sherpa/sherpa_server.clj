@@ -12,30 +12,37 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 (ns sherpa.sherpa-server
-  (:use [sherpa.avro-utils :only (to-map avro-record)])
+  (:use [sherpa.avro-utils :only (to-avro from-avro)])
   (:import [org.apache.avro.ipc SaslSocketServer]
            [java.net InetAddress InetSocketAddress]
            [sherpa.protocol SherpaProtocol]
            [sherpa.server MessageResponder ClojureResponder]))
 
+(def PROTOCOL SherpaProtocol/PROTOCOL)
+
 (defprotocol SherpaListener
-  "Protocol for a server-side listener on the sherpa protocol."
-  (query [listener protocol query-req])
-  (data [listener protocol data-req])
-  (cancel [listener protocol cancel-req])
-  (close [listener protocol close-req]))
+  "Server-side listener on the sherpa protocol."
+  (query [listener query-req])
+  (data [listener data-req])
+  (cancel [listener cancel-req])
+  (close [listener close-req]))
 
 (def DEFAULT-PORT 41414)
 
-(defmulti sherpa-rpc (fn [msg listener protocol request] msg))
-(defmethod sherpa-rpc :default [msg listener protocol request]
-           (throw (avro-record protocol "ErrorResponse" {:code nil ;; TODO use ReasonCode enumeration for Error
-                                                         :message (str "Unknown message type: " msg)})))
+(defmulti sherpa-rpc (fn [msg listener request] msg))
+(defmethod sherpa-rpc :default [msg listener request]
+           (throw {:sherpa-type "ErrorResponse"
+                   :code {:sherpa-type :ReasonCode
+                          :symbol :Error}
+                   :message (str "Unknown message type: " msg)}))
 
 (defmacro add-rpc [msg return-type]
-  `(defmethod sherpa-rpc ~msg [m# listener# protocol# request#]
-              (avro-record protocol# ~return-type
-                           ((symbol ~msg) listener# protocol# (to-map protocol# request#)))))
+  `(defmethod sherpa-rpc ~msg [m# listener# request#]
+              (to-avro (assoc
+                           ((symbol ~msg) listener# PROTOCOL (from-avro (.get request# ~msg)
+                                                                        PROTOCOL))
+                         :sherpa-type (keyword ~return-type))
+                       PROTOCOL)))
 
 (add-rpc "query" "QueryResponse")
 (add-rpc "data" "DataResponse")
@@ -43,13 +50,13 @@
 (add-rpc "close" "CloseResponse")
 
 (defn responder
-  "Adapter a SherpaListener into an Avro Responder."
-  [listener protocol]
-  (ClojureResponder. protocol
+  "Adapt a SherpaListener into an Avro Responder."
+  [listener]
+  (ClojureResponder. PROTOCOL
                      (reify MessageResponder
                             (respond [this msg request]
                                      (try
-                                       (sherpa-rpc (.getName msg) listener protocol request)
+                                       (sherpa-rpc (.getName msg) listener PROTOCOL (.get request ))
                                        (catch Throwable t
                                          (do (.printStackTrace t)
                                              ;; TODO throw ErrorResponse
@@ -70,7 +77,7 @@
                (InetAddress/getLocalHost))
         port (or (:port options) DEFAULT-PORT)
         address (InetSocketAddress. host port)
-        responder (responder listener SherpaProtocol/PROTOCOL)
+        responder (responder listener)
         server (SaslSocketServer. responder address)]
     (println "Starting sherpa server on " address)
     (.start server)
