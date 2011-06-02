@@ -1,8 +1,9 @@
 (ns sherpa.avro-utils
-  (:use [clojure.string :only (join)])
-  (:import [clojure.lang Keyword IPersistentMap]
+  (:use [clojure.string :only (join split)])
+  (:import [clojure.lang Keyword Associative]
            [org.apache.avro Schema$Type]
-           [org.apache.avro.generic GenericData$Record GenericData$EnumSymbol]))
+           [org.apache.avro.generic GenericData$Record GenericData$EnumSymbol
+            GenericRecord GenericEnumSymbol]))
 
 (defmulti to-avro (fn [data protocol] (class data)))
 
@@ -33,6 +34,11 @@
   [schema symbol-value]
   (GenericData$EnumSymbol. schema symbol-value))
 
+(defn avro-map
+  "Create an Avro map"
+  [data-map protocol]
+  (reduce (fn [m [k v]] (merge m {(name k) (to-avro v protocol)})) {} data-map))
+
 (defn fqname [ns name]
   (if ns
     (str ns "." name)
@@ -53,7 +59,7 @@
 ;; 2) Avro enum - The :symbol key will hold a keyword that
 ;;    is converted to the enum symbol
 ;; 3) Avro map, left as is because Avro handles any Map as a map.
-(defmethod to-avro IPersistentMap [data protocol]
+(defmethod to-avro Associative [data protocol]
            (let [sherpa-type (:sherpa-type data)]
              (if sherpa-type
                (let [ns-type (keyword-to-ns sherpa-type)
@@ -63,18 +69,33 @@
                  (condp = (.getType schema) 
                      Schema$Type/RECORD (avro-record protocol ns-type (dissoc data :sherpa-type))
                      Schema$Type/ENUM (avro-enum schema (name (:symbol data)))))
-               data)))
+               (avro-map data protocol))))
 
+(defmulti from-avro (fn [avro-data protocol] (class avro-data)))
 
+(defmethod from-avro :default [avro-data protocol] avro-data)
 
-(defn to-map
-  "Convert from an Avro generic record to a map keyed by keywords based
-   on the record field names.
-     protocol - Avro Protocol instance
-     avro-record - Avro record instance"
-  [protocol avro-record]
-  (let [schema (.getSchema avro-record)
-        fields (.getFields schema)
-        field-names (map #(.name %) fields)]
-    (zipmap (map keyword field-names)
-            (map #(.get avro-record %) field-names))))
+(defn fqname-to-keyword [fqname]
+  (let [parts (split fqname #"\.")]
+    (if (> (count parts) 1)
+      (let [name (last parts)
+            schema-ns (join "." (butlast parts))]
+        (keyword schema-ns name))
+      (keyword fqname))))
+
+(defmethod from-avro GenericRecord [avro-record protocol]
+           (let [schema (.getSchema avro-record)
+                 fields (.getFields schema)
+                 field-names (map #(.name %) fields)]
+             (assoc (zipmap (map fqname-to-keyword field-names)
+                            (map #(from-avro (.get avro-record %) protocol) field-names))
+               :sherpa-type (fqname-to-keyword (.getFullName schema)))))
+
+(defmethod from-avro Associative [avro-map protocol]
+           (reduce (fn [m [k v]] (merge m {(fqname-to-keyword k) (from-avro v protocol)}))
+                   {}
+                   avro-map))
+
+(defmethod from-avro GenericEnumSymbol [avro-enum protocol]
+           {:sherpa-type (fqname-to-keyword (.getFullName (.getSchema avro-enum)))
+            :symbol (keyword (.toString avro-enum))})
