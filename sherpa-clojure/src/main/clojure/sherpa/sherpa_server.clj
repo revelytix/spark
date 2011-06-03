@@ -37,12 +37,17 @@
                    :message (str "Unknown message type: " msg)}))
 
 (defmacro add-rpc [msg return-type]
-  `(defmethod sherpa-rpc ~msg [m# listener# request#]
-              (to-avro (assoc
-                           ((symbol ~msg) listener# PROTOCOL (from-avro (.get request# ~msg)
-                                                                        PROTOCOL))
-                         :sherpa-type (keyword ~return-type))
-                       PROTOCOL)))
+  `(defmethod sherpa-rpc ~msg [m# listener# avro-request#]
+              (println "query rpc, msg=" ~msg ", avro-req=" avro-request#)
+              (let [request# (from-avro avro-request# PROTOCOL)
+                    x# (println "  req=" request#)
+                    protocol-fn# ~(resolve (symbol msg))
+                    x# (println "  protocol-fn=" protocol-fn#)
+                    response# (protocol-fn# listener# request#)
+                    x# (println "  response=" response#)
+                    avro-resp# (to-avro (assoc response# :sherpa-type (keyword ~return-type)) PROTOCOL)
+                    x# (println "  avro-resp=" avro-resp#)]
+                avro-resp#)))
 
 (add-rpc "query" "QueryResponse")
 (add-rpc "data" "DataResponse")
@@ -56,7 +61,8 @@
                      (reify MessageResponder
                             (respond [this msg request]
                                      (try
-                                       (sherpa-rpc (.getName msg) listener PROTOCOL (.get request ))
+                                       (let [msg-name (.getName msg)]
+                                         (sherpa-rpc msg-name listener (.get request msg-name)))
                                        (catch Throwable t
                                          (do (.printStackTrace t)
                                              ;; TODO throw ErrorResponse
