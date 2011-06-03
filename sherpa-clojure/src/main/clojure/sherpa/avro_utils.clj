@@ -3,7 +3,8 @@
   (:import [clojure.lang Keyword Associative]
            [org.apache.avro Schema$Type]
            [org.apache.avro.generic GenericData$Record GenericData$EnumSymbol
-            GenericRecord GenericEnumSymbol]))
+            GenericRecord GenericEnumSymbol]
+           [org.apache.avro.util Utf8]))
 
 (defmulti to-avro (fn [data protocol] (class data)))
 
@@ -74,6 +75,8 @@
 (defmulti from-avro (fn [avro-data protocol] (class avro-data)))
 
 (defmethod from-avro :default [avro-data protocol] avro-data)
+
+(defmethod from-avro Utf8 [avro-data protocol] (.toString avro-data))
 
 (defn fqname-to-keyword [fqname]
   (let [parts (split fqname #"\.")]
