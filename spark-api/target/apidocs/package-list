@@ -1,0 +1,5 @@
+spark.api
+spark.api.credentials
+spark.api.exception
+spark.api.rdf
+spark.api.uris
