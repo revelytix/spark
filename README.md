@@ -11,4 +11,4 @@ Sherpa is a high-performance, language-agnostic, binary protocol for SPARQL proc
 
 ## Wiki 
 
-Find more info on the wiki: [[Home]]
+Find more info on the wiki: [https://github.com/revelytix/sparql-api/wiki](Wiki Home)
