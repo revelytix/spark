@@ -4,7 +4,8 @@
   (:import [java.util Map]
            [sherpa.protocol SherpaProtocol]
            [org.apache.avro Protocol Schema Schema$Type Schema$Field]
-           [org.apache.avro.generic GenericData$EnumSymbol GenericData$Record]))
+           [org.apache.avro.generic GenericData$EnumSymbol GenericData$Record]
+           [org.apache.avro.util Utf8]))
 
 (deftest test-keyword-to-ns
   (are [expected input] (= expected (keyword-to-ns input))
@@ -83,6 +84,11 @@
         cljenum (from-avro avenum example-protocol)]
     (is (= {:sherpa-type :my.ns/e1
             :symbol :a}))))
+
+(deftest test-from-avro-utf8
+  (let [avutf (Utf8. "abcd")
+        s (from-avro avutf example-protocol)]
+    (is (= "abcd" s))))
 
 (deftest test-roundtrip
   (testing "Roundtrip from to Avro record back to map"

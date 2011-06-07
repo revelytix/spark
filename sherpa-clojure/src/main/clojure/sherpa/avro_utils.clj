@@ -1,7 +1,7 @@
 (ns sherpa.avro-utils
   (:use [clojure.string :only (join split)])
   (:import [clojure.lang Keyword Associative]
-           [org.apache.avro Schema$Type]
+           [org.apache.avro Protocol Schema Schema$Type Schema$Field]
            [org.apache.avro.generic GenericData$Record GenericData$EnumSymbol
             GenericRecord GenericEnumSymbol]
            [org.apache.avro.util Utf8]))
@@ -17,7 +17,7 @@
      protocol - Avro Protocol instance
      type - name of the Avro record in the protocol
      vars - a Clojure map with keyword keys that match the record field names"
-  [protocol type vars]
+  [^Protocol protocol ^String type vars]
   (let [schema (.getType protocol type)
         rec (GenericData$Record. schema)]
     (when (nil? schema) (throw (RuntimeException. (str "Invalid record type: " type))))
@@ -26,13 +26,13 @@
         (when (nil? (.getField schema field))
           (throw (RuntimeException.
                   (str "Invalid field for " type ": " field
-                       ". Expected: " (join ", " (map #(.name %) (.getFields schema)))))))
+                       ". Expected: " (join ", " (map (fn [^Schema$Field field] (.name field)) (.getFields schema)))))))
         (.put rec field (to-avro v protocol))))
     rec))
 
 (defn avro-enum
   "Create an Avro enum"
-  [schema symbol-value]
+  [^Schema schema ^String symbol-value]
   (GenericData$EnumSymbol. schema symbol-value))
 
 (defn avro-map
@@ -48,7 +48,7 @@
 (defn keyword-to-ns [kw]
   (fqname (namespace kw) (name kw)))
 
-(defn protocol-identifier [protocol]
+(defn protocol-identifier [^Protocol protocol]
   (fqname (.getNamespace protocol) (.getName protocol)))
 
 ;; If a map is passed, there are three possibilities as indicated
@@ -60,7 +60,7 @@
 ;; 2) Avro enum - The :symbol key will hold a keyword that
 ;;    is converted to the enum symbol
 ;; 3) Avro map, left as is because Avro handles any Map as a map.
-(defmethod to-avro Associative [data protocol]
+(defmethod to-avro Associative [data ^Protocol protocol]
            (let [sherpa-type (:sherpa-type data)]
              (if sherpa-type
                (let [ns-type (keyword-to-ns sherpa-type)
@@ -76,7 +76,7 @@
 
 (defmethod from-avro :default [avro-data protocol] avro-data)
 
-(defmethod from-avro Utf8 [avro-data protocol] (.toString avro-data))
+(defmethod from-avro Utf8 [^Utf8 avro-data protocol] (.toString avro-data))
 
 (defn fqname-to-keyword [fqname]
   (let [parts (split fqname #"\.")]
@@ -86,12 +86,13 @@
         (keyword schema-ns name))
       (keyword fqname))))
 
-(defmethod from-avro GenericRecord [avro-record protocol]
+(defmethod from-avro GenericRecord [^GenericRecord avro-record ^Protocol protocol]
            (let [schema (.getSchema avro-record)
                  fields (.getFields schema)
-                 field-names (map #(.name %) fields)]
+                 field-names (map (fn [^Schema$Field field] (.name field)) fields)]
              (assoc (zipmap (map fqname-to-keyword field-names)
-                            (map #(from-avro (.get avro-record %) protocol) field-names))
+                            (map (fn [^String field-name] (from-avro (.get avro-record field-name) protocol))
+                                 field-names))
                :sherpa-type (fqname-to-keyword (.getFullName schema)))))
 
 (defmethod from-avro Associative [avro-map protocol]
@@ -99,6 +100,6 @@
                    {}
                    avro-map))
 
-(defmethod from-avro GenericEnumSymbol [avro-enum protocol]
+(defmethod from-avro GenericEnumSymbol [^GenericEnumSymbol avro-enum ^Protocol protocol]
            {:sherpa-type (fqname-to-keyword (.getFullName (.getSchema avro-enum)))
             :symbol (keyword (.toString avro-enum))})
