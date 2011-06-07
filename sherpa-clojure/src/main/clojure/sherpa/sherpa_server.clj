@@ -31,10 +31,7 @@
 
 (defmulti sherpa-rpc (fn [msg listener request] msg))
 (defmethod sherpa-rpc :default [msg listener request]
-           (throw {:sherpa-type "ErrorResponse"
-                   :code {:sherpa-type :ReasonCode
-                          :symbol :Error}
-                   :message (str "Unknown message type: " msg)}))
+           (throw (RuntimeException. (str "Unknown message type: " msg))))
 
 (defmacro add-rpc [msg return-type]
   `(defmethod sherpa-rpc ~msg [m# listener# avro-request#]
@@ -54,6 +51,15 @@
 (add-rpc "cancel" "CloseResponse")
 (add-rpc "close" "CloseResponse")
 
+(defn- error-response [exception-or-message]
+  (let [msg (if (instance? Throwable exception-or-message)
+              (.getMessage exception-or-message)
+              exception-or-message)]
+    (to-avro {:sherpa-type :ErrorResponse
+              :code {:sherpa-type :ReasonCode
+                     :symbol :Error}
+              :message msg} PROTOCOL)))
+
 (defn responder
   "Adapt a SherpaListener into an Avro Responder."
   [listener]
@@ -65,8 +71,7 @@
                                          (sherpa-rpc msg-name listener (.get request msg-name)))
                                        (catch Throwable t
                                          (do (.printStackTrace t)
-                                             ;; TODO throw ErrorResponse
-                                             (throw t))))))))
+                                             (error-response t))))))))
 
 (defn run-sherpa
   "Run a sherpa server that directs calls to the listener, which should
