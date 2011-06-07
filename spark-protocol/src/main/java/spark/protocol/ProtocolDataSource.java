@@ -25,7 +25,7 @@ import spark.api.DataSource;
  * This is the entry point to a spark-api implementation that accesses SPARQL 
  * endpoints over HTTP.  To connect to a SPARQL endpoint and run queries:
  * 
- * <code>
+ * <pre>
  * DataSource myDS = new ProtocolDataSource("http://DBpedia.org/sparql");
  * Connection conn = myDS.getConnection(NoCredentials.INSTANCE);
  * Command query = conn.createCommand("SELECT ?p ?o WHERE { <http://dbpedia.org/resource/Terry_Gilliam> ?p ?o }");    
@@ -39,7 +39,7 @@ import spark.api.DataSource;
  * solutions.close();
  * query.close();
  * conn.close();
- * </code>
+ * </pre>
  */
 public class ProtocolDataSource implements DataSource {
 
