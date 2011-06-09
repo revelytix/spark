@@ -35,10 +35,4 @@
                                   (.iterator mgr))))
            (close [_] (.close transceiver)))))
 
-(defn test-calling-client []
-  (let [client (sherpa-client {:host "localhost" :port 1234})
-        results (query client "SELECT ?x ?y WHERE { ... }" nil nil)]
-    
-    ;; results are a seq of solutions where each solution is a
-    ;; map from key (variable) to value (an RDF data type).
-    ))
+
