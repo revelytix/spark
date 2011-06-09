@@ -67,8 +67,12 @@
                      (reify MessageResponder
                             (respond [this msg request]
                                      (try
-                                       (let [msg-name (.getName msg)]
-                                         (sherpa-rpc msg-name listener (.get request msg-name)))
+                                       (let [msg-name (.getName msg)
+                                             response (sherpa-rpc msg-name listener (.get request msg-name))]
+                                         (let [fields (map #(.name %) (.. response getSchema getFields))]
+                                           (doseq [field fields]
+                                             (println "response key=" field "v class=" (class (.get response field)))))
+                                         response)
                                        (catch Throwable t
                                          (do (.printStackTrace t)
                                              (error-response t))))))))
