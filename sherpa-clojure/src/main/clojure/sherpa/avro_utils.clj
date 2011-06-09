@@ -1,6 +1,6 @@
 (ns sherpa.avro-utils
   (:use [clojure.string :only (join split)])
-  (:import [clojure.lang Keyword Associative]
+  (:import [clojure.lang Keyword Associative Sequential]
            [org.apache.avro Protocol Schema Schema$Type Schema$Field]
            [org.apache.avro.generic GenericData$Record GenericData$EnumSymbol
             GenericRecord GenericEnumSymbol]
@@ -61,16 +61,22 @@
 ;;    is converted to the enum symbol
 ;; 3) Avro map, left as is because Avro handles any Map as a map.
 (defmethod to-avro Associative [data ^Protocol protocol]
-           (let [sherpa-type (:sherpa-type data)]
-             (if sherpa-type
-               (let [ns-type (keyword-to-ns sherpa-type)
-                     schema (.getType protocol ns-type)]
-                 (if (nil? schema)
-                   (throw (RuntimeException. (str "Unknown schema " ns-type " in protocol " (protocol-identifier protocol)))))
-                 (condp = (.getType schema) 
-                     Schema$Type/RECORD (avro-record protocol ns-type (dissoc data :sherpa-type))
-                     Schema$Type/ENUM (avro-enum schema (name (:symbol data)))))
-               (avro-map data protocol))))
+  (let [sherpa-type (:sherpa-type data)]
+    (if sherpa-type
+      (let [ns-type (keyword-to-ns sherpa-type)
+            schema (.getType protocol ns-type)]
+        (if (nil? schema)
+          (throw (RuntimeException. (str "Unknown schema " ns-type " in protocol " (protocol-identifier protocol)))))
+        (condp = (.getType schema) 
+          Schema$Type/RECORD (avro-record protocol ns-type (dissoc data :sherpa-type))
+          Schema$Type/ENUM (avro-enum schema (name (:symbol data)))))
+      (avro-map data protocol))))
+
+(defmethod to-avro Sequential [data ^Protocol protocol]
+  (map #(to-avro % protocol) data))
+
+;; If something is both Associative and Sequential (vectors), prefer Sequential
+(prefer-method to-avro Sequential Associative)
 
 (defmulti from-avro (fn [avro-data protocol] (class avro-data)))
 

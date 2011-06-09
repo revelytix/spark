@@ -1,10 +1,10 @@
 (ns sherpa.test-avro-utils
   (:use [clojure.test]
         [sherpa.avro-utils])
-  (:import [java.util Map]
+  (:import [java.util Map Collection]
            [sherpa.protocol SherpaProtocol]
            [org.apache.avro Protocol Schema Schema$Type Schema$Field]
-           [org.apache.avro.generic GenericData$EnumSymbol GenericData$Record]
+           [org.apache.avro.generic GenericData$EnumSymbol GenericData$Record GenericRecord]
            [org.apache.avro.util Utf8]))
 
 (deftest test-keyword-to-ns
@@ -54,6 +54,16 @@
     (let [val (to-avro {:a "foo" :b 1 :c {:sherpa-type :e1 :symbol :b}} example-protocol)]
       (is (instance? Map val))
       (is (= "{\"c\" #<EnumSymbol b>, \"b\" 1, \"a\" \"foo\"}" (.toString val))))))
+
+(deftest test-to-avro-sequential
+  (testing "Convert to Avro list"
+    (let [val (to-avro [{:sherpa-type :rec1 :f2 "xyz"} 10 [{:sherpa-type :rec1 :f2 "abc"}]] example-protocol)]
+      (is (instance? Collection val))
+      (is (instance? GenericRecord (first val)))
+      (is (= 10 (second val)))
+      (let [inner (nth val 2)]
+        (is (instance? Collection inner))
+        (is (instance? GenericRecord (first inner)))))))
 
 (deftest test-fqname-to-keyword
   (are [expected input] (= expected (fqname-to-keyword input))
