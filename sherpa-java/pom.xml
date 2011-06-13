@@ -5,12 +5,12 @@
   <parent>
     <groupId>com.revelytix</groupId>
     <artifactId>sparql-api</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
   </parent>
 
   <groupId>com.revelytix</groupId>
   <artifactId>sherpa-java</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>sherpa-java - SHERPA sparql protocol client</name>
@@ -47,7 +47,7 @@
   <properties>
     <avro-version>1.5.0</avro-version>
     <sherpa-version>${project.version}</sherpa-version>
-    <spark-version>0.1.0</spark-version>
+    <spark-version>0.1.1-SNAPSHOT</spark-version>
   </properties>
 
   <dependencies>
