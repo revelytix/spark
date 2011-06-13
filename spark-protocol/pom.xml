@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <groupId>com.revelytix</groupId>
+    <artifactId>sparql-api</artifactId>
+    <version>0.1.0</version>
   </parent>
 
   <groupId>com.revelytix</groupId>
   <artifactId>spark-protocol</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0</version>
 
   <packaging>jar</packaging>
   <name>spark-protocol - SPARQL client implementation of the SPARQL protocol</name>
@@ -85,15 +85,6 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>2.1.2</version>
         <executions>
@@ -119,7 +110,6 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
 
 

@@ -1,0 +1,27 @@
+// More details here:
+// https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
+
+// update versions
+mate */pom.xml 	
+
+// check for test failures, etc
+mvn install
+
+// Commit at release version (tag here too?)
+git ci -am 'Release x.y.z'
+
+// push to Maven staging
+mvn deploy -Psign -Dgpg.passphrase=<thephrase>
+
+// Close staging repo:
+//   go to https://oss.sonatype.org
+//   login in
+//   select Staging Repositories
+//   select repository
+//   press "Close" button 
+//   this validate the artifacts 
+//   download jar files and test with them if necessary
+//   press "Release" button
+
+
+

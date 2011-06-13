@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <groupId>com.revelytix</groupId>
+    <artifactId>sparql-api</artifactId>
+    <version>0.1.0</version>
   </parent>
 
   <groupId>com.revelytix</groupId>
   <artifactId>sherpa-clojure</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0</version>
   <packaging>jar</packaging>
 
   <name>sherpa-clojure - SHERPA client and server utils in Clojure</name>
@@ -91,15 +91,6 @@
       </resource>
     </resources>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>   
       <plugin>
         <groupId>com.theoryinpractise</groupId>
         <artifactId>clojure-maven-plugin</artifactId>
