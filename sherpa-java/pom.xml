@@ -45,7 +45,7 @@
   </licenses>
 
   <properties>
-    <avro-version>1.5.0</avro-version>
+    <avro-version>1.5.1</avro-version>
     <sherpa-version>${project.version}</sherpa-version>
     <spark-version>0.1.1-SNAPSHOT</spark-version>
   </properties>
