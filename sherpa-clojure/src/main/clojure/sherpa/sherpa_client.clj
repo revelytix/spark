@@ -29,10 +29,15 @@
         requestor (SpecificRequestor. Query transceiver)
         query-api (SpecificRequestor/getClient Query requestor)]
     (reify SparqlClient
-           (query [_ sparql params props]
-                  (iterator-seq (let [mgr (QueryManager. query-api)]
-                                  (.query mgr sparql params props)
-                                  (.iterator mgr))))
-           (close [_] (.close transceiver)))))
+      (query [_ sparql params props]
+        (let [mgr (QueryManager. query-api)
+              ;; each item in the iter is a collection of values in
+              ;; the same order as the vars array
+              _ (.query mgr sparql params props)
+              data-iter (.iterator mgr) 
+              tuple-generator (partial zipmap (map keyword (.getVars mgr)))]
+          ;; turn each data array into a map for each tuple
+          (map tuple-generator (iterator-seq data-iter))))
+      (close [_] (.close transceiver)))))
 
 

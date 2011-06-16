@@ -5,7 +5,7 @@
 
 (defn iri
   [iri]
-  {:sherpa-type "IRI" :iri iri})
+  {:sherpa-type :IRI :iri iri})
 
 (defn batch
   "Create a batch of test data starting at row start with size tuples."
