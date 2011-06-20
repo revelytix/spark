@@ -37,13 +37,9 @@
   `(defmethod sherpa-rpc ~msg [m# listener# avro-request#]
               (println "query rpc, msg=" ~msg ", avro-req=" avro-request#)
               (let [request# (from-avro avro-request# PROTOCOL)
-                    x# (println "  req=" request#)
                     protocol-fn# ~(resolve (symbol msg))
-                    x# (println "  protocol-fn=" protocol-fn#)
                     response# (protocol-fn# listener# request#)
-                    x# (println "  response=" response#)
-                    avro-resp# (to-avro (assoc response# :sherpa-type (keyword ~return-type)) PROTOCOL)
-                    x# (println "  avro-resp=" avro-resp#)]
+                    avro-resp# (to-avro (assoc response# :sherpa-type (keyword ~return-type)) PROTOCOL)]
                 avro-resp#)))
 
 (add-rpc "query" "QueryResponse")
@@ -67,12 +63,8 @@
                      (reify MessageResponder
                             (respond [this msg request]
                                      (try
-                                       (let [msg-name (.getName msg)
-                                             response (sherpa-rpc msg-name listener (.get request msg-name))]
-                                         (let [fields (map #(.name %) (.. response getSchema getFields))]
-                                           (doseq [field fields]
-                                             (println "response key=" field "v class=" (class (.get response field)))))
-                                         response)
+                                       (let [msg-name (.getName msg)]
+                                         (sherpa-rpc msg-name listener (.get request msg-name)))
                                        (catch Throwable t
                                          (do (.printStackTrace t)
                                              (error-response t))))))))
