@@ -40,11 +40,11 @@ public class SHPCommand extends BaseCommand implements Command {
   
   @Override
   public void cancel() {
-    // TODO Auto-generated method stub
+    this.queryMgr.cancel();
   }
 
   @Override
-  public Result execute() {
+  public Result execute() {    
     // TODO Auto-generated method stub
     return null;
   }

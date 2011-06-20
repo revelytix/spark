@@ -21,6 +21,9 @@ import java.util.List;
 
 import org.apache.avro.AvroRemoteException;
 
+import sherpa.protocol.CloseRequest;
+import sherpa.protocol.CloseResponse;
+import sherpa.protocol.CancelRequest;
 import sherpa.protocol.DataRequest;
 import sherpa.protocol.DataResponse;
 import sherpa.protocol.ErrorResponse;
@@ -104,6 +107,22 @@ public class DummyQueryResponder implements Query {
       response.message = "Invalid request for rows outside the result set.";
       throw response;
     }
+  }
+
+  @Override
+  public CloseResponse cancel(CancelRequest cancel) throws AvroRemoteException,
+      ErrorResponse {
+    CloseResponse response = new CloseResponse();
+    response.queryId = cancel.queryId;
+    return response;
+  }
+
+  @Override
+  public CloseResponse close(CloseRequest close) throws AvroRemoteException,
+      ErrorResponse {
+    CloseResponse response = new CloseResponse();
+    response.queryId = close.queryId;
+    return response;
   }
 
 }

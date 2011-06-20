@@ -28,6 +28,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.avro.AvroRemoteException;
 
+import sherpa.protocol.CancelRequest;
+import sherpa.protocol.CloseRequest;
 import sherpa.protocol.DataRequest;
 import sherpa.protocol.DataResponse;
 import sherpa.protocol.ErrorResponse;
@@ -183,11 +185,35 @@ public class QueryManager implements Iterable<List<Object>> {
   }
 
   public void cancel() {
-    // TODO
+    CancelRequest cancelRequest = new CancelRequest();
+    cancelRequest.queryId = queryId;
+
+    try {
+      queryApi.cancel(cancelRequest);
+    } catch (ErrorResponse e) {
+      System.err.println(e.message);
+      e.printStackTrace();
+      // TODO - manage error
+    } catch (AvroRemoteException e) {
+      e.printStackTrace();
+      // TODO - manage error
+    }
   }
 
   public void close() {
-    // TODO
+    CloseRequest closeRequest = new CloseRequest();
+    closeRequest.queryId = queryId;
+
+    try {
+      queryApi.close(closeRequest);
+    } catch (ErrorResponse e) {
+      System.err.println(e.message);
+      e.printStackTrace();
+      // TODO - manage error
+    } catch (AvroRemoteException e) {
+      e.printStackTrace();
+      // TODO - manage error
+    }
   }
 
   public synchronized List<Object> getRow() {

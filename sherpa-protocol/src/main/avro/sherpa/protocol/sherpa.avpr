@@ -45,6 +45,19 @@
 	           			    {"type": "array", 
 	           				"items": ["IRI", "BNode", "PlainLiteral", "TypedLiteral", "string", "boolean", "int", "long", "float", "double", "null"]}}}]},
 	           			  
+
+	          {"name": "CancelRequest",
+		           "type": "record",
+		           "fields": [{"name": "queryId", "type": "string"}]},
+
+	          {"name": "CloseRequest",
+		           "type": "record",
+		           "fields": [{"name": "queryId", "type": "string"}]},
+			  
+	          {"name": "CloseResponse",
+	           "type": "record",
+	           "fields": [{"name": "queryId", "type": "string"}]},
+
 	          {"name": "ReasonCode",
 	           "type": "enum",
 	           "symbols": ["Close", "Cancel", "Timeout", "Error"]},
@@ -65,10 +78,24 @@
 		},
 				
 		"data": {
-			"doc": "Data response from server to client",
+			"doc": "Data request",
 			"request": [{"name": "data", "type": "DataRequest"}],
 			"response": "DataResponse",
 			"errors": ["ErrorResponse"]
-		}
+		},
+
+                "close": {
+                        "doc": "Request to close a query",
+                        "request": [{"name": "close", "type": "CloseRequest"}],
+                        "response": "CloseResponse",
+                        "errors": ["ErrorResponse"]
+                },
+
+                "cancel": {
+                        "doc": "Request to cancel a query",
+                        "request": [{"name": "cancel", "type": "CancelRequest"}],
+                        "response": "CloseResponse",
+                        "errors": ["ErrorResponse"]
+                }
 	}
 }
