@@ -2,7 +2,7 @@
 // https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
 
 // update versions
-mate */pom.xml 	
+<editor> pom.xml */pom.xml 	
 
 // check for test failures, etc
 mvn install
