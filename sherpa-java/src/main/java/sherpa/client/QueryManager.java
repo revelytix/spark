@@ -151,28 +151,28 @@ public class QueryManager implements Iterable<List<Object>> {
   }
 
   public synchronized boolean incrementCursor() {
-    System.out.println("..incrementCursor(), cursor=" + cursor);
+    //System.out.println("..incrementCursor(), cursor=" + cursor);
     while (true) {
       if (currentData.inc()) {  // Stay in the current batch
-        System.out.println("....incrementing in currentData");
+        //System.out.println("....incrementing in currentData");
         cursor++;
         return true;
       } else {
         Window nextData = nextQueue.poll(); // non-blocking take, null if empty        
         if (nextData != null) { // Switch to next batch
-          System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
+          //System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
           this.currentData = nextData;      
           asyncMore(cursor + currentData.data.size() + 1);
           
         } else { // Don't have data
           if (!currentData.more) { // Because we're done
-            System.out.println("....no current data, but we're all done.");
+            //System.out.println("....no current data, but we're all done.");
             cursor++;
             return false;
           } else { // Or we just haven't waited long enough for it
-            System.out.println("....no current data, no next data, but not done, just wait.");
+            //System.out.println("....no current data, no next data, but not done, just wait.");
             blockForData();            
-            System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
+            //System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
             asyncMore(cursor + currentData.data.size() + 1);
           }
         }
@@ -285,7 +285,7 @@ public class QueryManager implements Iterable<List<Object>> {
     }
 
     public List<Object> getData() {
-      System.out.println("..get row at " + index);
+      //System.out.println("..get row at " + index);
       return data.get(index);
     }
 
