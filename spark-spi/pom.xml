@@ -5,12 +5,12 @@
   <parent>
     <groupId>com.revelytix</groupId>
     <artifactId>sparql-api</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3-SNAPSHOT</version>
   </parent>
 
   <groupId>com.revelytix</groupId>
   <artifactId>spark-spi</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.3-SNAPSHOT</version>
 
   <packaging>jar</packaging>
   <name>spark-spi - SPARQL client connection SPI</name>
