@@ -5,7 +5,7 @@
 <editor> pom.xml */pom.xml 	
 
 // check for test failures, etc
-mvn install
+mvn clean install
 
 // Commit at release version (tag here too?)
 git ci -am 'Release x.y.z'
@@ -22,6 +22,15 @@ mvn deploy -Psign -Dgpg.passphrase=<thephrase>
 //   this validate the artifacts 
 //   download jar files and test with them if necessary
 //   press "Release" button
+
+// update all versions to next -SNAPSHOT
+<editor> pom.xml */pom.xml
+
+// Commit to next snapshot
+git ci -am 'Changing version to next snapshot'
+
+// Push changes to repo (by not pushing earlier, CI misses the release version)
+git push
 
 
 
