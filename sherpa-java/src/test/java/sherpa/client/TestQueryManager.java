@@ -10,6 +10,8 @@ import org.apache.avro.AvroRemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import sherpa.protocol.DataRequest;
+import sherpa.protocol.DataResponse;
 import sherpa.protocol.ErrorResponse;
 import sherpa.protocol.QueryRequest;
 import sherpa.protocol.QueryResponse;
@@ -56,13 +58,16 @@ public class TestQueryManager {
   @Test
   public void testExceptionOnQuery() {
     DummyQueryResponder queryResponder = new DummyQueryResponder(20) {
-      @Override
-      public QueryResponse query(QueryRequest query)
-          throws AvroRemoteException, ErrorResponse {
+      private ErrorResponse err() {
         ErrorResponse resp = new ErrorResponse();
         resp.code = ReasonCode.Error;
         resp.message = "foo";
-        throw resp; 
+        return resp;
+      }
+      @Override
+      public QueryResponse query(QueryRequest query)
+          throws AvroRemoteException, ErrorResponse {
+        throw err();
       }
     };
     
@@ -80,5 +85,36 @@ public class TestQueryManager {
     }
   }
   
-  
+  @Test
+  public void testExceptionOnData() {
+    DummyQueryResponder queryResponder = new DummyQueryResponder(20) {
+      private ErrorResponse err() {
+        ErrorResponse resp = new ErrorResponse();
+        resp.code = ReasonCode.Error;
+        resp.message = "foo";
+        return resp;
+      }
+      @Override
+      public DataResponse data(DataRequest req)
+          throws AvroRemoteException, ErrorResponse {
+        throw err();
+      }
+    };
+
+    QueryManager mgr = new QueryManager(queryResponder);
+    Map<String,String> empty = Collections.emptyMap();
+    mgr.query("SELECT foo", empty, empty);
+    try {
+      mgr.incrementCursor();
+      mgr.getRow();
+      
+      Assert.fail("Should have thrown an error response!");
+    } catch(RuntimeException e) {
+      Throwable cause = e.getCause();
+      Assert.assertTrue(cause instanceof ErrorResponse);
+      ErrorResponse er = (ErrorResponse) cause;
+      Assert.assertEquals(ReasonCode.Error, er.code);
+      Assert.assertEquals("foo", er.message);
+    }
+  }
 }

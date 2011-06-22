@@ -16,15 +16,13 @@
 package sherpa.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 
 import org.apache.avro.AvroRemoteException;
 
@@ -32,7 +30,6 @@ import sherpa.protocol.CancelRequest;
 import sherpa.protocol.CloseRequest;
 import sherpa.protocol.DataRequest;
 import sherpa.protocol.DataResponse;
-import sherpa.protocol.ErrorResponse;
 import sherpa.protocol.Query;
 import sherpa.protocol.QueryRequest;
 import sherpa.protocol.QueryResponse;
@@ -49,6 +46,7 @@ public class QueryManager implements Iterable<List<Object>> {
   
   // Resources
   private final Query queryApi;
+  private final Executor executor = Executors.newFixedThreadPool(1);
 
   // query metadata - doesn't change after the query starts
   private CharSequence queryId;
@@ -58,10 +56,14 @@ public class QueryManager implements Iterable<List<Object>> {
   // query state as cursor evolves, protected by "this" lock
   private int cursor = 0; // overall result set, 1-based
   private Window currentData = Window.EMPTY;
-  private final BlockingQueue<Window> nextQueue = new LinkedBlockingQueue<Window>();
-
+  
+  // coordination for next data between calling threads and background requester thread
+  private SignalSlot<Window> nextData = new SignalSlot<Window>();
+    
   public QueryManager(Query clientInterface) {
-    this.queryApi = clientInterface;    
+    this.queryApi = clientInterface;   
+    
+    Executors.newFixedThreadPool(1, new ClientThreadFactory());
   }
 
   public void query(String command, Map<String, String> params,
@@ -84,22 +86,21 @@ public class QueryManager implements Iterable<List<Object>> {
       for (CharSequence cs : response.vars) {
         vars.add(cs.toString());
       }
-    } catch (ErrorResponse e) {
-      throw new SparqlException("Got error querying server.", e);
     } catch (AvroRemoteException e) {
-      throw new SparqlException("Got error communicating with server.", e);
+      throw new SparqlException(e.getMessage(), e);
     }
 
-    asyncMore(1);
+    scheduleMoreRequest(1);
   }
 
   /**
-   * Fire request for a batch (async) or block on the existing one.
+   * Send request for more data for this query.
    * 
-   * @param startRow
-   *          Start row needed in return batch
+   * NOTE: This method is always run in a background thread!! 
+
+   * @param startRow Start row needed in return batch
    */
-  private void more(int startRow) {
+  private void asyncMoreRequest(int startRow) {
     try {
       DataRequest moreRequest = new DataRequest();
       moreRequest.queryId = queryId;
@@ -107,50 +108,34 @@ public class QueryManager implements Iterable<List<Object>> {
       moreRequest.maxSize = maxBatchSize;
       System.out.println("Client requesting " + startRow + " .. "
           + (startRow + maxBatchSize - 1));
-
+  
       DataResponse response = queryApi.data(moreRequest);
       System.out.println("Client got response " + response.startRow + " .. "
           + (response.startRow + response.data.size() - 1) + ", more="
-          + response.more);
-      try {
-        nextQueue.put(new Window(response.data, response.more));
-      } catch (InterruptedException e) {
-        // Reset interrupted state but don't try to handle it
-        Thread.currentThread().interrupt();
-      }
-
-    } catch (ErrorResponse e) {
-      System.err.println(e.message);
-      e.printStackTrace();
-      // TODO - manage error
-    } catch (AvroRemoteException e) {
-      e.printStackTrace();
-      // TODO - manage error
+          + response.more);            
+      nextData.add(new Window(response.data, response.more));
+    } catch(AvroRemoteException e) {
+      this.nextData.addError(e);
+    } catch(Throwable t) {
+      this.nextData.addError(t);
     }
   }
-
-  private final Executor executor = Executors.newFixedThreadPool(1);
-
   
-  private synchronized void asyncMore(final int startRow) {
+  private synchronized void scheduleMoreRequest(final int startRow) {
     if(currentData.more) {
       executor.execute(new Runnable() {
         public void run() {
-          more(startRow);
+          asyncMoreRequest(startRow);
         }
       });
     }
   }
 
   private synchronized void blockForData() {
-    try {
-      currentData = nextQueue.take(); // blocking dequeue
-    } catch (InterruptedException e) {
-      throw new SparqlException("Unexpected interruption");
-    }
+    currentData = nextData.take();
   }
 
-  public synchronized boolean incrementCursor() {
+  public synchronized boolean incrementCursor() {    
     //System.out.println("..incrementCursor(), cursor=" + cursor);
     while (true) {
       if (currentData.inc()) {  // Stay in the current batch
@@ -158,11 +143,11 @@ public class QueryManager implements Iterable<List<Object>> {
         cursor++;
         return true;
       } else {
-        Window nextData = nextQueue.poll(); // non-blocking take, null if empty        
-        if (nextData != null) { // Switch to next batch
+        Window nextWindow = nextData.poll();  // non-blocking take, null if empty
+        if (nextWindow != null) { // Switch to next batch
           //System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
-          this.currentData = nextData;      
-          asyncMore(cursor + currentData.data.size() + 1);
+          this.currentData = nextWindow;      
+          scheduleMoreRequest(cursor + currentData.data.size() + 1);
           
         } else { // Don't have data
           if (!currentData.more) { // Because we're done
@@ -173,7 +158,7 @@ public class QueryManager implements Iterable<List<Object>> {
             //System.out.println("....no current data, no next data, but not done, just wait.");
             blockForData();            
             //System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
-            asyncMore(cursor + currentData.data.size() + 1);
+            scheduleMoreRequest(cursor + currentData.data.size() + 1);
           }
         }
       }
@@ -190,13 +175,8 @@ public class QueryManager implements Iterable<List<Object>> {
 
     try {
       queryApi.cancel(cancelRequest);
-    } catch (ErrorResponse e) {
-      System.err.println(e.message);
-      e.printStackTrace();
-      // TODO - manage error
     } catch (AvroRemoteException e) {
-      e.printStackTrace();
-      // TODO - manage error
+      throw new SparqlException(e.getMessage(), e);
     }
   }
 
@@ -206,13 +186,8 @@ public class QueryManager implements Iterable<List<Object>> {
 
     try {
       queryApi.close(closeRequest);
-    } catch (ErrorResponse e) {
-      System.err.println(e.message);
-      e.printStackTrace();
-      // TODO - manage error
     } catch (AvroRemoteException e) {
-      e.printStackTrace();
-      // TODO - manage error
+      throw new SparqlException(e.getMessage(), e);
     }
   }
 
@@ -262,6 +237,10 @@ public class QueryManager implements Iterable<List<Object>> {
     }
   }
   
+  /**
+   * Represents a batch of result data. Walk through the data with inc()
+   * and get each tuple with getData(). 
+   */
   private static class Window {
     final List<List<Object>> data;
     final boolean more;
@@ -284,13 +263,21 @@ public class QueryManager implements Iterable<List<Object>> {
       return index < data.size();
     }
 
-    public List<Object> getData() {
+    List<Object> getData() {
       //System.out.println("..get row at " + index);
       return data.get(index);
     }
 
-    private static List<List<Object>> EMPTY_LIST = Collections.emptyList();
-    static Window EMPTY = new Window(EMPTY_LIST, true);
+    static Window EMPTY = new Window(new ArrayList<List<Object>>(), true);
   }
-
+  
+  private static class ClientThreadFactory implements ThreadFactory {
+    @Override
+    public Thread newThread(Runnable r) {
+      Thread t = new Thread(r, "Sherpa client data requester");
+      t.setDaemon(true);
+      return t;
+    }    
+  }
+  
 }
