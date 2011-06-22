@@ -1,0 +1,84 @@
+package sherpa.client;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.avro.AvroRemoteException;
+import org.junit.Assert;
+import org.junit.Test;
+
+import sherpa.protocol.ErrorResponse;
+import sherpa.protocol.QueryRequest;
+import sherpa.protocol.QueryResponse;
+import sherpa.protocol.ReasonCode;
+import sherpa.server.DummyQueryResponder;
+import spark.api.exception.SparqlException;
+
+public class TestQueryManager {
+  @Test
+  public void testQuery() {
+    DummyQueryResponder queryResponder = new DummyQueryResponder(20);
+  
+    QueryManager mgr = new QueryManager(queryResponder);
+    Map<String,String> params = Collections.emptyMap();
+    Map<String,String> props = new HashMap<String,String>();
+    props.put(QueryManager.BATCH_SIZE, "10");
+    
+    mgr.query("SELECT foo", params, props);
+    List<String> vars = mgr.getVars();
+    List<String> expectedVars = new ArrayList<String>();
+    expectedVars.add("x");
+    expectedVars.add("y");
+    Assert.assertEquals(expectedVars, vars);        
+    Assert.assertEquals(0, mgr.getCursor());
+    
+    // advance iterator
+    Assert.assertTrue(mgr.incrementCursor());
+    Assert.assertEquals(1, mgr.getCursor());
+    
+    // verify messages to server
+    Assert.assertTrue(queryResponder.messages.size() >= 2);
+    Assert.assertEquals("Message=query sparql=SELECT foo params={} props={} ", queryResponder.messages.get(0));
+    Assert.assertEquals("Message=data queryId=1 startRow=1 maxSize=10 ", queryResponder.messages.get(1));
+
+    // cancel 
+    mgr.cancel();
+    Assert.assertEquals("Message=cancel queryId=1 ", queryResponder.messages.get(queryResponder.messages.size()-1));
+    
+    // close 
+    mgr.close();
+    Assert.assertEquals("Message=close queryId=1 ", queryResponder.messages.get(queryResponder.messages.size()-1));
+  }
+  
+  @Test
+  public void testExceptionOnQuery() {
+    DummyQueryResponder queryResponder = new DummyQueryResponder(20) {
+      @Override
+      public QueryResponse query(QueryRequest query)
+          throws AvroRemoteException, ErrorResponse {
+        ErrorResponse resp = new ErrorResponse();
+        resp.code = ReasonCode.Error;
+        resp.message = "foo";
+        throw resp; 
+      }
+    };
+    
+    try {
+      QueryManager mgr = new QueryManager(queryResponder);
+      Map<String,String> empty = Collections.emptyMap();
+      mgr.query("SELECT foo", empty, empty);
+      Assert.fail("Should have thrown an error response!");
+    } catch(SparqlException e) {
+      Throwable cause = e.getCause();
+      Assert.assertTrue(cause instanceof ErrorResponse);
+      ErrorResponse er = (ErrorResponse) cause;
+      Assert.assertEquals(ReasonCode.Error, er.code);
+      Assert.assertEquals("foo", er.message);
+    }
+  }
+  
+  
+}

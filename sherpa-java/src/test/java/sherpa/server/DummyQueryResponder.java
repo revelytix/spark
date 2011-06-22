@@ -21,9 +21,9 @@ import java.util.List;
 
 import org.apache.avro.AvroRemoteException;
 
+import sherpa.protocol.CancelRequest;
 import sherpa.protocol.CloseRequest;
 import sherpa.protocol.CloseResponse;
-import sherpa.protocol.CancelRequest;
 import sherpa.protocol.DataRequest;
 import sherpa.protocol.DataResponse;
 import sherpa.protocol.ErrorResponse;
@@ -35,10 +35,20 @@ import sherpa.protocol.ReasonCode;
 
 public class DummyQueryResponder implements Query {
 
-  private final int rows;
-
+  public final int rows;
+  public List<String> messages = new ArrayList<String>();
+  
   public DummyQueryResponder(int rows) {
     this.rows = rows;
+  }
+  
+  public void record(Object... pairs) {
+    StringBuilder str = new StringBuilder();
+    int i = 0;
+    while(i < pairs.length) {
+      str.append(pairs[i++] + "=" + pairs[i++] + " ");
+    }
+    messages.add(str.toString());
   }
   
   @Override
@@ -54,6 +64,8 @@ public class DummyQueryResponder implements Query {
     response.vars.add("y");
 
     System.out.println("Server sending query response");
+   
+    record("Message", "query", "sparql", query.sparql, "params", query.parameters, "props", query.properties);
     return response;
   }
 
@@ -75,6 +87,9 @@ public class DummyQueryResponder implements Query {
       ErrorResponse {
     
     System.out.println("Server got data request for " + dataRequest.startRow);
+    record("Message", "data", "queryId", dataRequest.queryId, 
+        "startRow", dataRequest.startRow, 
+        "maxSize", dataRequest.maxSize);
     
     if(rows == 0) {
       DataResponse response = new DataResponse();
@@ -112,6 +127,9 @@ public class DummyQueryResponder implements Query {
   @Override
   public CloseResponse cancel(CancelRequest cancel) throws AvroRemoteException,
       ErrorResponse {
+    
+    record("Message", "cancel", "queryId", cancel.queryId);
+
     CloseResponse response = new CloseResponse();
     response.queryId = cancel.queryId;
     return response;
@@ -120,6 +138,9 @@ public class DummyQueryResponder implements Query {
   @Override
   public CloseResponse close(CloseRequest close) throws AvroRemoteException,
       ErrorResponse {
+
+    record("Message", "close", "queryId", close.queryId);
+
     CloseResponse response = new CloseResponse();
     response.queryId = close.queryId;
     return response;
