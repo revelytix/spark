@@ -94,7 +94,7 @@ public class SolutionSet extends BaseResults implements Solutions {
 
   @Override
   public List<RDFNode> getSolutionList() {
-    Map<String,RDFNode> solution = data.get(cursor-1);
+    Map<String,RDFNode> solution = data.get(cursor);
     List<RDFNode> solutionList = new ArrayList<RDFNode>(vars.size());
     
     for(String var : vars) {
