@@ -42,7 +42,8 @@ import spark.api.exception.SparqlException;
 public class QueryManager implements Iterable<List<Object>> {
 
   // Query properties
-  public final static String BATCH_SIZE = "batchSize"; 
+  public static final String BATCH_SIZE = "batchSize";
+  public static final String TIMEOUT = "timeout"; 
   
   // Resources
   private final Query queryApi;

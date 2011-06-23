@@ -24,15 +24,19 @@ import org.apache.avro.ipc.SaslSocketServer;
 import org.apache.avro.ipc.Server;
 import org.apache.avro.ipc.specific.SpecificResponder;
 
-import sherpa.protocol.Query;
 import spark.api.exception.SparqlException;
+import sherpa.protocol.Query;
 
 public class DummySherpaServer extends SpecificResponder {
 
   private final Server server;
   
   public DummySherpaServer(int rows) {
-    super(Query.class, new DummyQueryResponder(rows));
+    this(new DummyQueryResponder(rows));
+  }
+  
+  public DummySherpaServer(Query responder) {
+    super(Query.class, responder);
 
     try {
       server = new SaslSocketServer(this, new InetSocketAddress(InetAddress.getLocalHost(), 0));
@@ -40,7 +44,6 @@ public class DummySherpaServer extends SpecificResponder {
     } catch(IOException e) {
       throw new SparqlException("Error starting server.");
     }
-  
   }
   
   public InetSocketAddress getAddress() {
