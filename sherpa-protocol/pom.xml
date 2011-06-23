@@ -107,6 +107,7 @@
           </execution>
         </executions>
       </plugin>
+      <!-- This seems to crash Eclipse
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -128,6 +129,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
     </plugins>
   </build>
 </project>
