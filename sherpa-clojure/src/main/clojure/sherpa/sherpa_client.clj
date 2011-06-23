@@ -18,11 +18,21 @@
            [sherpa.client QueryManager]
            [sherpa.protocol Query QueryRequest DataRequest]))
 
+;; The SparqlClient protocol 
 (defprotocol SparqlClient
-  (query [client sparql params props])
-  (close [client]))
+  "Abstract access to a SPARQL processor."
+  (query [client sparql params props]
+    "Execute a query on a SPARQL processor and return a sequence of results for the query.
+      sparql - query string
+      params - map of param names and values
+      props - map of query properties like: timeout")
+  (close [client] "Close the client."))
 
-(defn sherpa-client [connect-map]
+(defn sherpa-client
+  "Create a client that implements the SparqlClient protocol and talks using the Sherpa protocol to 
+   a Sherpa server.  The connect-map should contain properties to specify which Sherpa server to 
+   connect to, such as :host and :port."
+  [connect-map]
   (let [addr (InetSocketAddress. (InetAddress/getByName (:host connect-map)) (:port connect-map))
         _ (println "client connecting to " addr)
         transceiver (SaslSocketTransceiver. addr)
