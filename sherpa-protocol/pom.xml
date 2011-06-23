@@ -107,20 +107,22 @@
           </execution>
         </executions>
       </plugin>
-      <!-- This seems to crash Eclipse
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.2</version>
         <executions>
           <execution>
-            <phase>generate-sources</phase>
+            <phase>initialize</phase>
             <goals>
-              <goal>java</goal>
+              <goal>exec</goal>
             </goals>
             <configuration>
-              <mainClass>org.apache.avro.tool.Main</mainClass>
+              <executable>java</executable>
               <arguments>
+                <argument>-cp</argument>
+                <classpath/>
+                <argument>org.apache.avro.tool.Main</argument>
                 <argument>idl</argument>
                 <argument>${basedir}/src/main/avro/sherpa/protocol/sherpa.avdl</argument>
                 <argument>${basedir}/src/main/avro/sherpa/protocol/sherpa.avpr</argument>
@@ -129,7 +131,6 @@
           </execution>
         </executions>
       </plugin>
-      -->
     </plugins>
   </build>
 </project>
