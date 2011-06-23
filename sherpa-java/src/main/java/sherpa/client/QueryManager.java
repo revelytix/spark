@@ -66,6 +66,13 @@ public class QueryManager implements Iterable<List<Object>> {
     
     Executors.newFixedThreadPool(1, new ClientThreadFactory());
   }
+  
+  // don't do this at home, kids:
+  // unsafely coerce Map<String,String> to Map<CharSequence,CharSequence>
+  @SuppressWarnings("unchecked")
+  private Map<CharSequence, CharSequence> sneakyCast(Object m) {
+    return (Map<CharSequence, CharSequence>)m;
+  }
 
   public void query(String command, Map<String, String> params,
       Map<String, String> props) {
@@ -76,8 +83,8 @@ public class QueryManager implements Iterable<List<Object>> {
     
     QueryRequest request = new QueryRequest();
     request.sparql = command;
-    request.parameters = new HashMap<CharSequence, CharSequence>();
-    request.properties = new HashMap<CharSequence, CharSequence>();
+    request.parameters = (params != null) ? sneakyCast(params) : new HashMap<CharSequence, CharSequence>();
+    request.properties = (props != null) ? sneakyCast(props) : new HashMap<CharSequence, CharSequence>();
     try {
       System.out.println("Client sending query request to server.");
       QueryResponse response = queryApi.query(request);

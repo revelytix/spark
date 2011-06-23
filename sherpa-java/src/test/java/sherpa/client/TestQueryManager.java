@@ -43,7 +43,7 @@ public class TestQueryManager {
     
     // verify messages to server
     Assert.assertTrue(queryResponder.messages.size() >= 2);
-    Assert.assertEquals("Message=query sparql=SELECT foo params={} props={} ", queryResponder.messages.get(0));
+    Assert.assertEquals("Message=query sparql=SELECT foo params={} props={batchSize=10} ", queryResponder.messages.get(0));
     Assert.assertEquals("Message=data queryId=1 startRow=1 maxSize=10 ", queryResponder.messages.get(1));
 
     // cancel 
@@ -117,4 +117,26 @@ public class TestQueryManager {
       Assert.assertEquals("foo", er.message);
     }
   }
+  
+  @Test
+  public void testParamsAndPropsTransferredThrough() {
+    final List<Object> outVals = new ArrayList<Object>();
+    DummyQueryResponder queryResponder = new DummyQueryResponder(10) {
+      public QueryResponse query(QueryRequest req) throws AvroRemoteException {
+        outVals.add(req.parameters);
+        outVals.add(req.properties);
+        return super.query(req);
+      }
+    };
+    
+    QueryManager mgr = new QueryManager(queryResponder);
+    Map<String,String> params = new HashMap<String,String>();
+    params.put("abc", "def");
+    Map<String,String> props = new HashMap<String,String>();
+    props.put("ghi", "jkl");
+    mgr.query("SELECT foo", params, props);
+    
+    Assert.assertEquals(2, outVals.size());
+  }  
+  
 }

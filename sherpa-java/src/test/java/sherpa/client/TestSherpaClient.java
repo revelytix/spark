@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.AvroRemoteException;
+import org.apache.avro.util.Utf8;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -97,8 +98,9 @@ public class TestSherpaClient {
       command.setTimeout(1234);
       command.executeQuery();
       
+      // Kind of tricky here - the keys and values are now Avro Utf8 instances which don't compare equal to Strings
       Map<CharSequence,CharSequence> serverProps = (Map<CharSequence,CharSequence>)results.get(0);
-      Assert.assertEquals("1234", serverProps.get(QueryManager.TIMEOUT));
+      Assert.assertEquals(new Utf8("1234"), serverProps.get(new Utf8(QueryManager.TIMEOUT)));
       
     } finally {
       server.shutdown();
