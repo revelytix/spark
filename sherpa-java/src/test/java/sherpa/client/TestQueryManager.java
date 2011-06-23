@@ -109,7 +109,7 @@ public class TestQueryManager {
       mgr.getRow();
       
       Assert.fail("Should have thrown an error response!");
-    } catch(RuntimeException e) {
+    } catch(SparqlException e) {
       Throwable cause = e.getCause();
       Assert.assertTrue(cause instanceof ErrorResponse);
       ErrorResponse er = (ErrorResponse) cause;

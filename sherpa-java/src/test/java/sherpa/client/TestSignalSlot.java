@@ -12,7 +12,7 @@ import org.junit.Test;
 public class TestSignalSlot {
 
   @Test
-  public void testRepeatedNonBlockingUse() {
+  public void testRepeatedNonBlockingUse() throws Throwable {
     SignalSlot<String> slot = new SignalSlot<String>();
     
     // nothing here yet, but don't block
@@ -28,7 +28,7 @@ public class TestSignalSlot {
   }
   
   @Test
-  public void testBlocking_produceBeforeConsume() {
+  public void testBlocking_produceBeforeConsume() throws Throwable {
     final SignalSlot<String> slot = new SignalSlot<String>();    
     slot.add("abc");
     
@@ -40,13 +40,17 @@ public class TestSignalSlot {
   public void testBlocking_consumeBlockingOnProduce() throws Throwable {
     final SignalSlot<String> slot = new SignalSlot<String>();
     final CountDownLatch latchEnd = new CountDownLatch(1);    
-    final List<String> results = new ArrayList<String>();    
+    final List<Object> results = new ArrayList<Object>();    
 
     // CONSUMER
     new Thread(new Runnable() {
       public void run() {
-        // Block for data
-        results.add(slot.take());
+        try {
+          // Block for data
+          results.add(slot.take());
+        } catch(Throwable t) {
+          results.add(t);
+        }
 
         // Notify main thread that we're done
         latchEnd.countDown();        

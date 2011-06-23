@@ -132,37 +132,39 @@ public class QueryManager implements Iterable<List<Object>> {
     }
   }
 
-  private synchronized void blockForData() {
-    currentData = nextData.take();
-  }
-
-  public synchronized boolean incrementCursor() {    
+  public synchronized boolean incrementCursor() throws SparqlException {    
     //System.out.println("..incrementCursor(), cursor=" + cursor);
-    while (true) {
-      if (currentData.inc()) {  // Stay in the current batch
-        //System.out.println("....incrementing in currentData");
-        cursor++;
-        return true;
-      } else {
-        Window nextWindow = nextData.poll();  // non-blocking take, null if empty
-        if (nextWindow != null) { // Switch to next batch
-          //System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
-          this.currentData = nextWindow;      
-          scheduleMoreRequest(cursor + currentData.data.size() + 1);
-          
-        } else { // Don't have data
-          if (!currentData.more) { // Because we're done
-            //System.out.println("....no current data, but we're all done.");
-            cursor++;
-            return false;
-          } else { // Or we just haven't waited long enough for it
-            //System.out.println("....no current data, no next data, but not done, just wait.");
-            blockForData();            
+    try {
+      while (true) {
+        if (currentData.inc()) {  // Stay in the current batch
+          //System.out.println("....incrementing in currentData");
+          cursor++;
+          return true;
+        } else {
+          Window nextWindow = nextData.poll();  // non-blocking take, null if empty
+          if (nextWindow != null) { // Switch to next batch
             //System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
+            this.currentData = nextWindow;      
             scheduleMoreRequest(cursor + currentData.data.size() + 1);
+            
+          } else { // Don't have data
+            if (!currentData.more) { // Because we're done
+              //System.out.println("....no current data, but we're all done.");
+              cursor++;
+              return false;
+            } else { // Or we just haven't waited long enough for it
+              //System.out.println("....no current data, no next data, but not done, just wait.");
+              currentData = nextData.take(); 
+              //System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
+              scheduleMoreRequest(cursor + currentData.data.size() + 1);
+            }
           }
         }
       }
+    } catch(RuntimeException e) {
+      throw e;
+    } catch(Throwable t) {      
+      throw new SparqlException(t.getMessage(), t);
     }
   }
 

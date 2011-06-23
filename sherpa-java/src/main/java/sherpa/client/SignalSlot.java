@@ -54,15 +54,11 @@ class SignalSlot <T> {
   /**
    * Get and clear the slot - MUST be called while holding the lock!! 
    * @return The data
-   * @throws RuntimeException If producer encounters an error
+   * @throws Throwable If producer encountered an error
    */
-  private T getAndClearUnderLock() {
+  private T getAndClearUnderLock() throws Throwable {
     if(error != null) {
-      if(error instanceof RuntimeException) {
-        throw (RuntimeException)error;
-      } else {
-        throw new RuntimeException(error.getMessage(), error);
-      }
+      throw error;
     } else {    
       // Return and clear current
       T retValue = data;
@@ -74,9 +70,9 @@ class SignalSlot <T> {
   /** 
    * Non-blocking read and remove.
    * @return The data or null if none exists
-   * @throws RuntimeException If producer encounters an error
+   * @throws Throwable If producer encountered an error
    */
-  public T poll() {
+  public T poll() throws Throwable {
     dataLock.lock();    
     try {
       return getAndClearUnderLock();
@@ -89,9 +85,9 @@ class SignalSlot <T> {
    * Blocking read and remove. If return is null, the thread
    * was interrupted by the producer.
    * @return The data or null if interrupted 
-   * @throws RuntimeException If producer encounters an error
+   * @throws Throwable If producer encountered an error
    */
-  public T take() {
+  public T take() throws Throwable {
     dataLock.lock();      
     try {
       while(data == null && error == null) {   // loop in case of spurious wake-ups
