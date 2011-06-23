@@ -1,101 +1,179 @@
-{	"namespace": "sherpa.protocol",
-	"protocol": "Query",
-	
-	"types": [{"name": "IRI",
-		       "type": "record",
-		       "fields": [{"name": "iri", "type": "string"}]},
-		       
-		      {"name": "BNode",
-		       "type": "record",
-		       "fields": [{"name": "label", "type": "string"}]},
-		       
-		      {"name": "PlainLiteral",
-		       "type": "record",
-		       "fields": [{"name": "lexical", "type": "string"},
-		          	      {"name": "language", "type": "string"}]},
-
-		      {"name": "TypedLiteral",
-			   "type": "record",
-			   "fields": [{"name": "lexical", "type": "string"},
-				          {"name": "datatype", "type": "IRI"}]},
-
-              {"name": "QueryRequest",
-   		       "type": "record",
-   		       "fields": [{"name": "sparql", "type": "string"},
-   		                  {"name": "parameters", "type": {"type":"map", "values": "string"}},
-       			  		  {"name": "properties", "type": {"type":"map", "values": "string"}}]},
-   		                     	          
-			  {"name": "QueryResponse",
-			   "type": "record",
-			   "fields": [{"name": "queryId", "type": "string"},
-			              {"name": "vars", "type": [{"type":"array", "items": "string"}, "null"]}]},
-			              
-	          {"name": "DataRequest",
-		           "type": "record",
-		           "fields": [{"name": "queryId", "type": "string"},
-		                      {"name": "startRow", "type": "int"},
-		                      {"name": "maxSize", "type": "int"}]},
-			  
-	          {"name": "DataResponse",
-	           "type": "record",
-	           "fields": [{"name": "queryId", "type": "string"},
-	           			  {"name": "startRow", "type": "int"},
-	           			  {"name": "more", "type": "boolean"},
-	           			  {"name": "data", "type": {"type":"array", "items": 
-	           			    {"type": "array", 
-	           				"items": ["IRI", "BNode", "PlainLiteral", "TypedLiteral", "string", "boolean", "int", "long", "float", "double", "null"]}}}]},
-	           			  
-
-	          {"name": "CancelRequest",
-		           "type": "record",
-		           "fields": [{"name": "queryId", "type": "string"}]},
-
-	          {"name": "CloseRequest",
-		           "type": "record",
-		           "fields": [{"name": "queryId", "type": "string"}]},
-			  
-	          {"name": "CloseResponse",
-	           "type": "record",
-	           "fields": [{"name": "queryId", "type": "string"}]},
-
-	          {"name": "ReasonCode",
-	           "type": "enum",
-	           "symbols": ["Close", "Cancel", "Timeout", "Error"]},
-	          
-	           
-	          {"name": "ErrorResponse", 
-	           "type": "error",
-	           "fields": [{"name": "code", "type": "ReasonCode"},
-	                      {"name": "message", "type": ["string", "null"]}]}
-	           ],
-    
-    "messages": {
-		"query": {
-			"doc": "Initial query request",
-			"request": [{"name": "query", "type": "QueryRequest"}],
-			"response": "QueryResponse",
-			"errors": ["ErrorResponse"]
-		},
-				
-		"data": {
-			"doc": "Data request",
-			"request": [{"name": "data", "type": "DataRequest"}],
-			"response": "DataResponse",
-			"errors": ["ErrorResponse"]
-		},
-
-                "close": {
-                        "doc": "Request to close a query",
-                        "request": [{"name": "close", "type": "CloseRequest"}],
-                        "response": "CloseResponse",
-                        "errors": ["ErrorResponse"]
-                },
-
-                "cancel": {
-                        "doc": "Request to cancel a query",
-                        "request": [{"name": "cancel", "type": "CancelRequest"}],
-                        "response": "CloseResponse",
-                        "errors": ["ErrorResponse"]
-                }
-	}
+{
+  "protocol" : "Query",
+  "namespace" : "sherpa.protocol",
+  "types" : [ {
+    "type" : "record",
+    "name" : "IRI",
+    "fields" : [ {
+      "name" : "iri",
+      "type" : "string"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "BNode",
+    "fields" : [ {
+      "name" : "label",
+      "type" : "string"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "PlainLiteral",
+    "fields" : [ {
+      "name" : "lexical",
+      "type" : "string"
+    }, {
+      "name" : "language",
+      "type" : "string"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "TypedLiteral",
+    "fields" : [ {
+      "name" : "lexical",
+      "type" : "string"
+    }, {
+      "name" : "datatype",
+      "type" : "IRI"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "QueryRequest",
+    "fields" : [ {
+      "name" : "sparql",
+      "type" : "string"
+    }, {
+      "name" : "parameters",
+      "type" : {
+        "type" : "map",
+        "values" : "string"
+      }
+    }, {
+      "name" : "properties",
+      "type" : {
+        "type" : "map",
+        "values" : "string"
+      }
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "QueryResponse",
+    "fields" : [ {
+      "name" : "queryId",
+      "type" : "string"
+    }, {
+      "name" : "vars",
+      "type" : [ {
+        "type" : "array",
+        "items" : "string"
+      }, "null" ]
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "DataRequest",
+    "fields" : [ {
+      "name" : "queryId",
+      "type" : "string"
+    }, {
+      "name" : "startRow",
+      "type" : "int"
+    }, {
+      "name" : "maxSize",
+      "type" : "int"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "DataResponse",
+    "fields" : [ {
+      "name" : "queryId",
+      "type" : "string"
+    }, {
+      "name" : "startRow",
+      "type" : "int"
+    }, {
+      "name" : "more",
+      "type" : "boolean"
+    }, {
+      "name" : "data",
+      "type" : {
+        "type" : "array",
+        "items" : {
+          "type" : "array",
+          "items" : [ "IRI", "BNode", "PlainLiteral", "TypedLiteral", "string", "boolean", "int", "long", "float", "double", "null" ]
+        }
+      }
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "CancelRequest",
+    "fields" : [ {
+      "name" : "queryId",
+      "type" : "string"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "CloseRequest",
+    "fields" : [ {
+      "name" : "queryId",
+      "type" : "string"
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "CloseResponse",
+    "fields" : [ {
+      "name" : "queryId",
+      "type" : "string"
+    } ]
+  }, {
+    "type" : "enum",
+    "name" : "ReasonCode",
+    "symbols" : [ "Close", "Cancel", "Timeout", "Error" ]
+  }, {
+    "type" : "error",
+    "name" : "ErrorResponse",
+    "fields" : [ {
+      "name" : "code",
+      "type" : "ReasonCode"
+    }, {
+      "name" : "message",
+      "type" : [ "string", "null" ]
+    } ]
+  } ],
+  "messages" : {
+    "query" : {
+      "request" : [ {
+        "name" : "query",
+        "type" : "QueryRequest",
+        "doc" : "Initial query request *"
+      } ],
+      "response" : "QueryResponse",
+      "errors" : [ "ErrorResponse" ]
+    },
+    "data" : {
+      "request" : [ {
+        "name" : "data",
+        "type" : "DataRequest",
+        "doc" : "Data request *"
+      } ],
+      "response" : "DataResponse",
+      "errors" : [ "ErrorResponse" ]
+    },
+    "close" : {
+      "request" : [ {
+        "name" : "close",
+        "type" : "CloseRequest",
+        "doc" : "Request to close a query *"
+      } ],
+      "response" : "CloseResponse",
+      "errors" : [ "ErrorResponse" ]
+    },
+    "cancel" : {
+      "request" : [ {
+        "name" : "cancel",
+        "type" : "CancelRequest",
+        "doc" : "Request to cancel a query *"
+      } ],
+      "response" : "CloseResponse",
+      "errors" : [ "ErrorResponse" ]
+    }
+  }
 }

@@ -1,0 +1,85 @@
+@namespace("sherpa.protocol")
+protocol Query {
+  
+  // TYPES
+  
+  record IRI {
+    string iri;
+  }
+  
+  record BNode {
+    string label;
+  }
+  
+  record PlainLiteral {
+    string lexical;
+    string language;
+  }
+  
+  record TypedLiteral {
+    string lexical;
+    IRI datatype;
+  }
+  
+  record QueryRequest {
+    string sparql;
+    map<string> parameters;
+    map<string> properties;
+  }
+  
+  record QueryResponse {
+    string queryId;
+    union { array<string>, null } vars;
+  }
+
+  record DataRequest {
+    string queryId;
+    int startRow;
+    int maxSize;
+  }
+  
+  record DataResponse {
+    string queryId;
+    int startRow;
+    boolean more;
+    array<array<union {IRI, BNode, PlainLiteral, TypedLiteral, 
+                       string, boolean, int, long, float, double,
+                       null} >> data;
+  }
+
+  record CancelRequest {
+    string queryId;
+  }
+  
+  record CloseRequest {
+    string queryId;
+  }
+  
+  record CloseResponse {
+    string queryId;
+  }
+  
+  enum ReasonCode {
+    Close, Cancel, Timeout, Error
+  } 
+  
+  error ErrorResponse {
+    ReasonCode code;
+    union {string, null} message;
+  }
+  
+  // MESSAGES
+
+  /** Initial query request **/
+  QueryResponse query( QueryRequest query ) throws ErrorResponse;
+  
+  /** Data request **/
+  DataResponse data( DataRequest data ) throws ErrorResponse;
+ 
+  /** Request to close a query **/
+  CloseResponse close( CloseRequest close ) throws ErrorResponse;
+
+  /** Request to cancel a query **/
+  CloseResponse cancel( CancelRequest cancel ) throws ErrorResponse; 
+  
+}
