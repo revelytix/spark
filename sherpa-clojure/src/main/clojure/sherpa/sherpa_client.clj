@@ -25,8 +25,13 @@
     "Execute a query on a SPARQL processor and return a sequence of results for the query.
       sparql - query string
       params - map of param names and values
-      props - map of query properties like: timeout")
-  (close [client] "Close the client."))
+      props - map of query properties like: timeout
+    The return value is a map of info:
+      :results The result sequence
+      :query-hnadle An opaque query handle that can be used to cancel the query")
+  (cancel [client query-handle] "Cancel the query based on query-handle.")
+  (close [client query-handle] "Close the query execution and release all resources.")
+  (shutdown [client] "Close the client and release all resources."))
 
 (defn sherpa-client
   "Create a client that implements the SparqlClient protocol and talks using the Sherpa protocol to 
@@ -46,8 +51,8 @@
               _ (.query execution sparql params props)
               data-iter (.iterator execution) 
               tuple-generator (partial zipmap (map keyword (.getVars execution)))]
-          ;; turn each data array into a map for each tuple
-          (map tuple-generator (iterator-seq data-iter))))
-      (close [_] (.close transceiver)))))
-
-
+          {:query-handle execution
+           :results (map tuple-generator (iterator-seq data-iter))}))
+      (cancel [_ query-handle] (.cancel query-handle))
+      (close [_ query-handle] (.close (query-handle)))
+      (shutdown [_] (.close transceiver)))))

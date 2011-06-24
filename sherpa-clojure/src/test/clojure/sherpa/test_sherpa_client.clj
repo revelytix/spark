@@ -8,7 +8,8 @@
   (let [server (server/run-sherpa (dummy/dummy-server 5) {:host "localhost" :port 0 :join? false})
         client (client/sherpa-client {:host "localhost" :port (.getPort server)})]
     (try
-      (let [result (client/query client "SELECT goes here" {} {})
+      (let [r (client/query client "SELECT goes here" {} {})
+            result (:results r)
             tuple (first result)]
         (is (= 5 (count result)))
         (is (= #{:x :y} (into #{} (keys tuple))))
@@ -17,15 +18,16 @@
         ;; type in sherpa protocol
         (is (= "{\"iri\": \"http:\\/\\/foobar.baz\\/this\\/uri\\/1\"}" (str (:x tuple)))))
       (finally
-       (client/close client)
+       (client/shutdown client)
        (.close server)))))
 
 (deftest test-client-0-rows
   (let [server (server/run-sherpa (dummy/dummy-server 0) {:host "localhost" :port 0 :join? false})
         client (client/sherpa-client {:host "localhost" :port (.getPort server)})]
     (try
-      (let [result (client/query client "SELECT goes here" {} {})]
+      (let [r (client/query client "SELECT goes here" {} {})
+            result (:results r)]
         (is (= 0 (count result))))
       (finally
-       (client/close client)
+       (client/shutdown client)
        (.close server)))))
