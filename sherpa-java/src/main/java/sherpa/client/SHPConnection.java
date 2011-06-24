@@ -25,7 +25,7 @@ import org.apache.avro.ipc.Transceiver;
 import org.apache.avro.ipc.specific.SpecificRequestor;
 
 import sherpa.client.QueryManager;
-import sherpa.protocol.Query;
+import sherpa.protocol.SherpaServer;
 import spark.api.Command;
 import spark.api.Connection;
 import spark.api.DataSource;
@@ -37,7 +37,7 @@ public class SHPConnection extends BaseConnection implements Connection {
   
   private Transceiver transceiver;
   private SpecificRequestor requestor;
-  private Query queryApi;
+  private SherpaServer queryApi;
 
   public SHPConnection(DataSource dataSource) {
     super(dataSource);
@@ -60,13 +60,13 @@ public class SHPConnection extends BaseConnection implements Connection {
     }
     
     try {
-      requestor = new SpecificRequestor(Query.class, transceiver);
+      requestor = new SpecificRequestor(SherpaServer.class, transceiver);
     } catch (IOException e) {
       throw new SparqlException("Error creating client requestor", e);
     }
 
     try {
-      queryApi = SpecificRequestor.getClient(Query.class, requestor);
+      queryApi = SpecificRequestor.getClient(SherpaServer.class, requestor);
     } catch (IOException e) {
       throw new SparqlException("Unable to create client data proxy.", e);
     }

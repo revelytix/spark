@@ -25,7 +25,7 @@ import org.apache.avro.ipc.Server;
 import org.apache.avro.ipc.specific.SpecificResponder;
 
 import spark.api.exception.SparqlException;
-import sherpa.protocol.Query;
+import sherpa.protocol.SherpaServer;
 
 public class DummySherpaServer extends SpecificResponder {
 
@@ -35,8 +35,8 @@ public class DummySherpaServer extends SpecificResponder {
     this(new DummyQueryResponder(rows));
   }
   
-  public DummySherpaServer(Query responder) {
-    super(Query.class, responder);
+  public DummySherpaServer(SherpaServer responder) {
+    super(SherpaServer.class, responder);
 
     try {
       server = new SaslSocketServer(this, new InetSocketAddress(InetAddress.getLocalHost(), 0));

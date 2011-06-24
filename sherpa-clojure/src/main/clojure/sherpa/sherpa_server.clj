@@ -64,7 +64,8 @@
                             (respond [this msg request]
                                      (try
                                        (let [msg-name (.getName msg)]
-                                         (sherpa-rpc msg-name listener (.get request msg-name)))
+                                         (sherpa-rpc msg-name listener (.get request
+                                                                             (str msg-name "Request"))))
                                        (catch Throwable t
                                          (do (.printStackTrace t)
                                              (error-response t))))))))

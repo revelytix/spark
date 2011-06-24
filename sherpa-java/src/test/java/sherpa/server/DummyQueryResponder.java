@@ -28,12 +28,12 @@ import sherpa.protocol.DataRequest;
 import sherpa.protocol.DataResponse;
 import sherpa.protocol.ErrorResponse;
 import sherpa.protocol.IRI;
-import sherpa.protocol.Query;
 import sherpa.protocol.QueryRequest;
 import sherpa.protocol.QueryResponse;
 import sherpa.protocol.ReasonCode;
+import sherpa.protocol.SherpaServer;
 
-public class DummyQueryResponder implements Query {
+public class DummyQueryResponder implements SherpaServer {
 
   public final int rows;
   public List<String> messages = new ArrayList<String>();

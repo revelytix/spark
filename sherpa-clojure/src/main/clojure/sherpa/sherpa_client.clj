@@ -16,7 +16,7 @@
            [org.apache.avro.ipc SaslSocketTransceiver]
            [org.apache.avro.ipc.specific SpecificRequestor]
            [sherpa.client QueryManager]
-           [sherpa.protocol Query QueryRequest DataRequest]))
+           [sherpa.protocol SherpaServer QueryRequest DataRequest]))
 
 ;; The SparqlClient protocol 
 (defprotocol SparqlClient
@@ -36,8 +36,8 @@
   (let [addr (InetSocketAddress. (InetAddress/getByName (:host connect-map)) (:port connect-map))
         _ (println "client connecting to " addr)
         transceiver (SaslSocketTransceiver. addr)
-        requestor (SpecificRequestor. Query transceiver)
-        query-api (SpecificRequestor/getClient Query requestor)]
+        requestor (SpecificRequestor. SherpaServer transceiver)
+        query-api (SpecificRequestor/getClient SherpaServer requestor)]
     (reify SparqlClient
       (query [_ sparql params props]
         (let [mgr (QueryManager. query-api)

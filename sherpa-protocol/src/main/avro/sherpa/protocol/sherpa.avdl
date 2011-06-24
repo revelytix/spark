@@ -1,5 +1,5 @@
 @namespace("sherpa.protocol")
-protocol Query {
+protocol SherpaServer {
   
   // TYPES
   
@@ -71,15 +71,15 @@ protocol Query {
   // MESSAGES
 
   /** Initial query request **/
-  QueryResponse query( QueryRequest query ) throws ErrorResponse;
+  QueryResponse query( QueryRequest queryRequest ) throws ErrorResponse;
   
   /** Data request **/
-  DataResponse data( DataRequest data ) throws ErrorResponse;
+  DataResponse data( DataRequest dataRequest ) throws ErrorResponse;
  
   /** Request to close a query **/
-  CloseResponse close( CloseRequest close ) throws ErrorResponse;
+  CloseResponse close( CloseRequest closeRequest ) throws ErrorResponse;
 
   /** Request to cancel a query **/
-  CloseResponse cancel( CancelRequest cancel ) throws ErrorResponse; 
+  CloseResponse cancel( CancelRequest cancelRequest ) throws ErrorResponse; 
   
 }

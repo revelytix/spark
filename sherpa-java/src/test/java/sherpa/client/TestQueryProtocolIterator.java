@@ -24,7 +24,7 @@ import org.apache.avro.ipc.specific.SpecificRequestor;
 import org.junit.Assert;
 import org.junit.Test;
 
-import sherpa.protocol.Query;
+import sherpa.protocol.SherpaServer;
 import sherpa.server.DummySherpaServer;
 
 public class TestQueryProtocolIterator {
@@ -35,8 +35,8 @@ public class TestQueryProtocolIterator {
     
     try {
       Transceiver tr = new SaslSocketTransceiver(serverAddress);
-      SpecificRequestor requestor = new SpecificRequestor(Query.class, tr);
-      Query queryApi = SpecificRequestor.getClient(Query.class, requestor);
+      SpecificRequestor requestor = new SpecificRequestor(SherpaServer.class, tr);
+      SherpaServer queryApi = SpecificRequestor.getClient(SherpaServer.class, requestor);
       QueryManager protocol = new QueryManager(queryApi);
 
       protocol.query("fake command",null,null);      
@@ -72,8 +72,8 @@ public class TestQueryProtocolIterator {
     
     try {
       Transceiver tr = new SaslSocketTransceiver(serverAddress);
-      SpecificRequestor requestor = new SpecificRequestor(Query.class, tr);
-      Query queryApi = SpecificRequestor.getClient(Query.class, requestor);
+      SpecificRequestor requestor = new SpecificRequestor(SherpaServer.class, tr);
+      SherpaServer queryApi = SpecificRequestor.getClient(SherpaServer.class, requestor);
 
       for(int i=0; i<3; i++) {
         //System.out.println("\nrunning command " + i);

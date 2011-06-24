@@ -30,9 +30,9 @@ import sherpa.protocol.CancelRequest;
 import sherpa.protocol.CloseRequest;
 import sherpa.protocol.DataRequest;
 import sherpa.protocol.DataResponse;
-import sherpa.protocol.Query;
 import sherpa.protocol.QueryRequest;
 import sherpa.protocol.QueryResponse;
+import sherpa.protocol.SherpaServer;
 import spark.api.exception.SparqlException;
 
 /**
@@ -46,7 +46,7 @@ public class QueryManager implements Iterable<List<Object>> {
   public static final String TIMEOUT = "timeout"; 
   
   // Resources
-  private final Query queryApi;
+  private final SherpaServer queryApi;
   private final Executor executor = Executors.newFixedThreadPool(1);
 
   // query metadata - doesn't change after the query starts
@@ -61,7 +61,7 @@ public class QueryManager implements Iterable<List<Object>> {
   // coordination for next data between calling threads and background requester thread
   private SignalSlot<Window> nextData = new SignalSlot<Window>();
     
-  public QueryManager(Query clientInterface) {
+  public QueryManager(SherpaServer clientInterface) {
     this.queryApi = clientInterface;   
     
     Executors.newFixedThreadPool(1, new ClientThreadFactory());
