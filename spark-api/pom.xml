@@ -4,7 +4,7 @@
 
   <parent>
     <groupId>com.revelytix</groupId>
-    <artifactId>sparql-api</artifactId>
+    <artifactId>spark</artifactId>
     <version>0.1.3-SNAPSHOT</version>
   </parent>
 
@@ -15,12 +15,12 @@
 
   <name>spark-api - SPARQL client connection API</name>
   <description>Defines a Java client-side connection-oriented API for accessing sparql endpoints ala JDBC.</description>
-  <url>https://github.com/revelytix/sparql-api</url>
+  <url>https://github.com/revelytix/spark</url>
   <inceptionYear>2011</inceptionYear>
 
   <scm>
-    <connection>scm:git:https://github.com/revelytix/sparql-api/spark-api</connection>
-    <url>https://github.com/revelytix/sparql-api/spark-api</url>
+    <connection>scm:git:https://github.com/revelytix/spark/spark-api</connection>
+    <url>https://github.com/revelytix/spark/spark-api</url>
   </scm>
 
   <organization>

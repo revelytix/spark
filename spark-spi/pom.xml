@@ -4,7 +4,7 @@
 
   <parent>
     <groupId>com.revelytix</groupId>
-    <artifactId>sparql-api</artifactId>
+    <artifactId>spark</artifactId>
     <version>0.1.3-SNAPSHOT</version>
   </parent>
 
@@ -15,12 +15,12 @@
   <packaging>jar</packaging>
   <name>spark-spi - SPARQL client connection SPI</name>
   <description>Defines optional utilities and base classes to make building implementations of the API easier.</description>
-  <url>https://github.com/revelytix/sparql-api</url>
+  <url>https://github.com/revelytix/spark</url>
   <inceptionYear>2011</inceptionYear>
 
   <scm>
-    <connection>scm:git:https://github.com/revelytix/sparql-api/spark-spi</connection>
-    <url>https://github.com/revelytix/sparql-api/spark-spi</url>
+    <connection>scm:git:https://github.com/revelytix/spark/spark-spi</connection>
+    <url>https://github.com/revelytix/spark/spark-spi</url>
   </scm>
 
   <developers>
