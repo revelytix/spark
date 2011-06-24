@@ -45,7 +45,7 @@
   <modules>
     <module>spark-api</module>
     <module>spark-spi</module>
-    <module>spark-protocol</module>
+    <module>spark-http-client</module>
     <module>sherpa-protocol</module>
     <module>sherpa-java</module>
     <module>sherpa-clojure</module>
