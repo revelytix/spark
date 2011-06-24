@@ -39,14 +39,14 @@ import spark.api.exception.SparqlException;
  * Manages the state associated with cursoring through a single query.  Each instance is 
  * designed for a single execution and should not be reused.
  */
-public class QueryManager implements Iterable<List<Object>> {
+public class QueryExecution implements Iterable<List<Object>> {
 
   // Query properties
   public static final String BATCH_SIZE = "batchSize";
   public static final String TIMEOUT = "timeout"; 
   
   // Resources
-  private final SherpaServer queryApi;
+  private final SherpaServer server;
   private final Executor executor = Executors.newFixedThreadPool(1);
 
   // query metadata - doesn't change after the query starts
@@ -61,8 +61,8 @@ public class QueryManager implements Iterable<List<Object>> {
   // coordination for next data between calling threads and background requester thread
   private SignalSlot<Window> nextData = new SignalSlot<Window>();
     
-  public QueryManager(SherpaServer clientInterface) {
-    this.queryApi = clientInterface;   
+  public QueryExecution(SherpaServer clientInterface) {
+    this.server = clientInterface;   
     
     Executors.newFixedThreadPool(1, new ClientThreadFactory());
   }
@@ -87,7 +87,7 @@ public class QueryManager implements Iterable<List<Object>> {
     request.properties = (props != null) ? sneakyCast(props) : new HashMap<CharSequence, CharSequence>();
     try {
       System.out.println("Client sending query request to server.");
-      QueryResponse response = queryApi.query(request);
+      QueryResponse response = server.query(request);
       System.out.println("Client received query response from server.");
       queryId = response.queryId;
       vars = new ArrayList<String>();
@@ -117,7 +117,7 @@ public class QueryManager implements Iterable<List<Object>> {
       System.out.println("Client requesting " + startRow + " .. "
           + (startRow + maxBatchSize - 1));
   
-      DataResponse response = queryApi.data(moreRequest);
+      DataResponse response = server.data(moreRequest);
       System.out.println("Client got response " + response.startRow + " .. "
           + (response.startRow + response.data.size() - 1) + ", more="
           + response.more);            
@@ -184,7 +184,7 @@ public class QueryManager implements Iterable<List<Object>> {
     cancelRequest.queryId = queryId;
 
     try {
-      queryApi.cancel(cancelRequest);
+      server.cancel(cancelRequest);
     } catch (AvroRemoteException e) {
       throw new SparqlException(e.getMessage(), e);
     }
@@ -195,7 +195,7 @@ public class QueryManager implements Iterable<List<Object>> {
     closeRequest.queryId = queryId;
 
     try {
-      queryApi.close(closeRequest);
+      server.close(closeRequest);
     } catch (AvroRemoteException e) {
       throw new SparqlException(e.getMessage(), e);
     }

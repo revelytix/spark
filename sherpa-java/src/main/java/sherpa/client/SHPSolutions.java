@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import sherpa.client.QueryManager;
+import sherpa.client.QueryExecution;
 import sherpa.protocol.IRI;
 import spark.api.Solutions;
 import spark.api.exception.SparqlException;
@@ -42,16 +42,16 @@ import spark.spi.rdf.TypedLiteralImpl;
 
 public class SHPSolutions extends BaseResults implements Solutions {
 
-  private final QueryManager queryMgr;
+  private final QueryExecution query;
   
   /**
    * Construct an SHPSolutions where 
    * @param command
-   * @param queryMgr
+   * @param query
    */
-  public SHPSolutions(SHPCommand command, QueryManager queryMgr) {
+  public SHPSolutions(SHPCommand command, QueryExecution query) {
     super(command);
-    this.queryMgr = queryMgr;    
+    this.query = query;    
   }
 
   @Override
@@ -134,7 +134,7 @@ public class SHPSolutions extends BaseResults implements Solutions {
   
   @Override
   public List<RDFNode> getSolutionList() {
-    List<Object> rowData = queryMgr.getRow();
+    List<Object> rowData = query.getRow();
     
     if(rowData != null) {
       List<RDFNode> row = new ArrayList<RDFNode>();
@@ -181,7 +181,7 @@ public class SHPSolutions extends BaseResults implements Solutions {
 
   @Override
   public int getRow() {
-    return this.queryMgr.getCursor();
+    return this.query.getCursor();
   }
 
   @Override
@@ -192,12 +192,12 @@ public class SHPSolutions extends BaseResults implements Solutions {
 
   @Override
   public boolean isBeforeFirst() {
-    return this.queryMgr.getCursor() == 0;
+    return this.query.getCursor() == 0;
   }
 
   @Override
   public boolean isFirst() {
-    return this.queryMgr.getCursor() == 1;
+    return this.query.getCursor() == 1;
   }
 
   @Override
@@ -208,13 +208,13 @@ public class SHPSolutions extends BaseResults implements Solutions {
 
   @Override
   public boolean next() {
-    return this.queryMgr.incrementCursor();
+    return this.query.incrementCursor();
   }
 
   @Override
   public void close() throws IOException {
     super.close();
-    this.queryMgr.close();
+    this.query.close();
   }
 
 }

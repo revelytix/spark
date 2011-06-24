@@ -24,10 +24,10 @@ public class TestQueryManager {
   public void testQuery() {
     DummyQueryResponder queryResponder = new DummyQueryResponder(20);
   
-    QueryManager mgr = new QueryManager(queryResponder);
+    QueryExecution mgr = new QueryExecution(queryResponder);
     Map<String,String> params = Collections.emptyMap();
     Map<String,String> props = new HashMap<String,String>();
-    props.put(QueryManager.BATCH_SIZE, "10");
+    props.put(QueryExecution.BATCH_SIZE, "10");
     
     mgr.query("SELECT foo", params, props);
     List<String> vars = mgr.getVars();
@@ -72,7 +72,7 @@ public class TestQueryManager {
     };
     
     try {
-      QueryManager mgr = new QueryManager(queryResponder);
+      QueryExecution mgr = new QueryExecution(queryResponder);
       Map<String,String> empty = Collections.emptyMap();
       mgr.query("SELECT foo", empty, empty);
       Assert.fail("Should have thrown an error response!");
@@ -101,7 +101,7 @@ public class TestQueryManager {
       }
     };
 
-    QueryManager mgr = new QueryManager(queryResponder);
+    QueryExecution mgr = new QueryExecution(queryResponder);
     Map<String,String> empty = Collections.emptyMap();
     mgr.query("SELECT foo", empty, empty);
     try {
@@ -129,7 +129,7 @@ public class TestQueryManager {
       }
     };
     
-    QueryManager mgr = new QueryManager(queryResponder);
+    QueryExecution mgr = new QueryExecution(queryResponder);
     Map<String,String> params = new HashMap<String,String>();
     params.put("abc", "def");
     Map<String,String> props = new HashMap<String,String>();

@@ -15,7 +15,7 @@
   (:import [java.net InetSocketAddress InetAddress]
            [org.apache.avro.ipc SaslSocketTransceiver]
            [org.apache.avro.ipc.specific SpecificRequestor]
-           [sherpa.client QueryManager]
+           [sherpa.client QueryExecution]
            [sherpa.protocol SherpaServer QueryRequest DataRequest]))
 
 ;; The SparqlClient protocol 
@@ -40,12 +40,12 @@
         query-api (SpecificRequestor/getClient SherpaServer requestor)]
     (reify SparqlClient
       (query [_ sparql params props]
-        (let [mgr (QueryManager. query-api)
+        (let [execution (QueryExecution. query-api)
               ;; each item in the iter is a collection of values in
               ;; the same order as the vars array
-              _ (.query mgr sparql params props)
-              data-iter (.iterator mgr) 
-              tuple-generator (partial zipmap (map keyword (.getVars mgr)))]
+              _ (.query execution sparql params props)
+              data-iter (.iterator execution) 
+              tuple-generator (partial zipmap (map keyword (.getVars execution)))]
           ;; turn each data array into a map for each tuple
           (map tuple-generator (iterator-seq data-iter))))
       (close [_] (.close transceiver)))))

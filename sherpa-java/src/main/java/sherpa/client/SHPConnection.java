@@ -24,7 +24,7 @@ import org.apache.avro.ipc.SaslSocketTransceiver;
 import org.apache.avro.ipc.Transceiver;
 import org.apache.avro.ipc.specific.SpecificRequestor;
 
-import sherpa.client.QueryManager;
+import sherpa.client.QueryExecution;
 import sherpa.protocol.SherpaServer;
 import spark.api.Command;
 import spark.api.Connection;
@@ -37,7 +37,7 @@ public class SHPConnection extends BaseConnection implements Connection {
   
   private Transceiver transceiver;
   private SpecificRequestor requestor;
-  private SherpaServer queryApi;
+  private SherpaServer server;
 
   public SHPConnection(DataSource dataSource) {
     super(dataSource);
@@ -66,7 +66,7 @@ public class SHPConnection extends BaseConnection implements Connection {
     }
 
     try {
-      queryApi = SpecificRequestor.getClient(SherpaServer.class, requestor);
+      server = SpecificRequestor.getClient(SherpaServer.class, requestor);
     } catch (IOException e) {
       throw new SparqlException("Unable to create client data proxy.", e);
     }
@@ -75,7 +75,7 @@ public class SHPConnection extends BaseConnection implements Connection {
   
   @Override
   public Command createCommand(String commandString) {
-    return new SHPCommand(this, commandString, new QueryManager(queryApi));
+    return new SHPCommand(this, commandString, new QueryExecution(server));
   }
 
   @Override

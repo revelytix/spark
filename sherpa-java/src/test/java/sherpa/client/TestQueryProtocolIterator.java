@@ -37,7 +37,7 @@ public class TestQueryProtocolIterator {
       Transceiver tr = new SaslSocketTransceiver(serverAddress);
       SpecificRequestor requestor = new SpecificRequestor(SherpaServer.class, tr);
       SherpaServer queryApi = SpecificRequestor.getClient(SherpaServer.class, requestor);
-      QueryManager protocol = new QueryManager(queryApi);
+      QueryExecution protocol = new QueryExecution(queryApi);
 
       protocol.query("fake command",null,null);      
       
@@ -78,7 +78,7 @@ public class TestQueryProtocolIterator {
       for(int i=0; i<3; i++) {
         //System.out.println("\nrunning command " + i);
         
-        QueryManager protocol = new QueryManager(queryApi);
+        QueryExecution protocol = new QueryExecution(queryApi);
         protocol.query("fake command",null,null);      
 
         int counter = 0;

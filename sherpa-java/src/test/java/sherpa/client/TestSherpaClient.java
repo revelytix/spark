@@ -100,7 +100,7 @@ public class TestSherpaClient {
       
       // Kind of tricky here - the keys and values are now Avro Utf8 instances which don't compare equal to Strings
       Map<CharSequence,CharSequence> serverProps = (Map<CharSequence,CharSequence>)results.get(0);
-      Assert.assertEquals(new Utf8("1234"), serverProps.get(new Utf8(QueryManager.TIMEOUT)));
+      Assert.assertEquals(new Utf8("1234"), serverProps.get(new Utf8(QueryExecution.TIMEOUT)));
       
     } finally {
       server.shutdown();
