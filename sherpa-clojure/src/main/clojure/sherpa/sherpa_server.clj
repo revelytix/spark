@@ -14,6 +14,7 @@
 (ns sherpa.sherpa-server
   (:use [sherpa.avro-utils :only (to-avro from-avro)])
   (:import [org.apache.avro.ipc SaslSocketServer]
+           [org.apache.avro AvroRemoteException]
            [java.net InetAddress InetSocketAddress]
            [sherpa.protocol SherpaProtocol]
            [sherpa.server MessageResponder ClojureResponder]))
@@ -50,25 +51,25 @@
 (defn- error-response [exception-or-message]
   (let [msg (if (instance? Throwable exception-or-message)
               (.getMessage exception-or-message)
-              exception-or-message)]
-    (to-avro {:sherpa-type :ErrorResponse
-              :code {:sherpa-type :ReasonCode
-                     :symbol :Error}
-              :message msg} PROTOCOL)))
+              exception-or-message)
+        err-response (to-avro {:sherpa-type :ErrorResponse
+                               :code {:sherpa-type :ReasonCode
+                                      :symbol :Error}
+                               :message msg} PROTOCOL)]
+    (AvroRemoteException. err-response)))
 
 (defn responder
   "Adapt a SherpaListener into an Avro Responder."
   [listener]
   (ClojureResponder. PROTOCOL
                      (reify MessageResponder
-                            (respond [this msg request]
-                                     (try
-                                       (let [msg-name (.getName msg)]
-                                         (sherpa-rpc msg-name listener (.get request
-                                                                             (str msg-name "Request"))))
-                                       (catch Throwable t
-                                         (do (.printStackTrace t)
-                                             (error-response t))))))))
+                       (respond [this msg request]
+                         (try
+                           (let [msg-name (.getName msg)]
+                             (sherpa-rpc msg-name listener (.get request
+                                                                 (str msg-name "Request"))))
+                           (catch Throwable t
+                             (throw (error-response t))))))))
 
 (defn run-sherpa
   "Run a sherpa server that directs calls to the listener, which should
