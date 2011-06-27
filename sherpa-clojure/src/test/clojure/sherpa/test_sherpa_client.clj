@@ -31,3 +31,31 @@
       (finally
        (client/shutdown client)
        (.close server)))))
+
+(defn call-tracker-decorator [base-server]
+  (let [counts {:query (ref 0)
+                :data (ref 0)
+                :cancel (ref 0)
+                :close (ref 0)}
+        up (fn [msg] (dosync (alter (msg counts) inc)))]
+    {:server (reify server/SherpaListener
+               (server/query [server request] (up :query) (server/query base-server request))
+               (server/data [server request] (up :data) (server/data base-server request))
+               (server/cancel [server request] (up :cancel) (server/cancel base-server request))
+               (server/close [server request] (up :close) (server/close base-server request)))
+     :counts counts}))
+
+(deftest test-client-cancel
+  (let [base-server (dummy/dummy-server 100)
+        {:keys (server counts)} (call-tracker-decorator base-server) 
+        server-proc (server/run-sherpa server {:host "localhost" :port 0 :join? false})
+        client (client/sherpa-client {:host "localhost" :port (.getPort server-proc)})]
+    (try
+      (let [r (client/query client "SELECT goes here" {} {})
+            result (:results r)]
+        (is (= 0 @(:cancel counts)))
+        (client/cancel client (:query-handle r))
+        (is (= 1 @(:cancel counts))))
+      (finally
+       (client/shutdown client)
+       (.close server-proc)))))

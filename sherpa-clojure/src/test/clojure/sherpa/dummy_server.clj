@@ -67,6 +67,6 @@
   (reify SherpaListener
          (query [server request] (query-call request))
          (data [server request] (data-call request rows))
-         (cancel [server request] (throw (UnsupportedOperationException. "TBD")))
-         (close [server request] (throw (UnsupportedOperationException. "TBD")))))
+         (cancel [server request] {:sherpa-type :CloseResponse :queryId (:queryId request)})
+         (close [server request] {:sherpa-type :CloseResponse :queryId (:queryId request)})))
 
