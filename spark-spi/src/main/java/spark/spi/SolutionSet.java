@@ -84,7 +84,7 @@ public class SolutionSet extends BaseResults implements Solutions {
   @Override
   public boolean next() {
     cursor++;
-    return cursor < (data.size() - 1);
+    return cursor < data.size();
   }
 
   @Override
@@ -111,7 +111,7 @@ public class SolutionSet extends BaseResults implements Solutions {
 
   
   private class SolutionIterator implements Iterator<Map<String,RDFNode>> {
-    int iterCursor = 0;
+    int iterCursor = -1;
     
     @Override
     public boolean hasNext() {
