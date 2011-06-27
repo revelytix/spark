@@ -48,7 +48,8 @@
         (let [execution (QueryExecution. query-api)
               ;; each item in the iter is a collection of values in
               ;; the same order as the vars array
-              _ (.query execution sparql params props)
+              str-props (zipmap (map (comp name first) props) (map second props))
+              _ (.query execution sparql params str-props)
               data-iter (.iterator execution) 
               tuple-generator (partial zipmap (map keyword (.getVars execution)))]
           {:query-handle execution
