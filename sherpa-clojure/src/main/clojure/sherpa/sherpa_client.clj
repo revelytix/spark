@@ -24,11 +24,11 @@
   (query [client sparql params props]
     "Execute a query on a SPARQL processor and return a sequence of results for the query.
       sparql - query string
-      params - map of param names and values
-      props - map of query properties like: timeout
+      params - map of param names and values (keys are expected to be keywords)
+      props - map of query properties like: timeout (keys are expected to be keywords)
     The return value is a map of info:
       :results The result sequence
-      :query-hnadle An opaque query handle that can be used to cancel the query")
+      :query-handle An opaque query handle that can be used to cancel the query")
   (cancel [client query-handle] "Cancel the query based on query-handle.")
   (close [client query-handle] "Close the query execution and release all resources.")
   (shutdown [client] "Close the client and release all resources."))
