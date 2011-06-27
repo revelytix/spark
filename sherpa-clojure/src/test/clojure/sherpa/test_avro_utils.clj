@@ -17,18 +17,18 @@
 (def schema-e1 (Schema/createEnum "e1" nil nil ["a" "b" "c"]))
 
 (def schema-rec1
-     (doto (Schema/createRecord "rec1" nil nil false)
-       (.setFields [(Schema$Field. "f1" (Schema/create Schema$Type/INT) nil nil)
-                    (Schema$Field. "f2" (Schema/create Schema$Type/STRING) nil nil)])))
+  (doto (Schema/createRecord "rec1" nil nil false)
+    (.setFields [(Schema$Field. "f1" (Schema/create Schema$Type/INT) nil nil)
+                 (Schema$Field. "f2" (Schema/create Schema$Type/STRING) nil nil)])))
 
 (def schema-rec2
-     (doto (Schema/createRecord "rec2" nil nil false)
-       (.setFields [(Schema$Field. "f3" schema-rec1 nil nil)
-                    (Schema$Field. "f4" (Schema/create Schema$Type/STRING) nil nil)])))
+  (doto (Schema/createRecord "rec2" nil nil false)
+    (.setFields [(Schema$Field. "f3" schema-rec1 nil nil)
+                 (Schema$Field. "f4" (Schema/create Schema$Type/STRING) nil nil)])))
 
 (def example-protocol
-     (doto (Protocol. "test" "my.ns")
-       (.setTypes [schema-e1 schema-rec1 schema-rec2])))
+  (doto (Protocol. "test" "my.ns")
+    (.setTypes [schema-e1 schema-rec1 schema-rec2])))
 
 (deftest test-to-avro-enum
   (testing "Create enum with no namespace"
@@ -108,3 +108,5 @@
              :properties {:timeout "60"}}]
       (is (= m (from-avro (to-avro m SherpaProtocol/PROTOCOL)
                           SherpaProtocol/PROTOCOL))))))
+
+;;(run-tests)
