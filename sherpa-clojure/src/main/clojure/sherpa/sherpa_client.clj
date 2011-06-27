@@ -54,5 +54,5 @@
           {:query-handle execution
            :results (map tuple-generator (iterator-seq data-iter))}))
       (cancel [_ query-handle] (.cancel query-handle))
-      (close [_ query-handle] (.close (query-handle)))
+      (close [_ query-handle] (.close query-handle))
       (shutdown [_] (.close transceiver)))))
