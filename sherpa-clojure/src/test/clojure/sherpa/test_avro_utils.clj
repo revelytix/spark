@@ -89,6 +89,13 @@
     (is (= {:a "foo" :b 1}
            cljmap))))
 
+(deftest test-from-avro-java-map
+  (let [m (java.util.HashMap.)]
+    (.put m "test" "100")
+    (let [cljmap (from-avro m example-protocol)]
+      (is (= {:test "100"}
+             cljmap)))))
+
 (deftest test-from-avro-enum
   (let [avenum (GenericData$EnumSymbol. (.getType example-protocol "e1") "a")
         cljenum (from-avro avenum example-protocol)]
