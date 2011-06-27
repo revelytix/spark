@@ -1,5 +1,6 @@
 .project
 .classpath
 .settings/
+sherpa-protocol/src/main/avro/sherpa/protocol/sherpa.avpr
 target/
 bin/
