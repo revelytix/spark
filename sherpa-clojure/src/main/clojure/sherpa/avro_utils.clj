@@ -4,7 +4,8 @@
            [org.apache.avro Protocol Schema Schema$Type Schema$Field]
            [org.apache.avro.generic GenericData$Record GenericData$EnumSymbol
             GenericRecord GenericEnumSymbol]
-           [org.apache.avro.util Utf8]))
+           [org.apache.avro.util Utf8]
+           [java.util Map]))
 
 (defmulti to-avro (fn [data protocol] (class data)))
 
@@ -80,6 +81,8 @@
 
 (defmulti from-avro (fn [avro-data protocol] (class avro-data)))
 
+(prefer-method from-avro Associative Map)
+
 (defmethod from-avro :default [avro-data protocol] avro-data)
 
 (defmethod from-avro Utf8 [^Utf8 avro-data protocol] (.toString avro-data))
@@ -93,19 +96,28 @@
       (keyword fqname))))
 
 (defmethod from-avro GenericRecord [^GenericRecord avro-record ^Protocol protocol]
-           (let [schema (.getSchema avro-record)
-                 fields (.getFields schema)
-                 field-names (map (fn [^Schema$Field field] (.name field)) fields)]
-             (assoc (zipmap (map fqname-to-keyword field-names)
-                            (map (fn [^String field-name] (from-avro (.get avro-record field-name) protocol))
-                                 field-names))
-               :sherpa-type (fqname-to-keyword (.getFullName schema)))))
+  (let [schema (.getSchema avro-record)
+        fields (.getFields schema)
+        field-names (map (fn [^Schema$Field field] (.name field)) fields)]
+    (assoc (zipmap (map fqname-to-keyword field-names)
+                   
+                   (map (fn [^String field-name]
+                          (from-avro (.get avro-record field-name) protocol))
+                        field-names))
+      :sherpa-type (fqname-to-keyword (.getFullName schema)))))
+
+(defn- map-from-avro [avro-map protocol]
+  (reduce (fn [m [k v]]
+            (merge m {(fqname-to-keyword (from-avro k protocol)) (from-avro v protocol)}))
+          {}
+          avro-map))
 
 (defmethod from-avro Associative [avro-map protocol]
-           (reduce (fn [m [k v]] (merge m {(fqname-to-keyword k) (from-avro v protocol)}))
-                   {}
-                   avro-map))
+  (map-from-avro avro-map protocol))
+
+(defmethod from-avro Map [avro-map protocol]
+  (map-from-avro avro-map protocol))
 
 (defmethod from-avro GenericEnumSymbol [^GenericEnumSymbol avro-enum ^Protocol protocol]
-           {:sherpa-type (fqname-to-keyword (.getFullName (.getSchema avro-enum)))
-            :symbol (keyword (.toString avro-enum))})
+  {:sherpa-type (fqname-to-keyword (.getFullName (.getSchema avro-enum)))
+   :symbol (keyword (.toString avro-enum))})
