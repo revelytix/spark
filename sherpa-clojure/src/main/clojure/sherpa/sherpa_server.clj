@@ -32,25 +32,33 @@
 
 (defmulti sherpa-rpc (fn [msg listener request] msg))
 (defmethod sherpa-rpc :default [msg listener request]
-           (throw (RuntimeException. (str "Unknown message type: " msg))))
+  (throw (RuntimeException. (str "Unknown message type: " msg))))
 
 (defmacro add-rpc [msg return-type]
   `(defmethod sherpa-rpc ~msg [m# listener# avro-request#]
-              (println "query rpc, msg=" ~msg ", avro-req=" avro-request#)
-              (let [request# (from-avro avro-request# PROTOCOL)
-                    protocol-fn# ~(resolve (symbol msg))
-                    response# (protocol-fn# listener# request#)
-                    avro-resp# (to-avro (assoc response# :sherpa-type (keyword ~return-type)) PROTOCOL)]
-                avro-resp#)))
+     (println "query rpc, msg=" ~msg ", avro-req=" avro-request#)
+     (let [request# (from-avro avro-request# PROTOCOL)
+           protocol-fn# ~(resolve (symbol msg))
+           response# (protocol-fn# listener# request#)
+           avro-resp# (to-avro (assoc response# :sherpa-type (keyword ~return-type)) PROTOCOL)]
+       avro-resp#)))
 
 (add-rpc "query" "QueryResponse")
 (add-rpc "data" "DataResponse")
 (add-rpc "cancel" "CloseResponse")
 (add-rpc "close" "CloseResponse")
 
+(defn root-cause [e]
+  (if-let [cause (.getCause e)]
+    (root-cause cause)
+    e))
+
 (defn- error-response [exception-or-message]
   (let [msg (if (instance? Throwable exception-or-message)
-              (.getMessage exception-or-message)
+              (let [root (root-cause exception-or-message)]
+                (str (.getMessage exception-or-message)
+                     (if (not (= root exception-or-message))
+                       (str " : " (.getMessage root)))))
               exception-or-message)
         err-response (to-avro {:sherpa-type :ErrorResponse
                                :code {:sherpa-type :ReasonCode

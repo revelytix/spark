@@ -24,9 +24,9 @@
       (is (= "abc" (.toString (.get err "message"))))
       (is (instance? GenericEnumSymbol (.get err "code"))))))
 
-(deftest test-sherpa-error
+(defn- check-error [exception-to-throw expected-message]
   (let [listener (reify SherpaListener
-                   (query [listener request] (throw (NullPointerException. "abcdef"))))
+                   (query [listener request] (throw exception-to-throw)))
         server (run-sherpa listener {:host "localhost" :port 0 :join? false})
         client (cl/sherpa-client {:host "localhost" :port (.getPort server)})]
     (try
@@ -35,5 +35,16 @@
       (catch SparqlException e
         (let [cause (.getCause e)]
           (is (instance? ErrorResponse cause))
-          (is (= "abcdef" (.toString (.message cause))))
+          (is (= expected-message (.toString (.message cause))))
           (is (instance? ReasonCode (.code cause))))))))
+
+(deftest test-sherpa-error
+  (check-error (NullPointerException. "abcdef")
+               "abcdef"))
+
+(deftest test-sherpa-error-nested
+  (check-error (RuntimeException. "fail"
+                                  (NullPointerException. "abcdef"))
+               "fail : abcdef"))
+
+;; (run-tests)
