@@ -36,15 +36,15 @@ import sherpa.protocol.SherpaServer;
 import spark.api.exception.SparqlException;
 
 /**
- * Manages the state associated with cursoring through a single query.  Each instance is 
- * designed for a single execution and should not be reused.
+ * Manages the state associated with cursoring through a single query. Each instance is designed for a single execution
+ * and should not be reused.
  */
 public class QueryExecution implements Iterable<List<Object>> {
 
   // Query properties
   public static final String BATCH_SIZE = "batchSize";
-  public static final String TIMEOUT = "timeout"; 
-  
+  public static final String TIMEOUT = "timeout";
+
   // Resources
   private final SherpaServer server;
   private final Executor executor = Executors.newFixedThreadPool(1);
@@ -57,34 +57,36 @@ public class QueryExecution implements Iterable<List<Object>> {
   // query state as cursor evolves, protected by "this" lock
   private int cursor = 0; // overall result set, 1-based
   private Window currentData = Window.EMPTY;
-  
+
   // coordination for next data between calling threads and background requester thread
   private SignalSlot<Window> nextData = new SignalSlot<Window>();
-    
+
   public QueryExecution(SherpaServer clientInterface) {
-    this.server = clientInterface;   
-    
+    this.server = clientInterface;
+
     Executors.newFixedThreadPool(1, new ClientThreadFactory());
   }
-  
+
   // don't do this at home, kids:
   // unsafely coerce Map<String,String> to Map<CharSequence,CharSequence>
   @SuppressWarnings("unchecked")
   private Map<CharSequence, CharSequence> sneakyCast(Object m) {
-    return (Map<CharSequence, CharSequence>)m;
+    return (Map<CharSequence, CharSequence>) m;
   }
 
   public void query(String command, Map<String, String> params,
       Map<String, String> props) {
-    
-    if(props != null && props.containsKey(BATCH_SIZE)) {
+
+    if (props != null && props.containsKey(BATCH_SIZE)) {
       this.maxBatchSize = Integer.parseInt(props.get(BATCH_SIZE));
     }
-    
+
     QueryRequest request = new QueryRequest();
     request.sparql = command;
-    request.parameters = (params != null) ? sneakyCast(params) : new HashMap<CharSequence, CharSequence>();
-    request.properties = (props != null) ? sneakyCast(props) : new HashMap<CharSequence, CharSequence>();
+    request.parameters = (params != null) ? sneakyCast(params)
+        : new HashMap<CharSequence, CharSequence>();
+    request.properties = (props != null) ? sneakyCast(props)
+        : new HashMap<CharSequence, CharSequence>();
     try {
       System.out.println("Client sending query request to server.");
       QueryResponse response = server.query(request);
@@ -104,9 +106,10 @@ public class QueryExecution implements Iterable<List<Object>> {
   /**
    * Send request for more data for this query.
    * 
-   * NOTE: This method is always run in a background thread!! 
-
-   * @param startRow Start row needed in return batch
+   * NOTE: This method is always run in a background thread!!
+   * 
+   * @param startRow
+   *          Start row needed in return batch
    */
   private void asyncMoreRequest(int startRow) {
     try {
@@ -116,21 +119,21 @@ public class QueryExecution implements Iterable<List<Object>> {
       moreRequest.maxSize = maxBatchSize;
       System.out.println("Client requesting " + startRow + " .. "
           + (startRow + maxBatchSize - 1));
-  
+
       DataResponse response = server.data(moreRequest);
       System.out.println("Client got response " + response.startRow + " .. "
           + (response.startRow + response.data.size() - 1) + ", more="
-          + response.more);            
+          + response.more);
       nextData.add(new Window(response.data, response.more));
-    } catch(AvroRemoteException e) {
+    } catch (AvroRemoteException e) {
       this.nextData.addError(e);
-    } catch(Throwable t) {
+    } catch (Throwable t) {
       this.nextData.addError(t);
     }
   }
-  
+
   private synchronized void scheduleMoreRequest(final int startRow) {
-    if(currentData.more) {
+    if (currentData.more) {
       executor.execute(new Runnable() {
         public void run() {
           asyncMoreRequest(startRow);
@@ -139,38 +142,40 @@ public class QueryExecution implements Iterable<List<Object>> {
     }
   }
 
-  public synchronized boolean incrementCursor() throws SparqlException {    
-    //System.out.println("..incrementCursor(), cursor=" + cursor);
+  public synchronized boolean incrementCursor() throws SparqlException {
+    // System.out.println("..incrementCursor(), cursor=" + cursor);
     try {
       while (true) {
-        if (currentData.inc()) {  // Stay in the current batch
-          //System.out.println("....incrementing in currentData");
+        if (currentData.inc()) { // Stay in the current batch
+          // System.out.println("....incrementing in currentData");
           cursor++;
           return true;
         } else {
-          Window nextWindow = nextData.poll();  // non-blocking take, null if empty
+          Window nextWindow = nextData.poll(); // non-blocking take, null if empty
           if (nextWindow != null) { // Switch to next batch
-            //System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
-            this.currentData = nextWindow;      
+            // System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" +
+            // currentData.data.size());
+            this.currentData = nextWindow;
             scheduleMoreRequest(cursor + currentData.data.size() + 1);
-            
+
           } else { // Don't have data
             if (!currentData.more) { // Because we're done
-              //System.out.println("....no current data, but we're all done.");
+              // System.out.println("....no current data, but we're all done.");
               cursor++;
               return false;
             } else { // Or we just haven't waited long enough for it
-              //System.out.println("....no current data, no next data, but not done, just wait.");
-              currentData = nextData.take(); 
-              //System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" + currentData.data.size());
+              // System.out.println("....no current data, no next data, but not done, just wait.");
+              currentData = nextData.take();
+              // System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" +
+              // currentData.data.size());
               scheduleMoreRequest(cursor + currentData.data.size() + 1);
             }
           }
         }
       }
-    } catch(RuntimeException e) {
+    } catch (RuntimeException e) {
       throw e;
-    } catch(Throwable t) {      
+    } catch (Throwable t) {
       throw new SparqlException(t.getMessage(), t);
     }
   }
@@ -217,10 +222,10 @@ public class QueryExecution implements Iterable<List<Object>> {
   private class QueryIterator implements Iterator<List<Object>> {
     private boolean incremented = false;
     private boolean hasNext = true;
-        
+
     @Override
-    public boolean hasNext() {         
-      if(! incremented) {
+    public boolean hasNext() {
+      if (!incremented) {
         hasNext = incrementCursor();
         incremented = true;
       }
@@ -229,12 +234,12 @@ public class QueryExecution implements Iterable<List<Object>> {
 
     @Override
     public List<Object> next() {
-      if(! incremented) {
+      if (!incremented) {
         hasNext = incrementCursor();
       }
-      
-      incremented = false;  // reset for next 
-      if(hasNext) {        
+
+      incremented = false; // reset for next
+      if (hasNext) {
         return getRow();
       } else {
         return null;
@@ -243,13 +248,13 @@ public class QueryExecution implements Iterable<List<Object>> {
 
     @Override
     public void remove() {
-      throw new UnsupportedOperationException("Cannot remove from a QueryIterator.");
+      throw new UnsupportedOperationException(
+          "Cannot remove from a QueryIterator.");
     }
   }
-  
+
   /**
-   * Represents a batch of result data. Walk through the data with inc()
-   * and get each tuple with getData(). 
+   * Represents a batch of result data. Walk through the data with inc() and get each tuple with getData().
    */
   private static class Window {
     final List<List<Object>> data;
@@ -262,11 +267,9 @@ public class QueryExecution implements Iterable<List<Object>> {
     }
 
     /**
-     * If there is still data in the window, increment the row and return true,
-     * otherwise false.
+     * If there is still data in the window, increment the row and return true, otherwise false.
      * 
-     * @return True if data is available at the current index, false if this
-     *         window is fully read
+     * @return True if data is available at the current index, false if this window is fully read
      */
     boolean inc() {
       index++;
@@ -274,20 +277,20 @@ public class QueryExecution implements Iterable<List<Object>> {
     }
 
     List<Object> getData() {
-      //System.out.println("..get row at " + index);
+      // System.out.println("..get row at " + index);
       return data.get(index);
     }
 
     static Window EMPTY = new Window(new ArrayList<List<Object>>(), true);
   }
-  
+
   private static class ClientThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(Runnable r) {
       Thread t = new Thread(r, "Sherpa client data requester");
       t.setDaemon(true);
       return t;
-    }    
+    }
   }
-  
+
 }
