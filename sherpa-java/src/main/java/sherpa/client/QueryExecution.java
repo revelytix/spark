@@ -30,6 +30,7 @@ import sherpa.protocol.CancelRequest;
 import sherpa.protocol.CloseRequest;
 import sherpa.protocol.DataRequest;
 import sherpa.protocol.DataResponse;
+import sherpa.protocol.ErrorResponse;
 import sherpa.protocol.QueryRequest;
 import sherpa.protocol.QueryResponse;
 import sherpa.protocol.SherpaServer;
@@ -97,7 +98,16 @@ public class QueryExecution implements Iterable<List<Object>> {
         vars.add(cs.toString());
       }
     } catch (AvroRemoteException e) {
-      throw new SparqlException(e.getMessage(), e);
+      String errorMessage = "Unknown server error";
+      if (e instanceof ErrorResponse) {
+        ErrorResponse er = (ErrorResponse) e;
+        if (er.message != null) {
+          errorMessage = er.message.toString();
+        }
+      } else {
+        errorMessage = e.getMessage();
+      }
+      throw new SparqlException(errorMessage, e);
     }
 
     scheduleMoreRequest(1);
