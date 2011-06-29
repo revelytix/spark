@@ -98,14 +98,14 @@ public class QueryExecution implements Iterable<List<Object>> {
         vars.add(cs.toString());
       }
     } catch (AvroRemoteException e) {
-      String errorMessage = "Unknown server error";
+      String errorMessage = "Remote Exception: ";
       if (e instanceof ErrorResponse) {
         ErrorResponse er = (ErrorResponse) e;
         if (er.message != null) {
-          errorMessage = er.message.toString();
+          errorMessage += er.message.toString();
         }
       } else {
-        errorMessage = e.getMessage();
+        errorMessage += e.getMessage();
       }
       throw new SparqlException(errorMessage, e);
     }
