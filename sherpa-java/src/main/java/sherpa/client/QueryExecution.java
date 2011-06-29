@@ -75,6 +75,20 @@ public class QueryExecution implements Iterable<List<Object>> {
     return (Map<CharSequence, CharSequence>) m;
   }
 
+  private SparqlException toSparqlException(AvroRemoteException e) {
+    String errorMessage = "Remote Exception: ";
+    if (e instanceof ErrorResponse) {
+      ErrorResponse er = (ErrorResponse) e;
+      if (er.message != null) {
+        errorMessage += er.message.toString();
+      }
+    } else {
+      errorMessage += e.getMessage();
+    }
+    SparqlException sparqlException = new SparqlException(errorMessage, e);
+    return sparqlException;
+  }
+
   public void query(String command, Map<String, String> params,
       Map<String, String> props) {
 
@@ -98,16 +112,7 @@ public class QueryExecution implements Iterable<List<Object>> {
         vars.add(cs.toString());
       }
     } catch (AvroRemoteException e) {
-      String errorMessage = "Remote Exception: ";
-      if (e instanceof ErrorResponse) {
-        ErrorResponse er = (ErrorResponse) e;
-        if (er.message != null) {
-          errorMessage += er.message.toString();
-        }
-      } else {
-        errorMessage += e.getMessage();
-      }
-      throw new SparqlException(errorMessage, e);
+      throw toSparqlException(e);
     }
 
     scheduleMoreRequest(1);
@@ -136,7 +141,7 @@ public class QueryExecution implements Iterable<List<Object>> {
           + response.more);
       nextData.add(new Window(response.data, response.more));
     } catch (AvroRemoteException e) {
-      this.nextData.addError(e);
+      this.nextData.addError( toSparqlException(e) );
     } catch (Throwable t) {
       this.nextData.addError(t);
     }
@@ -201,7 +206,7 @@ public class QueryExecution implements Iterable<List<Object>> {
     try {
       server.cancel(cancelRequest);
     } catch (AvroRemoteException e) {
-      throw new SparqlException(e.getMessage(), e);
+      throw toSparqlException(e);
     }
   }
 
@@ -212,7 +217,7 @@ public class QueryExecution implements Iterable<List<Object>> {
     try {
       server.close(closeRequest);
     } catch (AvroRemoteException e) {
-      throw new SparqlException(e.getMessage(), e);
+      throw toSparqlException(e);
     }
   }
 
