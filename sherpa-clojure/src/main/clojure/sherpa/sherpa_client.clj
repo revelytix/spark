@@ -38,7 +38,7 @@
    a Sherpa server.  The connect-map should contain properties to specify which Sherpa server to 
    connect to, such as :host and :port."
   [connect-map]
-  (let [addr (InetSocketAddress. (InetAddress/getByName (:host connect-map)) (:port connect-map))
+  (let [addr (InetSocketAddress. ^InetAddress (InetAddress/getByName (:host connect-map)) ^Integer (:port connect-map))
         _ (println "client connecting to " addr)
         transceiver (SaslSocketTransceiver. addr)
         requestor (SpecificRequestor. SherpaServer transceiver)
@@ -54,6 +54,6 @@
               tuple-generator (partial zipmap (map keyword (.getVars execution)))]
           {:query-handle execution
            :results (map tuple-generator (iterator-seq data-iter))}))
-      (cancel [_ query-handle] (.cancel query-handle))
-      (close [_ query-handle] (.close query-handle))
+      (cancel [_ query-handle] (.cancel ^QueryExecution query-handle))
+      (close [_ query-handle] (.close ^QueryExecution query-handle))
       (shutdown [_] (.close transceiver)))))

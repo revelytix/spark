@@ -48,7 +48,7 @@
 (add-rpc "cancel" "CloseResponse")
 (add-rpc "close" "CloseResponse")
 
-(defn root-cause [e]
+(defn root-cause [^Throwable e]
   (if-let [cause (.getCause e)]
     (root-cause cause)
     e))
