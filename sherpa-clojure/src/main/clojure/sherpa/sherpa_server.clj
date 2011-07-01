@@ -53,17 +53,34 @@
     (root-cause cause)
     e))
 
+(defn serialize-stack-trace [e]
+  (let [bos (java.io.ByteArrayOutputStream.)
+        oos (java.io.ObjectOutputStream. bos)]
+    (.writeObject oos (.getStackTrace e))
+    (.close oos)
+    (.toByteArray bos)))
+
+(defn- to-exception-map [e]
+  (if (not (nil? e))
+    (let [cause (.getCause e)]
+      {:sherpa-type :ServerException
+       :message (.getMessage e)
+       :errorType (.getName (class e))
+       :stackTrace (java.nio.ByteBuffer/wrap (serialize-stack-trace e))
+       :cause (if (not (= e cause))
+                (to-exception-map cause))})))
+
 (defn- error-response [exception-or-message]
-  (let [msg (if (instance? Throwable exception-or-message)
-              (let [root (root-cause exception-or-message)]
-                (str (.getMessage exception-or-message)
-                     (if (not (= root exception-or-message))
-                       (str " : " (.getMessage root)))))
-              exception-or-message)
+  (let [exception (if (instance? Throwable exception-or-message)
+                    (to-exception-map exception-or-message)
+                    {:message exception-or-message})
         err-response (to-avro {:sherpa-type :ErrorResponse
                                :code {:sherpa-type :ReasonCode
                                       :symbol :Error}
-                               :message msg} PROTOCOL)]
+
+                               :serverException exception
+
+                               } PROTOCOL)]
     (AvroRemoteException. err-response)))
 
 (defn responder

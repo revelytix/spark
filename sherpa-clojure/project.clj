@@ -1,6 +1,4 @@
-(def version "0.1.3-SNAPSHOT")
-
-(defproject com.revelytix/sparql-clojure version
+(defproject com.revelytix/sparql-clojure "0.1.3-SNAPSHOT"
   :description "Defines a SPARQL client and server processing framework using the SHERPA protocol."
 
   ;; Project dependencies, resolved via Maven
@@ -9,8 +7,8 @@
                  [org.clojure/clojure-contrib "1.2.0"]
 
                  ;; revelytix projects
-                 [com.revelytix/sherpa-protocol version]
-                 [com.revelytix/sherpa-java version]]
+                 [com.revelytix/sherpa-protocol "0.1.3-SNAPSHOT"]
+                 [com.revelytix/sherpa-java "0.1.3-SNAPSHOT"]]
 
   :dev-dependencies [[jline "0.9.94"]
                      [swank-clojure "1.2.1"]

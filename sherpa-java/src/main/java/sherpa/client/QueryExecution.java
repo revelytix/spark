@@ -15,6 +15,9 @@
  */
 package sherpa.client;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,6 +36,7 @@ import sherpa.protocol.DataResponse;
 import sherpa.protocol.ErrorResponse;
 import sherpa.protocol.QueryRequest;
 import sherpa.protocol.QueryResponse;
+import sherpa.protocol.ServerException;
 import sherpa.protocol.SherpaServer;
 import spark.api.exception.SparqlException;
 
@@ -75,18 +79,50 @@ public class QueryExecution implements Iterable<List<Object>> {
     return (Map<CharSequence, CharSequence>) m;
   }
 
+  private Exception reconstruct(ServerException e) {
+    if (e == null) {
+      return null;
+    }
+    if (e.stackTrace != null) {
+      String message = "";
+      if (e.message != null) {
+        message = e.message.toString();
+      }
+      String errorType = "";
+      if (e.errorType != null) {
+        errorType = e.errorType.toString() + ": ";
+      }
+      byte[] stackTraceBytes = e.stackTrace.array();
+      try {
+        StackTraceElement[] stackTrace = (StackTraceElement[]) new ObjectInputStream(new ByteArrayInputStream(stackTraceBytes)).readObject();
+        Exception cause = reconstruct(e.cause);
+        Exception serverException = new RuntimeException(errorType + message, cause);
+        serverException.setStackTrace(stackTrace);
+        return serverException;
+      } catch (IOException e2) {
+        System.out.println("IOException reading stackTrace: " + e2);
+      } catch (ClassNotFoundException e2) {
+        System.out.println("ClassNotFound reading stackTrace: " + e2);
+      }
+    }
+    return null;
+  }
+  
   private SparqlException toSparqlException(AvroRemoteException e) {
-    String errorMessage = "Remote Exception: ";
+    String causeMessage = "";
     if (e instanceof ErrorResponse) {
       ErrorResponse er = (ErrorResponse) e;
-      if (er.message != null) {
-        errorMessage += er.message.toString();
+      Exception cause = reconstruct(er.serverException);      
+      if (cause != null) {
+        if (cause.getMessage() != null) {
+          causeMessage = cause.getMessage();
+        }
+        e.initCause(cause);
       }
     } else {
-      errorMessage += e.getMessage();
+      causeMessage = e.getMessage();
     }
-    SparqlException sparqlException = new SparqlException(errorMessage, e);
-    return sparqlException;
+    return new SparqlException("Remote Exception: " + causeMessage, e);
   }
 
   public void query(String command, Map<String, String> params,
@@ -114,10 +150,9 @@ public class QueryExecution implements Iterable<List<Object>> {
     } catch (AvroRemoteException e) {
       throw toSparqlException(e);
     }
-
     scheduleMoreRequest(1);
   }
-
+  
   /**
    * Send request for more data for this query.
    * 
@@ -141,7 +176,7 @@ public class QueryExecution implements Iterable<List<Object>> {
           + response.more);
       nextData.add(new Window(response.data, response.more));
     } catch (AvroRemoteException e) {
-      this.nextData.addError( toSparqlException(e) );
+      this.nextData.addError(toSparqlException(e));
     } catch (Throwable t) {
       this.nextData.addError(t);
     }

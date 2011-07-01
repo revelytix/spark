@@ -31,6 +31,7 @@ import sherpa.protocol.IRI;
 import sherpa.protocol.QueryRequest;
 import sherpa.protocol.QueryResponse;
 import sherpa.protocol.ReasonCode;
+import sherpa.protocol.ServerException;
 import sherpa.protocol.SherpaServer;
 
 public class DummyQueryResponder implements SherpaServer {
@@ -119,7 +120,8 @@ public class DummyQueryResponder implements SherpaServer {
     } else {
       ErrorResponse response = new ErrorResponse();
       response.code = ReasonCode.Error;
-      response.message = "Invalid request for rows outside the result set.";
+      response.serverException = new ServerException();
+      response.serverException.message = "Invalid request for rows outside the result set.";
       throw response;
     }
   }

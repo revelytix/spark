@@ -16,6 +16,7 @@ import sherpa.protocol.ErrorResponse;
 import sherpa.protocol.QueryRequest;
 import sherpa.protocol.QueryResponse;
 import sherpa.protocol.ReasonCode;
+import sherpa.protocol.ServerException;
 import sherpa.server.DummyQueryResponder;
 import spark.api.exception.SparqlException;
 
@@ -61,7 +62,8 @@ public class TestQueryManager {
       private ErrorResponse err() {
         ErrorResponse resp = new ErrorResponse();
         resp.code = ReasonCode.Error;
-        resp.message = "foo";
+        resp.serverException = new ServerException();
+        resp.serverException.message = "foo";
         return resp;
       }
       @Override
@@ -81,7 +83,7 @@ public class TestQueryManager {
       Assert.assertTrue(cause instanceof ErrorResponse);
       ErrorResponse er = (ErrorResponse) cause;
       Assert.assertEquals(ReasonCode.Error, er.code);
-      Assert.assertEquals("foo", er.message);
+      Assert.assertEquals("foo", er.serverException.message);
     }
   }
   
@@ -91,7 +93,8 @@ public class TestQueryManager {
       private ErrorResponse err() {
         ErrorResponse resp = new ErrorResponse();
         resp.code = ReasonCode.Error;
-        resp.message = "foo";
+        resp.serverException = new ServerException();
+        resp.serverException.message = "foo";
         return resp;
       }
       @Override
@@ -114,7 +117,7 @@ public class TestQueryManager {
       Assert.assertTrue(cause instanceof ErrorResponse);
       ErrorResponse er = (ErrorResponse) cause;
       Assert.assertEquals(ReasonCode.Error, er.code);
-      Assert.assertEquals("foo", er.message);
+      Assert.assertEquals("foo", er.serverException.message);
     }
   }
   

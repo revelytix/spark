@@ -63,9 +63,16 @@ protocol SherpaServer {
     Close, Cancel, Timeout, Error
   } 
   
+  record ServerException {
+    string message;
+    union {string, null} errorType;
+    union {bytes, null} stackTrace;
+    union {ServerException, null} cause;
+  }
+  
   error ErrorResponse {
     ReasonCode code;
-    union {string, null} message;
+    union {ServerException, null} serverException;
   }
   
   // MESSAGES
