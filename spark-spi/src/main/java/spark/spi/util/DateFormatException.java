@@ -4,6 +4,8 @@
 package spark.spi.util;
 
 /**
+ * Exception to indicate a parse exception when processing an xsd:dateTime literal string.
+ * 
  * @author Alex Hall
  * @date Jul 12, 2011
  */
@@ -15,7 +17,10 @@ public class DateFormatException extends RuntimeException {
   private final int index;
   
   /**
-   * @param message
+   * Initialize a date format exception.
+   * @param msg The exception message.
+   * @param input The input string which triggered the exception.
+   * @param index The index in the string at which the exception occurred.
    */
   public DateFormatException(String msg, String input, int index) {
     super(msg);
@@ -23,6 +28,7 @@ public class DateFormatException extends RuntimeException {
     this.index = index;
   }
 
+  /** The index at which the exception occurred. */
   public int getIndex() { return index; }
   
   /* (non-Javadoc)
