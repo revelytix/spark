@@ -15,18 +15,29 @@
  */
 package spark.spi;
 
+import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+import spark.api.rdf.BlankNode;
+import spark.api.rdf.Literal;
+import spark.api.rdf.NamedNode;
 import spark.api.rdf.RDFNode;
 import spark.spi.rdf.BlankNodeImpl;
-
-import junit.framework.TestCase;
+import spark.spi.rdf.NamedNodeImpl;
+import spark.spi.rdf.PlainLiteralImpl;
 
 public class TestSolutionSet extends TestCase {
+  
+  private static final Date A_DATE = new Date(1311190453435L);
+  private static final String A_DATE_TIME = "2011-07-20T15:34:13.435-04:00";
+  
 	public void testSolution() {
 		// setup solutions
 		Map<String, RDFNode> solution1 = new HashMap<String, RDFNode>();
@@ -61,5 +72,65 @@ public class TestSolutionSet extends TestCase {
 		s.next();
 		assertFalse(s.isBeforeFirst());
 		assertTrue(s.isAfterLast());	
+	}
+	
+	public void testDatatypes() {
+	  String var = "x";
+	  List<Map<String,RDFNode>> sl = new ArrayList<Map<String,RDFNode>>();
+	  for (int i = 0; i < 10; i++) {
+	    sl.add(new HashMap<String,RDFNode>());
+	  }
+	  
+	  NamedNode uriRef = new NamedNodeImpl(URI.create("http://example.org/test"));
+	  BlankNode bn = new BlankNodeImpl("1");
+	  Literal lit = new PlainLiteralImpl("foo");
+	  
+	  sl.get(0).put(var, uriRef);
+	  sl.get(1).put(var, bn);
+	  sl.get(2).put(var, lit);
+	  sl.get(3).put(var, new PlainLiteralImpl(A_DATE_TIME));
+    sl.get(4).put(var, new PlainLiteralImpl("198765415975423167465132498465"));
+    sl.get(5).put(var, new PlainLiteralImpl("true"));
+    sl.get(6).put(var, new PlainLiteralImpl("3.14"));
+    sl.get(7).put(var, new PlainLiteralImpl("98.6"));
+    sl.get(8).put(var, new PlainLiteralImpl("42"));
+    
+    SolutionSet s = new SolutionSet(null, Arrays.asList("x"), sl);
+    assertTrue(s.isBeforeFirst());
+    
+    assertTrue(s.next());
+    assertEquals(uriRef, s.getNamedNode(var));    
+    assertEquals(uriRef.getURI(), s.getURI(var));    
+    
+    assertTrue(s.next());
+    assertEquals(bn, s.getBlankNode(var));    
+    
+    assertTrue(s.next());
+    assertEquals(lit, s.getLiteral(var));
+    assertEquals("foo", s.getString(var));
+    
+    assertTrue(s.next());
+    assertEquals(A_DATE, s.getDateTime(var));    
+    
+    assertTrue(s.next());
+    assertEquals(new BigInteger("198765415975423167465132498465"), s.getInteger(var));    
+    
+    assertTrue(s.next());
+    assertEquals(true, s.getBoolean(var));    
+    
+    assertTrue(s.next());
+    assertEquals(3.14d, s.getDouble(var));    
+    
+    assertTrue(s.next());
+    assertEquals(98.6f, s.getFloat(var));    
+    
+    assertTrue(s.next());
+    assertEquals(42, s.getInt(var));    
+    
+    assertTrue(s.next());
+    assertNull(s.getBinding(var));
+    
+    assertFalse(s.next());
+    assertTrue(s.isAfterLast());
 	}
 }
