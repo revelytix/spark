@@ -18,6 +18,8 @@ package spark.spi;
 import java.math.BigInteger;
 import java.util.Date;
 
+import spark.spi.util.DateTime;
+
 /**
  * Class of convenience conversions from lexical string representation to the 
  * various XSD data type native Java representations.
@@ -77,7 +79,6 @@ public final class Conversions {
    * @return Converted value
    */
   public static Date toDateTime(String lexicalDate) {
-    // TODO
-    return null;
+    return DateTime.parse(lexicalDate);
   }
 }
