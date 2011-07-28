@@ -33,8 +33,8 @@ public class TestQueryManager {
     mgr.query("SELECT foo", params, props);
     List<String> vars = mgr.getVars();
     List<String> expectedVars = new ArrayList<String>();
-    expectedVars.add("x");
-    expectedVars.add("y");
+    expectedVars.add("a");
+    expectedVars.add("b");
     Assert.assertEquals(expectedVars, vars);        
     Assert.assertEquals(0, mgr.getCursor());
     
