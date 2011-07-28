@@ -64,13 +64,27 @@ public class TestSherpaClient {
     try {
       Solutions solutions = helpExecuteQuery(server, batchSize);
 
+      Assert.assertTrue(solutions.isBeforeFirst());
+      Assert.assertFalse(solutions.isFirst());
+      Assert.assertFalse(solutions.isLast());
+      Assert.assertFalse(solutions.isAfterLast());
+      
       int counter = 0;
       while (solutions.next()) {
         Map<String,RDFNode> solution = solutions.getResult();
         Assert.assertNotNull(solution);
-        counter++;
+        Assert.assertEquals(++counter, solutions.getRow());
+        Assert.assertFalse(solutions.isBeforeFirst());
+        Assert.assertEquals(counter == 1, solutions.isFirst());
+        Assert.assertEquals(counter == resultRows, solutions.isLast());
+        Assert.assertFalse(solutions.isAfterLast());
       }
 
+      Assert.assertFalse(solutions.isBeforeFirst());
+      Assert.assertFalse(solutions.isFirst());
+      Assert.assertFalse(solutions.isLast());
+      Assert.assertTrue(solutions.isAfterLast());
+      
       System.out.println("Read " + counter + " rows");
       Assert.assertEquals(resultRows, counter);
 

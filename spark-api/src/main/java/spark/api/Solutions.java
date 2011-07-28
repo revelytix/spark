@@ -75,14 +75,6 @@ public interface Solutions extends CursoredResult<Map<String,RDFNode>> {
   // Generic data access as map or node from the current solution
   
   /**
-   * Get the current solution as a List of values in the same
-   * order as {@link #getVariables()}.  Unbound variables will
-   * be null.
-   * @return List of values that match the variables
-   */
-  List<RDFNode> getSolutionList();
-  
-  /**
    * Check whether the specified variable is bound in the 
    * current solution.
    * @param variable Variable name 

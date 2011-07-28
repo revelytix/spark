@@ -264,6 +264,14 @@ public class QueryExecution implements Iterable<List<Object>> {
     return this.cursor;
   }
 
+  public synchronized boolean isLast() {
+    return currentData.isValid() && !currentData.hasNext();
+  }
+  
+  public synchronized boolean isAfterLast() {
+    return !(currentData.isValid() || currentData.hasNext());
+  }
+  
   @Override
   public Iterator<List<Object>> iterator() {
     return new QueryIterator();
@@ -329,6 +337,14 @@ public class QueryExecution implements Iterable<List<Object>> {
     List<Object> getData() {
       // System.out.println("..get row at " + index);
       return data.get(index);
+    }
+    
+    boolean isValid() {
+      return index >= 0 && index < data.size();
+    }
+    
+    boolean hasNext() {
+      return more || index < data.size() - 1;
     }
 
     static Window EMPTY = new Window(new ArrayList<List<Object>>(), true);

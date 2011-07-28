@@ -37,6 +37,8 @@ import sherpa.protocol.SherpaServer;
 
 public class DummyQueryResponder implements SherpaServer {
 
+  public static final int DEFAULT_WIDTH = 2;
+  
   public final int rows;
   public final int width;
   public final List<List<Object>> data;
@@ -45,7 +47,7 @@ public class DummyQueryResponder implements SherpaServer {
   /** Create a dummy responder with generated data. */
   public DummyQueryResponder(int rows) {
     this.rows = rows;
-    this.width = 2;
+    this.width = DEFAULT_WIDTH;
     this.data = new ArrayList<List<Object>>(rows);
     for (int row = 1; row <= rows; row++) {
       IRI iri = new IRI();

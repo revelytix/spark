@@ -21,6 +21,37 @@ import sherpa.server.DummyQueryResponder;
 import spark.api.exception.SparqlException;
 
 public class TestQueryManager {
+  
+  public static void helpTestCursor(int rows, int batchSize) {
+    DummyQueryResponder queryResponder = new DummyQueryResponder(rows);
+    
+    QueryExecution mgr = new QueryExecution(queryResponder);
+    Map<String,String> params = Collections.emptyMap();
+    Map<String,String> props = new HashMap<String,String>();
+    props.put(QueryExecution.BATCH_SIZE, Integer.toString(batchSize));
+    
+    mgr.query("SELECT foo", params, props);
+    
+    Assert.assertEquals(0, mgr.getCursor());
+    Assert.assertFalse(mgr.isLast());
+    Assert.assertFalse(mgr.isAfterLast());
+    
+    int counter = 0;
+    while (mgr.incrementCursor()) {
+      List<Object> row = mgr.getRow();
+      Assert.assertNotNull(row);
+      Assert.assertEquals(DummyQueryResponder.DEFAULT_WIDTH, row.size());
+      Assert.assertEquals(++counter, mgr.getCursor());
+      Assert.assertEquals(counter == rows, mgr.isLast());
+      Assert.assertFalse(mgr.isAfterLast());
+    }
+    
+    Assert.assertFalse(mgr.isLast());
+    Assert.assertTrue(mgr.isAfterLast());
+    Assert.assertEquals(rows + 1, mgr.getCursor());
+    Assert.assertEquals(counter, rows);
+  }
+  
   @Test
   public void testQuery() {
     DummyQueryResponder queryResponder = new DummyQueryResponder(20);
@@ -54,6 +85,17 @@ public class TestQueryManager {
     // close 
     mgr.close();
     Assert.assertEquals("Message=close queryId=1 ", queryResponder.messages.get(queryResponder.messages.size()-1));
+  }
+  
+  @Test
+  public void testCursor() {
+    helpTestCursor(0, 5);
+    helpTestCursor(1, 5);
+    helpTestCursor(4, 5);
+    helpTestCursor(5, 5);
+    helpTestCursor(6, 5);
+    helpTestCursor(10, 5);
+    helpTestCursor(11, 5);
   }
   
   @Test

@@ -15,7 +15,6 @@
  */
 package spark.spi;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,18 +71,6 @@ public class SolutionSet extends BaseSolutions implements Solutions {
   @Override
   public int getRow() {
     return cursor+1;
-  }
-
-  @Override
-  public List<RDFNode> getSolutionList() {
-    Map<String,RDFNode> solution = data.get(cursor);
-    List<RDFNode> solutionList = new ArrayList<RDFNode>(vars.size());
-    
-    for(String var : vars) {
-      solutionList.add(solution.get(var));
-    }
-    
-    return solutionList;
   }
 
   @Override

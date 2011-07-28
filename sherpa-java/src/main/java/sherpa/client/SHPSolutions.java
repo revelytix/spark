@@ -20,7 +20,6 @@ package sherpa.client;
  */
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -77,23 +76,6 @@ public class SHPSolutions extends BaseSolutions implements Solutions {
   }
   
   @Override
-  public List<RDFNode> getSolutionList() {
-    List<Object> rowData = query.getRow();
-    
-    if(rowData != null) {
-      List<RDFNode> row = new ArrayList<RDFNode>();
-  
-      for(Object value : rowData) {
-        row.add(toNode(value));
-      }    
-      return row;
-      
-    } else {
-      return null;
-    }
-  }
-
-  @Override
   public Iterator<Map<String, RDFNode>> iterator() {
     // TODO Auto-generated method stub
     return null;
@@ -106,8 +88,7 @@ public class SHPSolutions extends BaseSolutions implements Solutions {
 
   @Override
   public boolean isAfterLast() {
-    // TODO Auto-generated method stub
-    return false;
+    return this.query.isAfterLast();
   }
 
   @Override
@@ -117,13 +98,12 @@ public class SHPSolutions extends BaseSolutions implements Solutions {
 
   @Override
   public boolean isFirst() {
-    return this.query.getCursor() == 1;
+    return this.query.getCursor() == 1 && !this.query.isAfterLast();
   }
 
   @Override
   public boolean isLast() {
-    // TODO Auto-generated method stub
-    return false;
+    return this.query.isLast();
   }
 
   @Override
