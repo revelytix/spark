@@ -21,7 +21,6 @@ package sherpa.client;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,11 +29,11 @@ import spark.api.Solutions;
 import spark.api.exception.SparqlException;
 import spark.api.rdf.RDFNode;
 import spark.api.uris.XsdTypes;
-import spark.spi.BaseSolutions;
+import spark.spi.StreamingSolutions;
 import spark.spi.rdf.NamedNodeImpl;
 import spark.spi.rdf.TypedLiteralImpl;
 
-public class SHPSolutions extends BaseSolutions implements Solutions {
+public class SHPSolutions extends StreamingSolutions implements Solutions {
 
   private final QueryExecution query;
   
@@ -50,8 +49,9 @@ public class SHPSolutions extends BaseSolutions implements Solutions {
   }
 
   @Override
-  public Map<String, RDFNode> getResult() {
-    List<Object> rowData = query.getRow();
+  protected Map<String, RDFNode> fetchNext() {
+    List<Object> rowData = null;
+    if (query.incrementCursor()) rowData = query.getRow();
     if (rowData != null) {
       if (rowData.size() != vars.size()) throw new IllegalStateException("Mis-matched variable and data list");
       Map<String, RDFNode> result = new HashMap<String, RDFNode>();
@@ -76,39 +76,13 @@ public class SHPSolutions extends BaseSolutions implements Solutions {
   }
   
   @Override
-  public Iterator<Map<String, RDFNode>> iterator() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public int getRow() {
-    return this.query.getCursor();
-  }
-
-  @Override
   public boolean isAfterLast() {
     return this.query.isAfterLast();
   }
 
   @Override
-  public boolean isBeforeFirst() {
-    return this.query.getCursor() == 0;
-  }
-
-  @Override
-  public boolean isFirst() {
-    return this.query.getCursor() == 1 && !this.query.isAfterLast();
-  }
-
-  @Override
   public boolean isLast() {
     return this.query.isLast();
-  }
-
-  @Override
-  public boolean next() {
-    return this.query.incrementCursor();
   }
 
   @Override

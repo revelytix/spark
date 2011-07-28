@@ -19,6 +19,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -92,7 +93,72 @@ public class TestSherpaClient {
       server.shutdown();
     }
   }
+  
+  public void helpCheckRows(List<Map<String,RDFNode>> data, int size) {
+    Assert.assertEquals(size, data.size());
+    for (Map<String,RDFNode> s : data) {
+      Assert.assertNotNull(s);
+    }
+    for (int i = 0; i < size - 1; i++) {
+      Assert.assertFalse(data.get(i).equals(data.get(i + 1)));
+    }
+  }
 
+  public void helpTestIteratorNormal(int rows, int batchSize) {
+    DummySherpaServer server = new DummySherpaServer(rows);
+    try {
+      Solutions solutions = helpExecuteQuery(server, batchSize);
+      Iterator<Map<String,RDFNode>> iter = solutions.iterator();
+      Assert.assertNotNull(iter);
+      List<Map<String,RDFNode>> data = new ArrayList<Map<String,RDFNode>>(rows);
+      // Traverse the iterator in a normal fashion.
+      while (iter.hasNext()) {
+        data.add(iter.next());
+      }
+      helpCheckRows(data, rows);
+    } finally {
+      server.shutdown();
+    }
+  }
+  
+  public void helpTestIteratorParanoid(int rows, int batchSize) {
+    DummySherpaServer server = new DummySherpaServer(rows);
+    try {
+      Solutions solutions = helpExecuteQuery(server, batchSize);
+      Iterator<Map<String,RDFNode>> iter = solutions.iterator();
+      Assert.assertNotNull(iter);
+      List<Map<String,RDFNode>> data = new ArrayList<Map<String,RDFNode>>(rows);
+      // Traverse the iterator, with lots of extra checks to hasNext();
+      Assert.assertEquals(rows > 0, iter.hasNext());
+      Assert.assertEquals(rows > 0, iter.hasNext());
+      while (iter.hasNext()) {
+        data.add(iter.next());
+        Assert.assertEquals(data.size() < rows, iter.hasNext());
+      }
+      helpCheckRows(data, rows);
+    } finally {
+      server.shutdown();
+    }
+  }
+  
+  public void helpTestIteratorCount(int rows, int batchSize) {
+    DummySherpaServer server = new DummySherpaServer(rows);
+    try {
+      Solutions solutions = helpExecuteQuery(server, batchSize);
+      Iterator<Map<String,RDFNode>> iter = solutions.iterator();
+      Assert.assertNotNull(iter);
+      List<Map<String,RDFNode>> data = new ArrayList<Map<String,RDFNode>>(rows);
+      // Traverse the iterator without calling hasNext()
+      for (int i = 0; i < rows; i++) {
+        data.add(iter.next());
+      }
+      Assert.assertFalse(iter.hasNext());
+      helpCheckRows(data, rows);
+    } finally {
+      server.shutdown();
+    }
+  }
+  
   @Test
   public void testCursor() {
     helpTestQueryCursor(0, 10);
@@ -170,6 +236,28 @@ public class TestSherpaClient {
     } finally {
       server.shutdown();
     }
+  }
+  
+  @Test
+  public void testIterator() {
+    helpTestIteratorNormal(0, 5);
+    helpTestIteratorNormal(1, 5);
+    helpTestIteratorNormal(4, 5);
+    helpTestIteratorNormal(5, 5);
+    helpTestIteratorNormal(6, 5);
+    helpTestIteratorNormal(10, 5);
+    helpTestIteratorParanoid(0, 5);
+    helpTestIteratorParanoid(1, 5);
+    helpTestIteratorParanoid(4, 5);
+    helpTestIteratorParanoid(5, 5);
+    helpTestIteratorParanoid(6, 5);
+    helpTestIteratorParanoid(10, 5);
+    helpTestIteratorCount(0, 5);
+    helpTestIteratorCount(1, 5);
+    helpTestIteratorCount(4, 5);
+    helpTestIteratorCount(5, 5);
+    helpTestIteratorCount(6, 5);
+    helpTestIteratorCount(10, 5);
   }
   
   public static List<List<Object>> toList(Object[][] data) {
