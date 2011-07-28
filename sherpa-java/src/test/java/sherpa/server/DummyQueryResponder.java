@@ -16,6 +16,7 @@
 package sherpa.server;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,10 +38,27 @@ import sherpa.protocol.SherpaServer;
 public class DummyQueryResponder implements SherpaServer {
 
   public final int rows;
+  public final int width;
+  public final List<List<Object>> data;
   public List<String> messages = new ArrayList<String>();
   
+  /** Create a dummy responder with generated data. */
   public DummyQueryResponder(int rows) {
     this.rows = rows;
+    this.width = 2;
+    this.data = new ArrayList<List<Object>>(rows);
+    for (int row = 1; row <= rows; row++) {
+      IRI iri = new IRI();
+      iri.iri = "http://foobar.baz/this/uri/" + row;
+      data.add(Arrays.<Object>asList(iri, row));
+    }
+  }
+  
+  /** Create a dummy responder with specified test data. */
+  public DummyQueryResponder(List<List<Object>> data) {
+    this.data = data;
+    this.rows = (data != null) ? data.size() : 0;
+    this.width = (rows > 0) ? data.get(0).size() : 0; // Assume all rows are the same width.
   }
   
   public void record(Object... pairs) {
@@ -60,9 +78,10 @@ public class DummyQueryResponder implements SherpaServer {
     
     QueryResponse response = new QueryResponse();
     response.queryId = "1";
-    response.vars = new ArrayList<CharSequence>();
-    response.vars.add("x");
-    response.vars.add("y");
+    response.vars = new ArrayList<CharSequence>(width);
+    for (int i = 0; i < width; i++) {
+      response.vars.add(Character.toString((char)('a' + i)));
+    }
 
     System.out.println("Server sending query response");
    
@@ -71,16 +90,7 @@ public class DummyQueryResponder implements SherpaServer {
   }
 
   private List<List<Object>> batch(int begin, int size) {
-    List<List<Object>> tuples = new ArrayList<List<Object>>();
-    for(int i=begin; i<begin+size; i++) {
-      List<Object> tuple = new ArrayList<Object>();
-      IRI iri = new IRI();
-      iri.iri = "http://foobar.baz/this/uri/" + i;
-      tuple.add(iri);
-      tuple.add(i);
-      tuples.add(tuple);
-    }
-    return tuples;
+    return data.subList(begin - 1, begin + size - 1);
   }
   
   @Override

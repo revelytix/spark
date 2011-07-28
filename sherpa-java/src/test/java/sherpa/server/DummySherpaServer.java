@@ -19,13 +19,14 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.apache.avro.ipc.SaslSocketServer;
 import org.apache.avro.ipc.Server;
 import org.apache.avro.ipc.specific.SpecificResponder;
 
-import spark.api.exception.SparqlException;
 import sherpa.protocol.SherpaServer;
+import spark.api.exception.SparqlException;
 
 public class DummySherpaServer extends SpecificResponder {
 
@@ -33,6 +34,10 @@ public class DummySherpaServer extends SpecificResponder {
   
   public DummySherpaServer(int rows) {
     this(new DummyQueryResponder(rows));
+  }
+  
+  public DummySherpaServer(List<List<Object>> data) {
+    this(new DummyQueryResponder(data));
   }
   
   public DummySherpaServer(SherpaServer responder) {
