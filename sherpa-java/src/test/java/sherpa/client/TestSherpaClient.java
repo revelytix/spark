@@ -16,7 +16,9 @@
 package sherpa.client;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,9 @@ import org.apache.avro.util.Utf8;
 import org.junit.Assert;
 import org.junit.Test;
 
+import sherpa.protocol.IRI;
+import sherpa.protocol.QueryRequest;
+import sherpa.protocol.QueryResponse;
 import sherpa.server.DummyQueryResponder;
 import sherpa.server.DummySherpaServer;
 import spark.api.Command;
@@ -32,30 +37,37 @@ import spark.api.Connection;
 import spark.api.DataSource;
 import spark.api.Solutions;
 import spark.api.credentials.NoCredentials;
+import spark.api.rdf.Literal;
+import spark.api.rdf.NamedNode;
 import spark.api.rdf.RDFNode;
-import sherpa.protocol.QueryRequest;
-import sherpa.protocol.QueryResponse;
+import spark.api.uris.XsdTypes;
+import spark.spi.rdf.NamedNodeImpl;
+import spark.spi.rdf.TypedLiteralImpl;
 
 
 public class TestSherpaClient {
 
+  public Solutions helpExecuteQuery(DummySherpaServer server, int batchSize) {
+    InetSocketAddress serverAddress = server.getAddress();
+    DataSource ds = new SHPDataSource(serverAddress.getHostName(),
+        serverAddress.getPort());
+    Connection conn = ds.getConnection(NoCredentials.INSTANCE);
+    Command command = conn
+        .createCommand("SELECT ?x ?y WHERE { this should be a real query but the test doesn't actually do anything real.");
+    ((SHPCommand) command).setBatchSize(batchSize);
+    return command.executeQuery();
+  }
+  
   public void helpTestQueryCursor(int resultRows, int batchSize) {
     DummySherpaServer server = new DummySherpaServer(resultRows);
-    InetSocketAddress serverAddress = server.getAddress();
 
     try {
-      DataSource ds = new SHPDataSource(serverAddress.getHostName(),
-          serverAddress.getPort());
-      Connection conn = ds.getConnection(NoCredentials.INSTANCE);
-      Command command = conn
-          .createCommand("SELECT ?x ?y WHERE { this should be a real query but the test doesn't actually do anything real.");
-      ((SHPCommand) command).setBatchSize(batchSize);
-      Solutions solutions = command.executeQuery();
+      Solutions solutions = helpExecuteQuery(server, batchSize);
 
       int counter = 0;
       while (solutions.next()) {
-        List<RDFNode> tuple = solutions.getSolutionList();
-        Assert.assertNotNull(tuple);
+        Map<String,RDFNode> solution = solutions.getResult();
+        Assert.assertNotNull(solution);
         counter++;
       }
 
@@ -106,5 +118,61 @@ public class TestSherpaClient {
       server.shutdown();
     }
 
+  }
+  
+  @Test
+  public void testData() {
+    NamedNodeImpl uri1 = new NamedNodeImpl(URI.create("http://example.org/foo"));
+    NamedNodeImpl uri2 = new NamedNodeImpl(URI.create("http://example.org/bar"));
+    TypedLiteralImpl lit1 = new TypedLiteralImpl("10", XsdTypes.INT);
+    TypedLiteralImpl lit2 = new TypedLiteralImpl("20", XsdTypes.INT);
+    List<List<Object>> data = toList(
+        new Object[][] {
+            new Object[] { iri(uri1), iri(uri2), toInt(lit1) },
+            new Object[] { iri(uri2), iri(uri1), toInt(lit2) }
+        });
+    
+    DummySherpaServer server = new DummySherpaServer(data);
+    try {
+      Solutions s = helpExecuteQuery(server, 5);
+      
+      Assert.assertTrue(s.next());
+      Map<String, RDFNode> solution = s.getResult();
+      Assert.assertEquals(3, solution.size());
+      Assert.assertEquals(uri1, solution.get("a"));
+      Assert.assertEquals(uri2, solution.get("b"));
+      Assert.assertEquals(lit1, solution.get("c"));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(uri2, s.getBinding("a"));
+      Assert.assertEquals(uri2, s.getNamedNode("a"));
+      Assert.assertEquals(uri1, s.getBinding("b"));
+      Assert.assertEquals(uri1.getURI(), s.getURI("b"));
+      Assert.assertEquals(lit2, s.getBinding("c"));      
+      Assert.assertEquals(lit2, s.getLiteral("c"));      
+      Assert.assertEquals(20, s.getInt("c"));
+      
+      Assert.assertFalse(s.next());
+    } finally {
+      server.shutdown();
+    }
+  }
+  
+  public static List<List<Object>> toList(Object[][] data) {
+    List<List<Object>> list = new ArrayList<List<Object>>(data.length);
+    for (Object[] row : data) {
+      list.add(Arrays.asList(row));
+    }
+    return list;
+  }
+  
+  public static IRI iri(NamedNode n) {
+    IRI i = new IRI();
+    i.iri = n.getURI().toString();
+    return i;
+  }
+  
+  public static Integer toInt(Literal l) {
+    return Integer.valueOf(l.getLexical());
   }
 }

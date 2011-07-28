@@ -19,28 +19,23 @@ package sherpa.client;
  * Represents a Solutions implementation.
  */
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import sherpa.client.QueryExecution;
 import sherpa.protocol.IRI;
 import spark.api.Solutions;
 import spark.api.exception.SparqlException;
-import spark.api.rdf.BlankNode;
-import spark.api.rdf.Literal;
-import spark.api.rdf.NamedNode;
 import spark.api.rdf.RDFNode;
 import spark.api.uris.XsdTypes;
-import spark.spi.BaseResults;
+import spark.spi.BaseSolutions;
 import spark.spi.rdf.NamedNodeImpl;
 import spark.spi.rdf.TypedLiteralImpl;
 
-public class SHPSolutions extends BaseResults implements Solutions {
+public class SHPSolutions extends BaseSolutions implements Solutions {
 
   private final QueryExecution query;
   
@@ -50,77 +45,26 @@ public class SHPSolutions extends BaseResults implements Solutions {
    * @param query
    */
   public SHPSolutions(SHPCommand command, QueryExecution query) {
-    super(command);
+    super(command, query.getVars());
+    if (vars == null) throw new IllegalStateException("SHPSolutions constructed with un-initialized QueryExecution");
     this.query = query;    
   }
 
   @Override
-  public RDFNode getBinding(String variable) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public BlankNode getBlankNode(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean getBoolean(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public Date getDateTime(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public double getDouble(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public float getFloat(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public int getInt(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public BigInteger getInteger(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Literal getLiteral(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public NamedNode getNamedNode(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public Map<String, RDFNode> getResult() {
-    // TODO Auto-generated method stub
+    List<Object> rowData = query.getRow();
+    if (rowData != null) {
+      if (rowData.size() != vars.size()) throw new IllegalStateException("Mis-matched variable and data list");
+      Map<String, RDFNode> result = new HashMap<String, RDFNode>();
+      for (int i = 0; i < vars.size(); i++) {
+        result.put(vars.get(i), toNode(rowData.get(i)));
+      }
+      return result;
+    }
     return null;
   }
 
-  private RDFNode toNode(Object value) {
+  private static RDFNode toNode(Object value) {
     if(value instanceof RDFNode) {
       return (RDFNode) value;
     } else if(value instanceof IRI) {
@@ -147,30 +91,6 @@ public class SHPSolutions extends BaseResults implements Solutions {
     } else {
       return null;
     }
-  }
-
-  @Override
-  public String getString(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public URI getURI(String variable) throws SparqlException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public List<String> getVariables() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean isBound(String variable) {
-    // TODO Auto-generated method stub
-    return false;
   }
 
   @Override
