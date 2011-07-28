@@ -115,7 +115,7 @@ public class SHPSolutions extends BaseResults implements Solutions {
   }
 
   @Override
-  public Map<String, RDFNode> getSolution() {
+  public Map<String, RDFNode> getResult() {
     // TODO Auto-generated method stub
     return null;
   }

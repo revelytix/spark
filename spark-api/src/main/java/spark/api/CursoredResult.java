@@ -17,7 +17,7 @@ package spark.api;
 
 /**
  * A result that provides a cursored view of a result set.  The cursor is 
- * traversed using {@link #next()}.  The cursor result can be retrieved with 
+ * traversed using {@link #next()}.  The cursor result index can be retrieved with 
  * {@link #getRow()} and is 1-based.  The instance is initialized at result 0,
  * before the first result.
  * @param <R> Each result is of type R
@@ -36,6 +36,13 @@ public interface CursoredResult <R> extends Result, Iterable<R> {
    * @return 1-based result index
    */
   int getRow();
+  
+  /**
+   * Gets the current result. Calling this method when the cursor is not on a valid row (i.e. before
+   * the first result or after the last result) yields unspecified results.
+   * @return The current result.
+   */
+  R getResult();
   
   /**
    * True when result is initialized and result index is at 0.  

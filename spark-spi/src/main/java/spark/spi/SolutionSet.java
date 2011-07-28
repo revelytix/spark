@@ -39,7 +39,7 @@ public class SolutionSet extends BaseSolutions implements Solutions {
   }
   
   @Override
-  public Map<String, RDFNode> getSolution() {
+  public Map<String, RDFNode> getResult() {
     return data.get(cursor);
   }
 

@@ -47,7 +47,7 @@ public abstract class BaseSolutions extends BaseResults implements Solutions {
 
   @Override
   public boolean isBound(String variable) {
-    return getSolution().get(variable) != null;
+    return getResult().get(variable) != null;
   }
 
   @Override
@@ -57,7 +57,7 @@ public abstract class BaseSolutions extends BaseResults implements Solutions {
 
   @Override
   public RDFNode getBinding(String variable) {
-    return getSolution().get(variable);
+    return getResult().get(variable);
   }
 
   @Override

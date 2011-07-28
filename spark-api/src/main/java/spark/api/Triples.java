@@ -27,7 +27,7 @@ import spark.api.rdf.Triple;
  * <p>For the current triple under the cursor, these generic methods 
  * can be used to inspect the solution:</p>
  * <ul>
- * <li>{@link #getTriple()} - return a Triple with SPO</li>
+ * <li>{@link #getResult()} - return a Triple with SPO</li>
  * <li>{@link #getSubject()} - just subject</li>
  * <li>{@link #getPredicate()} - just predicate</li>
  * <li>{@link #getObject()} - just object</li>
@@ -35,12 +35,6 @@ import spark.api.rdf.Triple;
  */
 public interface Triples extends CursoredResult<Triple> {
 
-  /**
-   * Get the triple at the cursor.
-   * @return Current triple
-   */
-  Triple getTriple();
-  
   /**
    * Get the subject for the triple at the cursor.
    * @return The subject

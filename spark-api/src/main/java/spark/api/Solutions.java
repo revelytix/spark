@@ -41,7 +41,7 @@ import spark.api.rdf.RDFNode;
  * <p>For the current solution under the cursor, these generic methods 
  * can be used to inspect the solution:</p>
  * <ul>
- * <li>{@link #getSolution()} - as map (unbound omitted)</li>
+ * <li>{@link #getResult()} - as map (unbound omitted)</li>
  * <li>{@link #getSolutionList()} - as list (unbound are null)</li>
  * <li>{@link #getBinding(String)} - get variable's value or null if unbound</li>
  * <li>{@link #isBound(String)} - check whether variable is bound in solution</li>
@@ -73,13 +73,6 @@ public interface Solutions extends CursoredResult<Map<String,RDFNode>> {
   List<String> getVariables();
   
   // Generic data access as map or node from the current solution
-  
-  /** 
-   * Get the current solution as a Map from variable name to value.
-   * Unbound variables will not be included.
-   * @return Map of variable to value for the current solution
-   */
-  Map<String, RDFNode> getSolution();
   
   /**
    * Get the current solution as a List of values in the same

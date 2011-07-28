@@ -37,7 +37,7 @@ public class SparqlQuery {
     System.out.println("vars = " + solutions.getVariables());
     int row = 0;
     while(solutions.next()) {
-      System.out.println("Row " + (row++) + ": " + solutions.getSolution());
+      System.out.println("Row " + (row++) + ": " + solutions.getResult());
     }
     solutions.close();
     query.close();

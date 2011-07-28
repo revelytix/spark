@@ -61,11 +61,11 @@ public class TestSolutionSet extends TestCase {
 		assertFalse(s.isBeforeFirst());
 		assertFalse(s.isAfterLast());
 		assertEquals(node1, s.getBinding("x"));
-		assertEquals(solution1, s.getSolution());
+		assertEquals(solution1, s.getResult());
 		assertEquals(Arrays.asList(new RDFNode[]{node1}), s.getSolutionList());
 		
 		s.next();
-		assertEquals(solution2, s.getSolution());
+		assertEquals(solution2, s.getResult());
 		assertFalse(s.isBeforeFirst());
 		assertFalse(s.isAfterLast());
 		
