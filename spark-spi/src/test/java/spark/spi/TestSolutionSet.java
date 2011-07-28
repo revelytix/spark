@@ -133,4 +133,28 @@ public class TestSolutionSet extends TestCase {
     assertFalse(s.next());
     assertTrue(s.isAfterLast());
 	}
+	
+	public void testIterator() {
+    // setup solutions
+    Map<String, RDFNode> solution1 = new HashMap<String, RDFNode>();
+    BlankNodeImpl node1 = new BlankNodeImpl("1");
+    solution1.put("x", node1);
+    Map<String, RDFNode> solution2 = new HashMap<String, RDFNode>();
+    solution2.put("x", new BlankNodeImpl("2"));
+    List<Map<String, RDFNode>> solutionList = new ArrayList<Map<String, RDFNode>>();
+    solutionList.add(solution1);
+    solutionList.add(solution2);
+        
+    // setup SolutionSet
+    SolutionSet s = new SolutionSet( null, 
+        Arrays.asList(new String[]{"x"}),
+        solutionList  );
+
+    // exercise iterator
+    List<Map<String,RDFNode>> resultList = new ArrayList<Map<String,RDFNode>>(solutionList.size());
+    for (Map<String,RDFNode> result : s) {
+      resultList.add(result);
+    }
+    assertEquals(solutionList, resultList);
+	}
 }

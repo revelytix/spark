@@ -15,10 +15,7 @@
  */
 package spark.spi;
 
-import java.math.BigInteger;
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,41 +23,26 @@ import java.util.Map;
 import spark.api.Command;
 import spark.api.Solutions;
 import spark.api.exception.SparqlException;
-import spark.api.rdf.BlankNode;
-import spark.api.rdf.Literal;
-import spark.api.rdf.NamedNode;
 import spark.api.rdf.RDFNode;
 
-public class SolutionSet extends BaseResults implements Solutions {
+public class SolutionSet extends BaseSolutions implements Solutions {
   
   private final List<Map<String,RDFNode>> data;
-  private final List<String> vars;
   
   private static final int BEFORE_FIRST = -1;
   private static final int FIRST = 0;
   private volatile int cursor = BEFORE_FIRST;
   
   public SolutionSet(Command command, List<String> vars, List<Map<String,RDFNode>> data) {
-    super(command);
-    this.vars = vars;
+    super(command, vars);
     this.data = data;
   }
   
-  @Override
-  public boolean isBound(String variable) {
-    return getSolution().get(variable) != null;
-  }
-
   @Override
   public Map<String, RDFNode> getSolution() {
     return data.get(cursor);
   }
 
-  @Override
-  public List<String> getVariables() {
-    return this.vars;
-  }
-  
   @Override
   public boolean isAfterLast() {
     return cursor >= data.size();
@@ -133,89 +115,6 @@ public class SolutionSet extends BaseResults implements Solutions {
       throw new SparqlException("remove not supported on Solutions");
     }
     
-  }
-  
-  @Override
-  public RDFNode getBinding(String variable) {
-    return getSolution().get(variable);
-  }
-
-  @Override
-  public NamedNode getNamedNode(String variable) throws SparqlException {
-    Object value = this.getBinding(variable);
-    if(value == null) {
-      return null;
-    } else if(value instanceof NamedNode) {
-      return (NamedNode) value; 
-    } else {
-      throw new SparqlException("Node for variable " + variable + " contains a " + value.getClass().getName() + ", not a NamedNode.");
-    }
-  }
-  
-  @Override
-  public URI getURI(String variable) throws SparqlException {
-    return getNamedNode(variable).getURI();
-  }
-
-  @Override
-  public BlankNode getBlankNode(String variable) throws SparqlException {
-    Object value = this.getBinding(variable);
-    if(value == null) {
-      return null;
-    } else if(value instanceof BlankNode) {
-      return (BlankNode) value; 
-    } else {
-      throw new SparqlException("Node for variable " + variable + " contains a " + value.getClass().getName() + ", not a BlankNode.");
-    }
-  }
-
-  @Override
-  public Literal getLiteral(String variable)
-      throws SparqlException {
-    Object value = this.getBinding(variable);
-    if(value == null) {
-      return null;
-    } else if(value instanceof Literal) {
-      return (Literal) value; 
-    } else {
-      throw new SparqlException("Node for variable " + variable + " contains a " + value.getClass().getName() + ", not a Literal.");
-    }
-  }
-
-  @Override
-  public Date getDateTime(String variable) throws SparqlException {
-    return Conversions.toDateTime(getLiteral(variable).getLexical());
-  }
-
-  @Override
-  public BigInteger getInteger(String variable) throws SparqlException {
-    return Conversions.toBigInteger(getLiteral(variable).getLexical());
-  }
-  
-  @Override
-  public boolean getBoolean(String variable)
-      throws SparqlException {
-    return Conversions.toBoolean(getLiteral(variable).getLexical());
-  }
-
-  @Override
-  public double getDouble(String variable) throws SparqlException {
-    return Conversions.toDouble(getLiteral(variable).getLexical());
-  }
-
-  @Override
-  public float getFloat(String variable) throws SparqlException {
-    return Conversions.toFloat(getLiteral(variable).getLexical());
-  }
-
-  @Override
-  public int getInt(String variable) throws SparqlException {
-    return Conversions.toInteger(getLiteral(variable).getLexical());
-  }
-
-  @Override
-  public String getString(String variable) throws SparqlException {
-    return getLiteral(variable).getLexical();
   }
 
 }
