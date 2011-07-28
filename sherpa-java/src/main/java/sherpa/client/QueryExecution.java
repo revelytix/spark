@@ -52,7 +52,7 @@ public class QueryExecution implements Iterable<List<Object>> {
 
   // Resources
   private final SherpaServer server;
-  private final Executor executor = Executors.newFixedThreadPool(1);
+  private final Executor executor = Executors.newFixedThreadPool(1, new ClientThreadFactory());
 
   // query metadata - doesn't change after the query starts
   private CharSequence queryId;
@@ -68,8 +68,6 @@ public class QueryExecution implements Iterable<List<Object>> {
 
   public QueryExecution(SherpaServer clientInterface) {
     this.server = clientInterface;
-
-    Executors.newFixedThreadPool(1, new ClientThreadFactory());
   }
 
   // don't do this at home, kids:
