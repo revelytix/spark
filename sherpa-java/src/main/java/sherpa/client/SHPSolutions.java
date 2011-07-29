@@ -96,11 +96,6 @@ public class SHPSolutions extends StreamingSolutions implements Solutions {
   }
   
   @Override
-  public boolean isAfterLast() {
-    return this.query.isAfterLast();
-  }
-
-  @Override
   public boolean isLast() {
     return this.query.isLast();
   }

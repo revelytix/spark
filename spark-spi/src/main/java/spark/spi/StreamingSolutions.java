@@ -70,7 +70,12 @@ public abstract class StreamingSolutions extends BaseSolutions implements Soluti
 
   @Override
   public boolean isFirst() {
-    return cursor == FIRST && !isAfterLast();
+    return cursor == FIRST && currentRow != null;
+  }
+
+  @Override
+  public boolean isAfterLast() {
+    return currentRow == null && cursor > BEFORE_FIRST;
   }
 
   @Override
