@@ -13,7 +13,7 @@ protocol SherpaServer {
   
   record PlainLiteral {
     string lexical;
-    string language;
+    union { string, null } language;
   }
   
   record TypedLiteral {
