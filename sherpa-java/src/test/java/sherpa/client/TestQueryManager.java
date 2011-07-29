@@ -69,7 +69,7 @@ public class TestQueryManager {
     Assert.assertEquals(expectedVars, vars);        
     Assert.assertEquals(0, mgr.getCursor());
     
-    // advance iterator
+    // advance iterator; this blocks until the first page of results is ready, so first data request is guaranteed to have happened
     Assert.assertTrue(mgr.incrementCursor());
     Assert.assertEquals(1, mgr.getCursor());
     
@@ -80,11 +80,13 @@ public class TestQueryManager {
 
     // cancel 
     mgr.cancel();
-    Assert.assertEquals("Message=cancel queryId=1 ", queryResponder.messages.get(queryResponder.messages.size()-1));
+    int cancelMsg = queryResponder.messages.indexOf("Message=cancel queryId=1 ");
+    Assert.assertTrue(cancelMsg > 1); // Should be at least 2 messages before cancel request (query request and first data request)
     
     // close 
     mgr.close();
-    Assert.assertEquals("Message=close queryId=1 ", queryResponder.messages.get(queryResponder.messages.size()-1));
+    int closeMsg = queryResponder.messages.indexOf("Message=close queryId=1 ");
+    Assert.assertTrue(closeMsg > cancelMsg); // Cancel and close are synchronous, so cancel must have happend after.
   }
   
   @Test
