@@ -24,13 +24,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import sherpa.protocol.BNode;
 import sherpa.protocol.IRI;
+import sherpa.protocol.PlainLiteral;
+import sherpa.protocol.TypedLiteral;
 import spark.api.Solutions;
-import spark.api.exception.SparqlException;
 import spark.api.rdf.RDFNode;
-import spark.api.uris.XsdTypes;
+import spark.spi.Conversions;
 import spark.spi.StreamingSolutions;
+import spark.spi.rdf.BlankNodeImpl;
 import spark.spi.rdf.NamedNodeImpl;
+import spark.spi.rdf.PlainLiteralImpl;
 import spark.spi.rdf.TypedLiteralImpl;
 
 public class SHPSolutions extends StreamingSolutions implements Solutions {
@@ -63,15 +67,31 @@ public class SHPSolutions extends StreamingSolutions implements Solutions {
     return null;
   }
 
+  /** Convert a protocol data object to an RDFNode. */
   private static RDFNode toNode(Object value) {
-    if(value instanceof RDFNode) {
+    if (value == null) {
+      return null;
+    } else if (value instanceof RDFNode) {
       return (RDFNode) value;
-    } else if(value instanceof IRI) {
+    } else if (value instanceof IRI) {
       return new NamedNodeImpl(URI.create(((IRI)value).iri.toString()));
-    } else if(value instanceof Integer) {
-      return new TypedLiteralImpl(""+value, XsdTypes.INT);
+    } else if (value instanceof PlainLiteral) {
+      PlainLiteral pl = (PlainLiteral)value;
+      String lang = pl.language != null ? pl.language.toString() : null;
+      return new PlainLiteralImpl(pl.lexical.toString(), lang);
+    } else if (value instanceof TypedLiteral) {
+      TypedLiteral tl = (TypedLiteral)value;
+      return new TypedLiteralImpl(tl.lexical.toString(), URI.create(tl.datatype.toString()));
+    } else if (value instanceof BNode) {
+      return new BlankNodeImpl(((BNode)value).label.toString());
     } else {
-      throw new SparqlException("Can't convert value to RDFNode. Type: " + value.getClass().getName());
+      // Sherpa passes strings as something other than java.lang.String, so convert.
+      if (value instanceof CharSequence) {
+        value = value.toString();
+      }
+      // What's left is a primitive Java type, convert it to an XSD-typed literal.
+      // Falls back to xsd:anySimpleType for unrecognized classes
+      return Conversions.toLiteral(value);
     }
   }
   

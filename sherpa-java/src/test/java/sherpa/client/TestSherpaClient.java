@@ -19,18 +19,23 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.avro.AvroRemoteException;
 import org.apache.avro.util.Utf8;
 import org.junit.Assert;
 import org.junit.Test;
 
+import sherpa.protocol.BNode;
 import sherpa.protocol.IRI;
+import sherpa.protocol.PlainLiteral;
 import sherpa.protocol.QueryRequest;
 import sherpa.protocol.QueryResponse;
+import sherpa.protocol.TypedLiteral;
 import sherpa.server.DummyQueryResponder;
 import sherpa.server.DummySherpaServer;
 import spark.api.Command;
@@ -42,8 +47,11 @@ import spark.api.rdf.Literal;
 import spark.api.rdf.NamedNode;
 import spark.api.rdf.RDFNode;
 import spark.api.uris.XsdTypes;
+import spark.spi.rdf.BlankNodeImpl;
 import spark.spi.rdf.NamedNodeImpl;
+import spark.spi.rdf.PlainLiteralImpl;
 import spark.spi.rdf.TypedLiteralImpl;
+import spark.spi.util.DateTime;
 
 
 public class TestSherpaClient {
@@ -239,6 +247,105 @@ public class TestSherpaClient {
   }
   
   @Test
+  public void testDatatypes() {
+    Date d = new Date();
+    NamedNodeImpl uri = new NamedNodeImpl(URI.create("http://example.org/foo"));
+    PlainLiteralImpl lit1 = new PlainLiteralImpl("bar");
+    PlainLiteralImpl lit2 = new PlainLiteralImpl("baz", "en");
+    TypedLiteralImpl lit3 = new TypedLiteralImpl(DateTime.format(d, TimeZone.getDefault()), XsdTypes.DATE_TIME);
+    TypedLiteralImpl aInt = new TypedLiteralImpl("20", XsdTypes.INT);
+    TypedLiteralImpl aLong = new TypedLiteralImpl("54687323427654", XsdTypes.LONG);
+    TypedLiteralImpl aBool = new TypedLiteralImpl("true", XsdTypes.BOOLEAN);
+    TypedLiteralImpl aFloat = new TypedLiteralImpl("3.14", XsdTypes.FLOAT);
+    TypedLiteralImpl aDouble = new TypedLiteralImpl("98.6", XsdTypes.DOUBLE);
+    TypedLiteralImpl aString = new TypedLiteralImpl("abcd", XsdTypes.STRING);
+    BlankNodeImpl bn = new BlankNodeImpl("node0");
+    
+    List<List<Object>> data = toList(
+        new Object[][] {
+            new Object[] { iri(uri) },
+            new Object[] { plainLit(lit1) },
+            new Object[] { plainLit(lit2) },
+            new Object[] { typedLit(lit3) },
+            new Object[] { Integer.valueOf(aInt.getLexical()) },
+            new Object[] { Long.valueOf(aLong.getLexical()) },
+            new Object[] { Boolean.valueOf(aBool.getLexical()) },
+            new Object[] { Float.valueOf(aFloat.getLexical()) },
+            new Object[] { Double.valueOf(aDouble.getLexical()) },
+            new Object[] { aString.getLexical() },
+            new Object[] { bNode(bn) },
+            new Object[] { null },
+        });
+    
+    DummySherpaServer server = new DummySherpaServer(data);
+    try {
+      Solutions s = helpExecuteQuery(server, 10);
+      String var = "a";
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(uri, s.getBinding(var));
+      Assert.assertEquals(uri.getURI(), s.getURI(var));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(lit1, s.getBinding(var));
+      Assert.assertEquals(lit1, s.getLiteral(var));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(lit2, s.getBinding(var));
+      Assert.assertEquals(lit2, s.getLiteral(var));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(lit3, s.getBinding(var));
+      Assert.assertEquals(lit3, s.getLiteral(var));
+      Assert.assertEquals(d, s.getDateTime(var));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(aInt, s.getBinding(var));
+      Assert.assertEquals(aInt, s.getLiteral(var));
+      Assert.assertEquals(20, s.getInt(var));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(aLong, s.getBinding(var));
+      Assert.assertEquals(aLong, s.getLiteral(var));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(aBool, s.getBinding(var));
+      Assert.assertEquals(aBool, s.getLiteral(var));
+      Assert.assertEquals(true, s.getBoolean(var));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(aFloat, s.getBinding(var));
+      Assert.assertEquals(aFloat, s.getLiteral(var));
+      Assert.assertTrue(Float.valueOf(aFloat.getLexical()).equals(s.getFloat(var)));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(aDouble, s.getBinding(var));
+      Assert.assertEquals(aDouble, s.getLiteral(var));
+      Assert.assertTrue(Double.valueOf(aDouble.getLexical()).equals(s.getDouble(var)));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(aString, s.getBinding(var));
+      Assert.assertEquals(aString, s.getLiteral(var));
+      Assert.assertEquals("abcd", s.getString(var));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertEquals(bn, s.getBinding(var));
+      Assert.assertEquals(bn, s.getBlankNode(var));
+      
+      Assert.assertTrue(s.next());
+      Assert.assertNull(s.getBinding(var));
+      Assert.assertFalse(s.isBound(var));
+      Assert.assertNull(s.getNamedNode(var));
+      Assert.assertNull(s.getLiteral(var));
+      Assert.assertNull(s.getBlankNode(var));
+      
+      Assert.assertFalse(s.next());
+    } finally {
+      server.shutdown();
+    }
+  }
+  
+  @Test
   public void testIterator() {
     helpTestIteratorNormal(0, 5);
     helpTestIteratorNormal(1, 5);
@@ -266,6 +373,26 @@ public class TestSherpaClient {
       list.add(Arrays.asList(row));
     }
     return list;
+  }
+  
+  public static PlainLiteral plainLit(PlainLiteralImpl l) {
+    PlainLiteral lit = new PlainLiteral();
+    lit.lexical = l.getLexical();
+    lit.language = l.getLanguage();
+    return lit;
+  }
+  
+  public static TypedLiteral typedLit(TypedLiteralImpl l) {
+    TypedLiteral lit = new TypedLiteral();
+    lit.lexical = l.getLexical();
+    lit.datatype = l.getDataType().toString();
+    return lit;
+  }
+  
+  public static BNode bNode(BlankNodeImpl n) {
+    BNode bn = new BNode();
+    bn.label = n.getLabel();
+    return bn;
   }
   
   public static IRI iri(NamedNode n) {
