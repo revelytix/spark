@@ -35,8 +35,8 @@ public abstract class StreamingSolutions extends BaseSolutions implements Soluti
   protected static final int BEFORE_FIRST = 0;
   protected static final int FIRST = 1;
   
-  private int cursor = BEFORE_FIRST;
-  private Map<String,RDFNode> currentRow = null;
+  protected int cursor = BEFORE_FIRST;
+  protected Map<String,RDFNode> currentRow = null;
   
   /**
    * @param command The command which created these solutions.
