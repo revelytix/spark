@@ -18,13 +18,13 @@ package spark.protocol;
 
 import java.util.Map;
 
+import junit.framework.Assert;
 import spark.api.Command;
 import spark.api.Connection;
 import spark.api.DataSource;
 import spark.api.Solutions;
 import spark.api.credentials.NoCredentials;
 import spark.api.rdf.RDFNode;
-import spark.protocol.ProtocolDataSource;
 
 public class SparqlQuery {
 
@@ -58,6 +58,17 @@ public class SparqlQuery {
     solutions.close();
     query.close();
     conn.close();
+  }
+  
+  static int iterateResults(Solutions s) {
+    int c = 0;
+    while (s.next()) {
+      c++;
+      Assert.assertNotNull(s.getBinding("s"));
+      Assert.assertNotNull(s.getBinding("p"));
+      Assert.assertNotNull(s.getBinding("o"));
+    }
+    return c;
   }
   
   public static void main(String arg[]) throws Exception {

@@ -62,6 +62,13 @@
       <version>${spark-version}</version>
     </dependency>
     <dependency>
+      <groupId>com.revelytix</groupId>
+      <artifactId>spark-spi</artifactId>
+      <version>${spark-version}</version>
+	  <type>test-jar</type>
+	  <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
       <version>${http-version}</version>
@@ -78,6 +85,24 @@
       <artifactId>httpmime</artifactId>
       <version>${http-version}</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+      <version>${http-version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>woodstox-core-asl</artifactId>
+      <version>4.1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.2</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

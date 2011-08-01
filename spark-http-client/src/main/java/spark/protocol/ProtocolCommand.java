@@ -21,7 +21,6 @@ import spark.api.Result;
 import spark.api.Solutions;
 import spark.api.exception.SparqlException;
 import spark.spi.BaseCommand;
-import spark.spi.SolutionSet;
 
 /**
  * A SPARQL API Command for executing commands to the SPARQL endpoint.
@@ -47,13 +46,12 @@ public class ProtocolCommand extends BaseCommand {
   @Override
   public Solutions executeQuery() {
     try {
-      XMLResultSetParser sparqlResult = SparqlCall.execute(((ProtocolDataSource)getConnection().getDataSource()).getUrl(), getCommand());
-      return new SolutionSet(this, sparqlResult.getVariables(), sparqlResult.getData());
+      return SparqlCall.execute(((ProtocolDataSource)getConnection().getDataSource()).getUrl(), this);
     } catch(IOException e) {
       throw new SparqlException(e);
     }
   }
-
+  
   @Override
   public void cancel() {
     // TODO Auto-generated method stub

@@ -18,6 +18,7 @@ package spark.protocol;
 import static org.apache.http.protocol.HTTP.UTF_8;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -48,9 +49,12 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
+import spark.api.Command;
+import spark.api.Solutions;
 import spark.api.exception.SparqlException;
+import spark.protocol.parser.XMLResults;
 
-class SparqlCall {
+public class SparqlCall {
 
   @SuppressWarnings("unused")
   private static final int INFORMATIONAL_MIN = 100;
@@ -142,15 +146,19 @@ class SparqlCall {
     }
   }
   
-  static XMLResultSetParser execute(URL url, String command) throws IOException {
-    HttpResponse response = executeInternal(url, command);
+  /** Execute the SELECT query specified by the given command against the given endpoint URL. */
+  public static Solutions execute(URL url, Command cmd) throws IOException {
+    HttpResponse response = executeInternal(url, cmd.getCommand());
     
     HttpEntity entity = response.getEntity();
     if (entity == null) throw new SparqlException("No data in response from server");
 
     // blindly assume the results are "application/sparql-results+xml"
-    return new XMLResultSetParser(entity.getContent());
+    return getSolution(cmd, entity.getContent());
   }
   
-  
+  /** Construct a solution from an input stream; broken into a separate method for easier testing. */
+  public static Solutions getSolution(Command cmd, InputStream input) throws SparqlException, IOException {
+    return (Solutions) XMLResults.createResults(cmd, input);
+  }
 }

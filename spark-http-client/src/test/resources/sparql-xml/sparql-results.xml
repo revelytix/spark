@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="a"/>
+  </head>
+  <results>
+    <result>
+      <binding name="a"><uri>http://example.org/a</uri></binding>
+    </result>
+    <result>
+      <binding name="a"><bnode>node0</bnode></binding>
+    </result>
+    <result>
+      <binding name="a"><literal>xyz</literal></binding>
+    </result>
+    <result>
+      <binding name="a"><literal datatype="http://www.w3.org/2001/XMLSchema#int">100</literal></binding>
+    </result>
+    <result>
+      <binding name="a"><literal xml:lang="fr">chat</literal></binding>
+    </result>
+  </results>
+</sparql>
