@@ -15,6 +15,12 @@
  */
 package spark.spi;
 
+import static spark.spi.TestCursor.AFTER_LAST;
+import static spark.spi.TestCursor.BEFORE_FIRST;
+import static spark.spi.TestCursor.FIRST;
+import static spark.spi.TestCursor.LAST;
+import static spark.spi.TestCursor.NONE;
+
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
@@ -54,23 +60,19 @@ public class TestSolutionSet extends TestCase {
 				Arrays.asList(new String[]{"x"}),
 				solutionList  );
 		
-		assertTrue(s.isBeforeFirst());
-		assertFalse(s.isAfterLast());
+    TestCursor.assertCursor(s, BEFORE_FIRST);
 		
-		s.next();
-		assertFalse(s.isBeforeFirst());
-		assertFalse(s.isAfterLast());
+		assertTrue(s.next());
+    TestCursor.assertCursor(s, FIRST);
 		assertEquals(node1, s.getBinding("x"));
 		assertEquals(solution1, s.getResult());
 		
-		s.next();
+    assertTrue(s.next());
 		assertEquals(solution2, s.getResult());
-		assertFalse(s.isBeforeFirst());
-		assertFalse(s.isAfterLast());
+    TestCursor.assertCursor(s, LAST);
 		
-		s.next();
-		assertFalse(s.isBeforeFirst());
-		assertTrue(s.isAfterLast());	
+    assertFalse(s.next());
+    TestCursor.assertCursor(s, AFTER_LAST);
 	}
 	
 	public void testDatatypes() {
@@ -95,42 +97,52 @@ public class TestSolutionSet extends TestCase {
     sl.get(8).put(var, new PlainLiteralImpl("42"));
     
     SolutionSet s = new SolutionSet(null, Arrays.asList("x"), sl);
-    assertTrue(s.isBeforeFirst());
+    TestCursor.assertCursor(s, BEFORE_FIRST);
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, FIRST);
     assertEquals(uriRef, s.getNamedNode(var));    
     assertEquals(uriRef.getURI(), s.getURI(var));    
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, NONE);
     assertEquals(bn, s.getBlankNode(var));    
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, NONE);
     assertEquals(lit, s.getLiteral(var));
     assertEquals("foo", s.getString(var));
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, NONE);
     assertEquals(A_DATE, s.getDateTime(var));    
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, NONE);
     assertEquals(new BigInteger("198765415975423167465132498465"), s.getInteger(var));    
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, NONE);
     assertEquals(true, s.getBoolean(var));    
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, NONE);
     assertEquals(3.14d, s.getDouble(var));    
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, NONE);
     assertEquals(98.6f, s.getFloat(var));    
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, NONE);
     assertEquals(42, s.getInt(var));    
     
     assertTrue(s.next());
+    TestCursor.assertCursor(s, LAST);
     assertNull(s.getBinding(var));
     
     assertFalse(s.next());
-    assertTrue(s.isAfterLast());
+    TestCursor.assertCursor(s, AFTER_LAST);
 	}
 	
 	public void testIterator() {

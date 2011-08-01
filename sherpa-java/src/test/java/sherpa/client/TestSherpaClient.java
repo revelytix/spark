@@ -15,6 +15,12 @@
  */
 package sherpa.client;
 
+import static spark.spi.TestCursor.AFTER_LAST;
+import static spark.spi.TestCursor.BEFORE_FIRST;
+import static spark.spi.TestCursor.FIRST;
+import static spark.spi.TestCursor.LAST;
+import static spark.spi.TestCursor.NONE;
+
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
@@ -47,6 +53,7 @@ import spark.api.rdf.Literal;
 import spark.api.rdf.NamedNode;
 import spark.api.rdf.RDFNode;
 import spark.api.uris.XsdTypes;
+import spark.spi.TestCursor;
 import spark.spi.rdf.BlankNodeImpl;
 import spark.spi.rdf.NamedNodeImpl;
 import spark.spi.rdf.PlainLiteralImpl;
@@ -73,26 +80,18 @@ public class TestSherpaClient {
     try {
       Solutions solutions = helpExecuteQuery(server, batchSize);
 
-      Assert.assertTrue(solutions.isBeforeFirst());
-      Assert.assertFalse(solutions.isFirst());
-      Assert.assertFalse(solutions.isLast());
-      Assert.assertFalse(solutions.isAfterLast());
+      TestCursor.assertCursor(solutions, BEFORE_FIRST);
       
       int counter = 0;
       while (solutions.next()) {
         Map<String,RDFNode> solution = solutions.getResult();
         Assert.assertNotNull(solution);
         Assert.assertEquals(++counter, solutions.getRow());
-        Assert.assertFalse(solutions.isBeforeFirst());
-        Assert.assertEquals(counter == 1, solutions.isFirst());
-        Assert.assertEquals(counter == resultRows, solutions.isLast());
-        Assert.assertFalse(solutions.isAfterLast());
+        int state = ((counter == 1) ? FIRST : NONE) | ((counter == resultRows) ? LAST : NONE);
+        TestCursor.assertCursor(solutions, state);
       }
 
-      Assert.assertFalse(solutions.isBeforeFirst());
-      Assert.assertFalse(solutions.isFirst());
-      Assert.assertFalse(solutions.isLast());
-      Assert.assertTrue(solutions.isAfterLast());
+      TestCursor.assertCursor(solutions, AFTER_LAST);
       
       System.out.println("Read " + counter + " rows");
       Assert.assertEquals(resultRows, counter);

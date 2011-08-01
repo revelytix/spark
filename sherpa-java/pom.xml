@@ -72,6 +72,13 @@
       <version>${spark-version}</version>
     </dependency>
     <dependency>
+      <groupId>com.revelytix</groupId>
+      <artifactId>spark-spi</artifactId>
+      <version>${spark-version}</version>
+	  <type>test-jar</type>
+	  <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.6.1</version>
