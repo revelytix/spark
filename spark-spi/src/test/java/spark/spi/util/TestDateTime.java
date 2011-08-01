@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Revelytix, Inc.  All rights reserved.
+ * Copyright 2011 Revelytix, Inc.  All rights reserved.
  */
 package spark.spi.util;
 
