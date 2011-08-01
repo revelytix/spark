@@ -16,6 +16,8 @@
 package spark.spi;
 
 import junit.framework.Assert;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import spark.api.CursoredResult;
 
 /**
@@ -26,6 +28,11 @@ import spark.api.CursoredResult;
  */
 public class TestCursor {
 
+  /** Return an empty test suite so JUnit doesn't complain. */
+  public static Test suite() {
+    return new TestSuite();
+  }
+  
   /** State when none of <tt>isBeforeFirst</tt>, <tt>isFirst</tt>, <tt>isLast</tt>, or <tt>isAfterLast</tt> is true. */
   public static final int NONE = 0;
   
