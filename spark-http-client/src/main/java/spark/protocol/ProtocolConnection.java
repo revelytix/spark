@@ -15,6 +15,8 @@
  */
 package spark.protocol;
 
+import org.apache.http.client.HttpClient;
+
 import spark.api.Connection;
 import spark.api.Credentials;
 import spark.api.ServiceDescription;
@@ -25,8 +27,13 @@ import spark.spi.BaseConnection;
  */
 public class ProtocolConnection extends BaseConnection implements Connection {
 
-  ProtocolConnection(ProtocolDataSource dataSource, Credentials creds) {
+  /** The HTTP client which is shared by all connections originating from the parent data source. */
+  private final HttpClient httpClient;
+  
+  ProtocolConnection(ProtocolDataSource dataSource, HttpClient httpClient, Credentials creds) {
     super(dataSource);
+    if (httpClient == null) throw new IllegalArgumentException("Missing HTTP client.");
+    this.httpClient = httpClient;
     // TODO: something with creds
   }
   
@@ -41,4 +48,7 @@ public class ProtocolConnection extends BaseConnection implements Connection {
     return null;
   }
 
+  HttpClient getHttpClient() {
+    return httpClient;
+  }
 }

@@ -25,7 +25,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
@@ -33,20 +32,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.params.ConnPerRouteBean;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 import spark.api.Command;
@@ -74,6 +62,7 @@ public class SparqlCall {
   /** The maximum length of a GET request */
   private static final int QUERY_LIMIT = 1024;
 
+  /** URL-encode a string as UTF-8, catching any thrown UnsupportedEncodingException. */
   private static final String encode(String s) {
     try {
       return URLEncoder.encode(s, UTF_8);
@@ -82,32 +71,24 @@ public class SparqlCall {
     }
   }
   
-  private static HttpResponse executeInternal(URL url, String query) {
-    HttpParams defParams = new BasicHttpParams();
-    ConnManagerParams.setMaxTotalConnections(defParams, 200);
-    ConnPerRouteBean connPerRoute = new ConnPerRouteBean(20);
-
-    int port = url.getPort();
-    if (port == -1) port = url.getDefaultPort();
-    HttpHost host = new HttpHost(url.getHost(), port);
-
-    connPerRoute.setMaxForRoute(new HttpRoute(host), 50);
-    ConnManagerParams.setMaxConnectionsPerRoute(defParams, connPerRoute);
-    SchemeRegistry schemeRegistry = new SchemeRegistry();
-    schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-    schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-    ClientConnectionManager conManager =  new ThreadSafeClientConnManager(defParams, schemeRegistry);
-
-    HttpParams httpParams = new BasicHttpParams();
-    httpParams.setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
-    httpParams.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000);
-    
-    HttpClient client = new DefaultHttpClient(conManager, httpParams);
-    
+  private final HttpClient client;
+  private final Command command;
+  private final URL url;
+  
+  SparqlCall(HttpClient client, Command command, URL url) {
+    if (client == null) throw new IllegalArgumentException("Null client");
+    if (command == null) throw new IllegalArgumentException("Null command");
+    if (url == null) throw new IllegalArgumentException("Null URL");
+    this.client = client;
+    this.command = command;
+    this.url = url;
+  }
+  
+  private HttpResponse executeInternal() {
     HttpUriRequest req;
 
     try {
-      String params = "query=" + encode(query);
+      String params = "query=" + encode(command.getCommand());
       String u = url.toString() + "?" + params;
       if (u.length() > QUERY_LIMIT) {
         // POST connection
@@ -123,6 +104,12 @@ public class SparqlCall {
         req = new HttpGet(u);
       }
 
+      if (command.getTimeout() != Command.NO_TIMEOUT) {
+        HttpParams reqParams = new BasicHttpParams();
+        HttpConnectionParams.setSoTimeout(reqParams, (int) (command.getTimeout() * 1000));
+        req.setParams(reqParams);
+      }
+      
       HttpResponse response = client.execute(req);
       StatusLine status = response.getStatusLine();
       int code = status.getStatusCode();
@@ -147,14 +134,14 @@ public class SparqlCall {
   }
   
   /** Execute the SELECT query specified by the given command against the given endpoint URL. */
-  public static Solutions execute(URL url, Command cmd) throws IOException {
-    HttpResponse response = executeInternal(url, cmd.getCommand());
+  public Solutions execute() throws IOException {
+    HttpResponse response = executeInternal();
     
     HttpEntity entity = response.getEntity();
     if (entity == null) throw new SparqlException("No data in response from server");
 
     // blindly assume the results are "application/sparql-results+xml"
-    return getSolution(cmd, entity.getContent());
+    return getSolution(command, entity.getContent());
   }
   
   /** Construct a solution from an input stream; broken into a separate method for easier testing. */

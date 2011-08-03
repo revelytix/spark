@@ -16,9 +16,13 @@
 package spark.protocol;
 
 import java.io.IOException;
+import java.net.URL;
+
+import org.apache.http.client.HttpClient;
 
 import spark.api.Result;
 import spark.api.Solutions;
+import spark.api.Triples;
 import spark.api.exception.SparqlException;
 import spark.spi.BaseCommand;
 
@@ -26,6 +30,22 @@ import spark.spi.BaseCommand;
  * A SPARQL API Command for executing commands to the SPARQL endpoint.
  */
 public class ProtocolCommand extends BaseCommand {
+  
+  public enum ResultType {
+    SELECT(Solutions.class),
+    ASK(Result.class), // TODO change this when a BooleanResult is added.
+    GRAPH(Triples.class);
+    
+    private final Class<? extends Result> resultClass;
+    private ResultType(Class<? extends Result> resultClass) {
+      this.resultClass = resultClass;
+    }
+    
+    /** Gets the {@link Result} interface expected for results of this type. */
+    public Class<? extends Result> getResultClass() {
+      return resultClass;
+    }
+  }
   
   ProtocolCommand(ProtocolConnection connection, String command) {
     super(connection, command);
@@ -44,17 +64,23 @@ public class ProtocolCommand extends BaseCommand {
   }
 
   @Override
-  public Solutions executeQuery() {
-    try {
-      return SparqlCall.execute(((ProtocolDataSource)getConnection().getDataSource()).getUrl(), this);
-    } catch(IOException e) {
-      throw new SparqlException(e);
-    }
+  public Solutions executeQuery() throws SparqlException {
+    return (Solutions)execute(ResultType.SELECT);
   }
   
   @Override
   public void cancel() {
     // TODO Auto-generated method stub
 
+  }
+  
+  private Result execute(ResultType cmdType) throws SparqlException {
+    HttpClient client = ((ProtocolConnection)getConnection()).getHttpClient();
+    URL url = ((ProtocolDataSource)getConnection().getDataSource()).getUrl();
+    try {
+      return new SparqlCall(client, this, url).execute();
+    } catch (IOException e) {
+      throw new SparqlException("Error executing SPARQL protocol request", e);
+    }
   }
 }
