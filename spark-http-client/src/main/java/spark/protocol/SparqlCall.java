@@ -46,6 +46,7 @@ import spark.api.exception.SparqlException;
  */
 public class SparqlCall {
 
+  // HTTP response codes.
   private static final int SUCCESS_MIN = 200;
   private static final int SUCCESS_MAX = 299;
   @SuppressWarnings("unused")
@@ -56,6 +57,15 @@ public class SparqlCall {
   /** The maximum length of a GET request */
   private static final int QUERY_LIMIT = 1024;
 
+  /** Method name for HTTP POST. */
+  private static final String POST = "POST";
+  /** Accept header for content negotiation. */
+  private static final String ACCEPT = "Accept";
+  /** Content-Type header for content negotiation. */
+  private static final String CONTENT_TYPE = "Content-Type";
+  /** Content-Type value to use for URL-encoded query params included in the POST request body. */
+  private static final String FORM_ENCODED = "application/x-www-form-urlencoded";
+  
   /** URL-encode a string as UTF-8, catching any thrown UnsupportedEncodingException. */
   private static final String encode(String s) {
     try {
@@ -70,7 +80,7 @@ public class SparqlCall {
    * @param command The SPARQL protocol command.
    * @return The HTTP response.
    */
-  static HttpResponse executeRequest(ProtocolCommand command) {
+  static HttpResponse executeRequest(ProtocolCommand command, String mimeType) {
     HttpClient client = ((ProtocolConnection)command.getConnection()).getHttpClient();
     URL url = ((ProtocolDataSource)command.getConnection().getDataSource()).getUrl();
     HttpUriRequest req;
@@ -97,7 +107,8 @@ public class SparqlCall {
         req.setParams(reqParams);
       }
       
-      // TODO set content type.
+      // Add Accept and Content-Type (for POST'ed queries) headers to the request.
+      addHeaders(req, mimeType);
       
       HttpResponse response = client.execute(req);
       StatusLine status = response.getStatusLine();
@@ -120,4 +131,14 @@ public class SparqlCall {
     }
   }
   
+  /**
+   * Add headers to a request.
+   * @param req The request to set the headers on.
+   */
+  static void addHeaders(HttpUriRequest req, String mimeType) {
+    if (POST.equalsIgnoreCase(req.getMethod())) {
+      req.addHeader(CONTENT_TYPE, FORM_ENCODED);
+    }
+    if (mimeType != null) req.setHeader(ACCEPT, mimeType);
+  }
 }

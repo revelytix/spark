@@ -29,9 +29,13 @@ import spark.spi.BaseCommand;
  */
 public class ProtocolCommand extends BaseCommand {
   
+  /** Enumeration of possible query result types. */
   public enum ResultType {
+    /** SPARQL SELECT query results. */
     SELECT(Solutions.class),
+    /** SPARQL ASK query results. */
     ASK(Result.class), // TODO change this when a BooleanResult is added.
+    /** SPARQL DESCRIBE or CONSTRUCT query results (both return graphs). */
     GRAPH(Triples.class);
     
     private final Class<? extends Result> resultClass;
@@ -45,10 +49,27 @@ public class ProtocolCommand extends BaseCommand {
     }
   }
   
+  /** Media content type for content negotiation. */
+  private String contentType = null;
+  
+  /** Create a SPARQL protcol command to execute over the given connection. */
   ProtocolCommand(ProtocolConnection connection, String command) {
     super(connection, command);
   }
   
+  /** @return the media content type to specify when doing content negotiation for this request. */
+  public String getContentType() {
+    return contentType;
+  }
+
+  /**
+   * Sets the media content type to use when doing content negotiation for this request.
+   * @param contentType The MIME content type.
+   */
+  public void setContentType(String contentType) {
+    this.contentType = contentType;
+  }
+
   @Override
   public Result execute() {
     return execute(null);
@@ -73,7 +94,34 @@ public class ProtocolCommand extends BaseCommand {
   
   /** Executes the request, and parses the response. */
   private Result execute(ResultType cmdType) throws SparqlException {
-    HttpResponse response = SparqlCall.executeRequest(this);
+    String mimeType = contentType;
+    
+    // Validate the user-supplied MIME type.
+    if (mimeType != null && !ResultFactory.supports(mimeType, cmdType)) {
+      System.out.println("Requested MIME content type '" + mimeType + 
+          "' does not support expected response type: " + cmdType);
+      mimeType = null;
+    }
+    
+    // Get the default MIME type to request
+    if (mimeType == null) {
+      mimeType = ResultFactory.getDefaultMediaType(cmdType);
+    }
+    
+    StringBuilder sb = new StringBuilder("Executing SPARQL protocol request ");
+    if (mimeType != null) {
+      sb.append("for content type '").append(mimeType).append("' ");
+    } else {
+      sb.append("for unknown content type ");
+    }
+    if (cmdType != null) {
+      sb.append("with expected results of type ").append(cmdType).append(".");
+    } else {
+      sb.append("with unknown expected result type.");
+    }
+    System.out.println(sb.toString());
+    
+    HttpResponse response = SparqlCall.executeRequest(this, mimeType);
     return ResultFactory.getResult(this, response, cmdType);
   }
 }
