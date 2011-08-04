@@ -28,7 +28,6 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 import spark.api.Solutions;
 import spark.api.uris.XsdTypes;
-import spark.protocol.SparqlCall;
 import spark.spi.TestCursor;
 import spark.spi.rdf.BlankNodeImpl;
 import spark.spi.rdf.NamedNodeImpl;
@@ -48,7 +47,7 @@ public class TestXMLSelectResults extends TestCase {
   
   private static Solutions getTestData(String testName) throws Exception {
     String fn = TEST_DIR + testName + FILE_EXT;
-    return SparqlCall.getSolution(null, new FileInputStream(fn));
+    return (Solutions) XMLResultsParser.createResults(null, new FileInputStream(fn), null);
   }
   
   public void testEmptyResults() throws Exception {

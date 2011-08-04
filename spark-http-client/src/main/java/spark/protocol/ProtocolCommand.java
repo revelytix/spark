@@ -15,15 +15,13 @@
  */
 package spark.protocol;
 
-import java.io.IOException;
-import java.net.URL;
-
-import org.apache.http.client.HttpClient;
+import org.apache.http.HttpResponse;
 
 import spark.api.Result;
 import spark.api.Solutions;
 import spark.api.Triples;
 import spark.api.exception.SparqlException;
+import spark.protocol.parser.ResultFactory;
 import spark.spi.BaseCommand;
 
 /**
@@ -73,13 +71,9 @@ public class ProtocolCommand extends BaseCommand {
 
   }
   
+  /** Executes the request, and parses the response. */
   private Result execute(ResultType cmdType) throws SparqlException {
-    HttpClient client = ((ProtocolConnection)getConnection()).getHttpClient();
-    URL url = ((ProtocolDataSource)getConnection().getDataSource()).getUrl();
-    try {
-      return new SparqlCall(client, this, url).execute();
-    } catch (IOException e) {
-      throw new SparqlException("Error executing SPARQL protocol request", e);
-    }
+    HttpResponse response = SparqlCall.executeRequest(this);
+    return ResultFactory.getResult(this, response, cmdType);
   }
 }

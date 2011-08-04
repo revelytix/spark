@@ -123,6 +123,16 @@ public class ResultFactory {
   }
   
   /**
+   * Gets the default content type to use when sending a query request with the given expected result type.
+   * @param expectedType The expected result type, or null if none is specified.
+   * @return The default MIME content type to use for the given result type.
+   */
+  public static String getDefaultMediaType(ResultType expectedType) {
+    ResponseFormat format = (expectedType != null) ? defaultTypeFormats.get(expectedType) : DEFAULT_FORMAT;
+    return format.mimeText;
+  }
+  
+  /**
    * Find a parser to handle the protocol response body based on the content type found in the response
    * and the expected result type specified by the user; if one or both fields is missing then
    * attempts to choose a sensible default.
@@ -175,7 +185,7 @@ public class ResultFactory {
    * @throws SparqlException If the response from the server could not be parsed, or could not be
    *         converted to the expected result type.
    */
-  public Result getResult(Command cmd, HttpResponse response, ResultType expectedType) throws SparqlException {
+  public static Result getResult(Command cmd, HttpResponse response, ResultType expectedType) throws SparqlException {
     HttpEntity entity = response.getEntity();
     if (entity == null) throw new SparqlException("No data in response from server");
     

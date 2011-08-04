@@ -18,7 +18,6 @@ package spark.protocol;
 import static org.apache.http.protocol.HTTP.UTF_8;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -38,27 +37,21 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 import spark.api.Command;
-import spark.api.Solutions;
 import spark.api.exception.SparqlException;
-import spark.protocol.ProtocolCommand.ResultType;
-import spark.protocol.parser.XMLResultsParser;
 
+/**
+ * This class provides a single method for executing a SPARQL HTTP query request and returning the
+ * server response. It is called by ProtocolCommand, and the primary purpose for having this as a
+ * separate class is to isolate the code which uses the Apache HTTP client in one place.
+ */
 public class SparqlCall {
 
-  @SuppressWarnings("unused")
-  private static final int INFORMATIONAL_MIN = 100;
-  @SuppressWarnings("unused")
-  private static final int INFORMATIONAL_MAX = 199;
   private static final int SUCCESS_MIN = 200;
   private static final int SUCCESS_MAX = 299;
   @SuppressWarnings("unused")
   private static final int REDIRECT_MIN = 300;
   @SuppressWarnings("unused")
   private static final int REDIRECT_MAX = 399;
-  private static final int CLIENT_ERROR_MIN = 400;
-  private static final int CLIENT_ERROR_MAX = 499;
-  private static final int SERVER_ERROR_MIN = 500;
-  private static final int SERVER_ERROR_MAX = 599;
 
   /** The maximum length of a GET request */
   private static final int QUERY_LIMIT = 1024;
@@ -72,20 +65,14 @@ public class SparqlCall {
     }
   }
   
-  private final HttpClient client;
-  private final Command command;
-  private final URL url;
-  
-  SparqlCall(HttpClient client, Command command, URL url) {
-    if (client == null) throw new IllegalArgumentException("Null client");
-    if (command == null) throw new IllegalArgumentException("Null command");
-    if (url == null) throw new IllegalArgumentException("Null URL");
-    this.client = client;
-    this.command = command;
-    this.url = url;
-  }
-  
-  private HttpResponse executeInternal() {
+  /**
+   * Executes a SPARQL HTTP protocol request for the given command, and returns the response.
+   * @param command The SPARQL protocol command.
+   * @return The HTTP response.
+   */
+  static HttpResponse executeRequest(ProtocolCommand command) {
+    HttpClient client = ((ProtocolConnection)command.getConnection()).getHttpClient();
+    URL url = ((ProtocolDataSource)command.getConnection().getDataSource()).getUrl();
     HttpUriRequest req;
 
     try {
@@ -96,8 +83,7 @@ public class SparqlCall {
         try {
           req = new HttpPost(url.toURI());
         } catch (URISyntaxException e) {
-          throw new SparqlException("Endpoint <" + url
-              + "> not in an acceptable format", e);
+          throw new SparqlException("Endpoint <" + url + "> not in an acceptable format", e);
         }
         ((HttpPost) req).setEntity((HttpEntity) new StringEntity(params));
       } else {
@@ -111,19 +97,19 @@ public class SparqlCall {
         req.setParams(reqParams);
       }
       
+      // TODO set content type.
+      
       HttpResponse response = client.execute(req);
       StatusLine status = response.getStatusLine();
       int code = status.getStatusCode();
+      
+      // TODO the client doesn't handle redirects for posts; should we do that here?
 
       if (code >= SUCCESS_MIN && code <= SUCCESS_MAX) {
         return response;
-
-      } else if (code >= CLIENT_ERROR_MIN && code >= CLIENT_ERROR_MAX) {
-        throw new SparqlException(status.getReasonPhrase() + code);
-      } else if (code >= SERVER_ERROR_MIN && code >= SERVER_ERROR_MAX) {
-        throw new SparqlException(status.getReasonPhrase() + code);
       } else {
-        throw new SparqlException(status.getReasonPhrase() + code);
+        throw new SparqlException("Unexpected status code in server response: " +
+            status.getReasonPhrase() + "(" + code + ")");
       }
     } catch (UnsupportedEncodingException e) {
       throw new SparqlException("Unabled to encode data", e);
@@ -134,19 +120,4 @@ public class SparqlCall {
     }
   }
   
-  /** Execute the SELECT query specified by the given command against the given endpoint URL. */
-  public Solutions execute() throws IOException {
-    HttpResponse response = executeInternal();
-    
-    HttpEntity entity = response.getEntity();
-    if (entity == null) throw new SparqlException("No data in response from server");
-
-    // blindly assume the results are "application/sparql-results+xml"
-    return getSolution(command, entity.getContent());
-  }
-  
-  /** Construct a solution from an input stream; broken into a separate method for easier testing. */
-  public static Solutions getSolution(Command cmd, InputStream input) throws SparqlException, IOException {
-    return (Solutions) XMLResultsParser.createResults(cmd, input, ResultType.SELECT);
-  }
 }
