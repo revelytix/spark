@@ -39,6 +39,7 @@ import spark.api.Command;
 import spark.api.Solutions;
 import spark.api.exception.SparqlException;
 import spark.api.rdf.RDFNode;
+import spark.protocol.ProtocolCommand;
 import spark.protocol.parser.XMLResultsParser.Element;
 import spark.spi.StreamingSolutions;
 import spark.spi.rdf.BlankNodeImpl;
@@ -101,6 +102,12 @@ public class XMLSelectResults extends StreamingSolutions implements Solutions {
       reader.close();
     } catch (XMLStreamException e) {
       throw new SparqlException("Error closing stream", e);
+    } finally {
+      Command c = getCommand();
+      // Need this check because command can be null when testing the parser...
+      if (c != null && c instanceof ProtocolCommand) {
+        ((ProtocolCommand)c).release();
+      }
     }
   }
 

@@ -15,7 +15,11 @@
  */
 package spark.protocol;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
 
 import spark.api.Result;
 import spark.api.Solutions;
@@ -48,6 +52,12 @@ public class ProtocolCommand extends BaseCommand {
       return resultClass;
     }
   }
+  
+  /** Lock to protecte the request being executed. */
+  private final Lock requestLock = new ReentrantLock();
+  
+  /** The request being executed for this command. */
+  private HttpUriRequest request = null;
   
   /** Media content type for content negotiation. */
   private String contentType = null;
@@ -88,8 +98,35 @@ public class ProtocolCommand extends BaseCommand {
   
   @Override
   public void cancel() {
-    // TODO Auto-generated method stub
-
+    requestLock.lock();
+    try {
+      if (request != null) request.abort();
+    } finally {
+      requestLock.unlock();
+    }
+  }
+  
+  /** Releases the currently executing request, freeing this command to be re-executed if desired. */
+  public void release() {
+    requestLock.lock();
+    try {
+      this.request = null;
+    } finally {
+      requestLock.unlock();
+    }
+  }
+  
+  /** Sets the currently executing request. */
+  void setRequest(HttpUriRequest request) {
+    requestLock.lock();
+    try {
+      if (this.request != null) {
+        throw new SparqlException("Command is already executing a request.");
+      }
+      this.request = request;
+    } finally {
+      requestLock.unlock();
+    }
   }
   
   /** Executes the request, and parses the response. */
@@ -121,7 +158,12 @@ public class ProtocolCommand extends BaseCommand {
     }
     System.out.println(sb.toString());
     
-    HttpResponse response = SparqlCall.executeRequest(this, mimeType);
-    return ResultFactory.getResult(this, response, cmdType);
+    try {
+      HttpResponse response = SparqlCall.executeRequest(this, mimeType);
+      return ResultFactory.getResult(this, response, cmdType);
+    } catch (Throwable t) {
+      release();
+      throw SparqlException.convert("Error creating SPARQL result from server response", t);
+    }
   }
 }

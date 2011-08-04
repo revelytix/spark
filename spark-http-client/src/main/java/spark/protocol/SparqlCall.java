@@ -110,6 +110,9 @@ public class SparqlCall {
       // Add Accept and Content-Type (for POST'ed queries) headers to the request.
       addHeaders(req, mimeType);
       
+      // There's a small chance the request could be aborted before it's even executed, we'll have to live with that.
+      command.setRequest(req);
+      
       HttpResponse response = client.execute(req);
       StatusLine status = response.getStatusLine();
       int code = status.getStatusCode();
