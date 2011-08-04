@@ -40,7 +40,7 @@ import org.apache.http.params.HttpParams;
 import spark.api.Command;
 import spark.api.Solutions;
 import spark.api.exception.SparqlException;
-import spark.protocol.parser.XMLResults;
+import spark.protocol.parser.XMLResultsParser;
 
 public class SparqlCall {
 
@@ -146,6 +146,6 @@ public class SparqlCall {
   
   /** Construct a solution from an input stream; broken into a separate method for easier testing. */
   public static Solutions getSolution(Command cmd, InputStream input) throws SparqlException, IOException {
-    return (Solutions) XMLResults.createResults(cmd, input);
+    return (Solutions) XMLResultsParser.createResults(cmd, input);
   }
 }

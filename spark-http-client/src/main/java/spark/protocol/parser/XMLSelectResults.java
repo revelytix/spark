@@ -19,10 +19,10 @@ import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
 import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
-import static spark.protocol.parser.XMLResults.Element.BINDING;
-import static spark.protocol.parser.XMLResults.Element.RESULT;
-import static spark.protocol.parser.XMLResults.Element.RESULTS;
-import static spark.protocol.parser.XMLResults.Element.SPARQL;
+import static spark.protocol.parser.XMLResultsParser.Element.BINDING;
+import static spark.protocol.parser.XMLResultsParser.Element.RESULT;
+import static spark.protocol.parser.XMLResultsParser.Element.RESULTS;
+import static spark.protocol.parser.XMLResultsParser.Element.SPARQL;
 
 import java.io.IOException;
 import java.net.URI;
@@ -39,7 +39,7 @@ import spark.api.Command;
 import spark.api.Solutions;
 import spark.api.exception.SparqlException;
 import spark.api.rdf.RDFNode;
-import spark.protocol.parser.XMLResults.Element;
+import spark.protocol.parser.XMLResultsParser.Element;
 import spark.spi.StreamingSolutions;
 import spark.spi.rdf.BlankNodeImpl;
 import spark.spi.rdf.NamedNodeImpl;
@@ -220,7 +220,7 @@ public class XMLSelectResults extends StreamingSolutions implements Solutions {
    * @throws SparqlException Thrown if the type is not a START_ELEMENT or the name is not the required name.
    */
   protected final void testOpen(int type, Element elt, String message) throws SparqlException {
-    XMLResults.testOpen(reader, type, elt, message);
+    XMLResultsParser.testOpen(reader, type, elt, message);
   }
 
   /**
@@ -231,7 +231,7 @@ public class XMLSelectResults extends StreamingSolutions implements Solutions {
    * @throws SparqlException Thrown if the type is not an END_ELEMENT or the name is not the required name.
    */
   protected final void testClose(int type, Element elt, String message) throws SparqlException {
-    XMLResults.testClose(reader, type, elt, message);
+    XMLResultsParser.testClose(reader, type, elt, message);
   }
 
   /**
@@ -240,7 +240,7 @@ public class XMLSelectResults extends StreamingSolutions implements Solutions {
    * @return <code>true</code> iff the current local name is the same as the element name.
    */
   protected final boolean nameIs(Element elt) {
-    return XMLResults.nameIs(reader, elt);
+    return XMLResultsParser.nameIs(reader, elt);
   }
 
 }

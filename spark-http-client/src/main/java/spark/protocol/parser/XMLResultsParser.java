@@ -17,11 +17,11 @@ package spark.protocol.parser;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
-import static spark.protocol.parser.XMLResults.Element.HEAD;
-import static spark.protocol.parser.XMLResults.Element.LINK;
-import static spark.protocol.parser.XMLResults.Element.RESULTS;
-import static spark.protocol.parser.XMLResults.Element.SPARQL;
-import static spark.protocol.parser.XMLResults.Element.VARIABLE;
+import static spark.protocol.parser.XMLResultsParser.Element.HEAD;
+import static spark.protocol.parser.XMLResultsParser.Element.LINK;
+import static spark.protocol.parser.XMLResultsParser.Element.RESULTS;
+import static spark.protocol.parser.XMLResultsParser.Element.SPARQL;
+import static spark.protocol.parser.XMLResultsParser.Element.VARIABLE;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ import spark.api.exception.SparqlException;
  * 
  * @author Paul Gearon
  */
-public final class XMLResults {
+public final class XMLResultsParser {
 
   /** Enumeration of the elements found in a SPARQL result document. */
   public enum Element { SPARQL, HEAD, RESULTS, VARIABLE, LINK, RESULT, BINDING, URI, LITERAL, BNODE, BOOLEAN };
@@ -55,7 +55,7 @@ public final class XMLResults {
   /** The reference attribute used for metadata */
   private static final String HREF = "href";
 
-  private XMLResults() {}
+  private XMLResultsParser() {}
 
   /**
    * Constructs an XMLResults object based on the contents of the given stream.
