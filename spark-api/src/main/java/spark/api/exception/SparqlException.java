@@ -20,6 +20,13 @@ package spark.api.exception;
  */
 public class SparqlException extends RuntimeException {
 
+  /**
+   * @return The original exception if it's a SparqlException, or a new SparqlException wrapping the original exception.
+   */
+  public static SparqlException convert(String message, Throwable t) {
+    return (t instanceof SparqlException) ? (SparqlException) t : new SparqlException(message, t);
+  }
+  
   private static final long serialVersionUID = -7174855352655879684L;
 
   /**
