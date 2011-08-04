@@ -34,6 +34,7 @@ import javax.xml.stream.XMLStreamReader;
 import spark.api.Command;
 import spark.api.Result;
 import spark.api.exception.SparqlException;
+import spark.protocol.ProtocolCommand.ResultType;
 
 /**
  * This class starts the parsing of SPARQL XML results to determine what kind of
@@ -47,7 +48,7 @@ import spark.api.exception.SparqlException;
  * 
  * @author Paul Gearon
  */
-public final class XMLResultsParser {
+public final class XMLResultsParser implements ResultParser {
 
   /** Enumeration of the elements found in a SPARQL result document. */
   public enum Element { SPARQL, HEAD, RESULTS, VARIABLE, LINK, RESULT, BINDING, URI, LITERAL, BNODE, BOOLEAN };
@@ -55,7 +56,11 @@ public final class XMLResultsParser {
   /** The reference attribute used for metadata */
   private static final String HREF = "href";
 
-  private XMLResultsParser() {}
+  /** Parses the input stream as either XML select or ask results. */
+  @Override
+  public Result parse(Command cmd, InputStream input, ResultType type) {
+    return createResults(cmd, input, type);
+  }
 
   /**
    * Constructs an XMLResults object based on the contents of the given stream.
@@ -64,7 +69,7 @@ public final class XMLResultsParser {
    * @return A new XMLResults object. Either variable bindings, or a boolean result.
    * @throws SparqlException If the data stream was not valid.
    */
-  public static Result createResults(Command cmd, InputStream stream) throws SparqlException {
+  public static Result createResults(Command cmd, InputStream stream, ResultType type) throws SparqlException {
     XMLInputFactory xmlStreamFactory = XMLInputFactory.newInstance();
     xmlStreamFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
     XMLStreamReader rdr;
@@ -88,7 +93,12 @@ public final class XMLResultsParser {
       throw new SparqlException("Error reading the XML stream", e);
     }
     String typeName = rdr.getLocalName();
-    if (typeName.equalsIgnoreCase(RESULTS.toString())) return new XMLSelectResults(cmd, rdr, cols, md);
+    if (typeName.equalsIgnoreCase(RESULTS.toString())) {
+      if (type != null && type != ResultType.SELECT) {
+        throw new SparqlException("Unexpected result type; expected " + type + " but found SELECT.");
+      }
+      return new XMLSelectResults(cmd, rdr, cols, md);
+    }
     //if (typeName.equalsIgnoreCase(BOOLEAN.toString())) return new XMLAskResult(rdr, query, md);
 
     throw new SparqlException("Unknown element type in result document. Expected <results> or <boolean> but got <" + typeName + ">");

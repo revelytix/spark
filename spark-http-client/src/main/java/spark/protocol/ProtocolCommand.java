@@ -53,8 +53,7 @@ public class ProtocolCommand extends BaseCommand {
   
   @Override
   public Result execute() {
-    // TODO Auto-generated method stub
-    return null;
+    return execute(null);
   }
 
   @Override
