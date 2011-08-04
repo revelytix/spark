@@ -128,8 +128,8 @@ public class ResultFactory {
    * @return The default MIME content type to use for the given result type.
    */
   public static String getDefaultMediaType(ResultType expectedType) {
-    ResponseFormat format = (expectedType != null) ? defaultTypeFormats.get(expectedType) : DEFAULT_FORMAT;
-    return format.mimeText;
+    ResponseFormat format = (expectedType != null) ? defaultTypeFormats.get(expectedType) : null;
+    return (format != null) ? format.mimeText : null;
   }
   
   /**
