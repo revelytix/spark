@@ -32,6 +32,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
+import spark.api.Command;
 import spark.api.Credentials;
 import spark.api.DataSource;
 
@@ -57,22 +58,30 @@ import spark.api.DataSource;
  */
 public class ProtocolDataSource implements DataSource {
   
+  /** Value to use with {@link #setAcquireTimeout(int)} to indicate no acquire timeout. */
   public static final int NO_ACQUIRE_TIMEOUT = 0;
 
+  /** Default connection pool size for new ProtocolDataSource instances. */
   public static final int DEFAULT_POOL_SIZE = 10;
+  /** Default acquire timeout for new ProtocolDataSource instances. */
   public static final int DEFAULT_ACQUIRE_TIMEOUT = NO_ACQUIRE_TIMEOUT;
   
+  // HTTP/HTTPS scheme constants.
   private static final String HTTP_SCHEME = "http";
   private static final String HTTPS_SCHEME = "https";
   private static final int HTTP_PORT = 80;
   private static final int HTTPS_PORT = 443;
   
+  /** Thread-safe, re-usable HTTP client passed to child connections. */
   private HttpClient httpClient = null;
   
+  /** Connection pool size; must be set before the first connection is created. */
   private int poolSize = DEFAULT_POOL_SIZE;
   
+  /** Connection pool acquire timeout; must be set before the first connection is created. */
   private int acquireTimeout = DEFAULT_ACQUIRE_TIMEOUT;
   
+  /** The endpoint URL. */
   private final URL url;
   
   /**
@@ -105,10 +114,15 @@ public class ProtocolDataSource implements DataSource {
     return new ProtocolConnection(this, getClient(true), creds);
   }
 
+  /** @return the maximum size of the connection pool. */
   public int getConnectionPoolSize() {
     return poolSize;
   }
 
+  /**
+   * Sets the maximum size of the connection pool.
+   * @param poolSize The maximum number of connections that can be in use at any one time for this data source.
+   */
   public synchronized void setConnectionPoolSize(int poolSize) {
     if (httpClient != null) {
       throw new IllegalStateException("Cannot set the connection pool size after it is in use.");
@@ -116,14 +130,36 @@ public class ProtocolDataSource implements DataSource {
     this.poolSize = poolSize;
   }
 
+  /** @return the timeout, in seconds, for acquiring connections from the pool. */
   public int getAcquireTimeout() {
     return acquireTimeout;
   }
 
-  public void setAcquireTimeout(int seconds) {
+  /**
+   * <p>
+   * Sets the timeout, in seconds, for acquiring connections from the pool, or
+   * {@link #NO_ACQUIRE_TIMEOUT} to indicate that threads should wait indefinitely.
+   * </p>
+   * 
+   * <p>
+   * <b>Note:</b> HTTP connections are not acquired from the pool until a command is executed.
+   * Setting this parameter has no effect on the call to {@link #getConnection(Credentials)}; that
+   * method always return immediately. Instead, setting this parameter affects calls to
+   * {@link Command#execute()}; the observed timeout on that method can be as large as the sum
+   * of this connection pool acquire timeout plus the value of {@link Command#getTimeout()}.
+   * </p>
+   * 
+   * @param seconds The maximum amount of time, in seconds, that a command will wait for a connection
+   *        to become available from the pool before giving up and throwing an exception.
+   */
+  public synchronized void setAcquireTimeout(int seconds) {
+    if (httpClient != null) {
+      throw new IllegalStateException("Cannot set the connection pool acquire timeout after it is in use.");
+    }
     this.acquireTimeout = seconds;
   }
 
+  /** Gets the (re-usable) HTTP client backing this data source, creating it if necessary. */
   private synchronized HttpClient getClient(boolean create) {
     if (httpClient == null && create) {
       httpClient = createPooledClient();
@@ -153,7 +189,7 @@ public class ProtocolDataSource implements DataSource {
     
     HttpParams httpParams = new BasicHttpParams();
     HttpProtocolParams.setUseExpectContinue(httpParams, false);
-    ConnManagerParams.setTimeout(httpParams, acquireTimeout);
+    ConnManagerParams.setTimeout(httpParams, acquireTimeout * 1000);
     return new DefaultHttpClient(ccm, httpParams);
   }
 }

@@ -23,7 +23,25 @@ import spark.api.ServiceDescription;
 import spark.spi.BaseConnection;
 
 /**
- * A sparql API Connection connected to a SPARQL endpoint.
+ * <p>
+ * A SPARQL API Connection connected to a SPARQL endpoint. Ideally we would like to maintain a
+ * low-level HTTP connection in this class for re-use by all commands originating from this
+ * connection. However, we've made the design decision to use the Apache {@link HttpClient}
+ * for executing HTTP requests because of the long list of features which it automatically provides
+ * (redirect handling, authentication, proxying, connection pooling, etc). The HttpClient gets an
+ * HTTP connection from the pool for each request that is executed, and releases it when the 
+ * request is complete.
+ * </p>
+ * 
+ * <p>
+ * The down-side of this design choice is that <tt>ProtocolConnection</tt> instances do not have
+ * dedicated dedicated low-level HTTP connections; the ability of one command created on this
+ * ProtocolConnection to obtain and use an HTTP connection has no effect on the ability of
+ * subsequent commands created on the same ProtocolConnection to obtain an HTTP connection. The
+ * up-side, other than richness of features, is that an idle ProtocolConnection instance does not
+ * occupy an open HTTP connection, and the HTTP connection is free to be used by other
+ * ProtocolConnection instances.
+ * </p>
  */
 public class ProtocolConnection extends BaseConnection implements Connection {
 
@@ -48,6 +66,7 @@ public class ProtocolConnection extends BaseConnection implements Connection {
     return null;
   }
 
+  /** Gets the shared HTTP client backing this connection. */
   HttpClient getHttpClient() {
     return httpClient;
   }
