@@ -20,6 +20,10 @@ package spark.api;
  * is a factory for connections and implementations should use standard
  * JavaBean patterns to specify any necessary connection properties 
  * (host, port, etc).
+ * 
+ * Depending on the implementation, a DataSource might be a thin wrapper
+ * around a collection of source-specific connection properties, or it
+ * might provide additional features such as connection pooling.
  */
 public interface DataSource {
 
@@ -30,4 +34,12 @@ public interface DataSource {
    * @return The connection
    */
   Connection getConnection(Credentials creds);
+  
+  /**
+   * Close the DataSource, releasing any underlying resources. Users should
+   * close data sources when they are finished working with them, and once
+   * closed a data source should not be used any further.
+   */
+  void close();
+  
 }

@@ -114,6 +114,18 @@ public class ProtocolDataSource implements DataSource {
     return new ProtocolConnection(this, getClient(true), creds);
   }
 
+  @Override
+  public void close() {
+    HttpClient client = null;
+    synchronized(this) {
+      client = httpClient;
+      httpClient = null;
+    }
+    if (client != null) {
+      client.getConnectionManager().shutdown();
+    }
+  }
+
   /** @return the maximum size of the connection pool. */
   public int getConnectionPoolSize() {
     return poolSize;
@@ -169,7 +181,6 @@ public class ProtocolDataSource implements DataSource {
   
   /**
    * Creates a new thread-safe HTTP connection pool for use with a data source.
-   * TODO Figure out when to release the pool.
    * @param poolSize The size of the connection pool.
    * @return A new connection pool with the given size.
    */

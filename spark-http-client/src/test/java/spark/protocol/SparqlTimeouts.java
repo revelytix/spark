@@ -92,19 +92,25 @@ public class SparqlTimeouts {
     doQuery(ds, Command.NO_TIMEOUT);
     doQuery(ds, 5);
     doQuery(ds, Command.NO_TIMEOUT);
+    ds.close();
   }
 
-  public static void testAcquireTimeout() {
+  public static void testAcquireTimeout() throws Exception {
     final ProtocolDataSource ds = new ProtocolDataSource(url);
     ds.setConnectionPoolSize(3);
     ds.setAcquireTimeout(5);
-    for (int i = 0; i < 5; i++) {
+    int threads = 5;
+    final CountDownLatch latch = new CountDownLatch(threads);
+    for (int i = 0; i < threads; i++) {
       new Thread(new Runnable() {
         public void run() {
           doQuery(ds, Command.NO_TIMEOUT);
+          latch.countDown();
         }
       }).start();
     }
+    latch.await();
+    ds.close();
   }
   
   public static void testCancel() throws Exception {
@@ -174,6 +180,7 @@ public class SparqlTimeouts {
     log("query 2 thread done");
     
     exec(c);
+    ds.close();
   }
   
   /**

@@ -42,6 +42,7 @@ public class SparqlQuery {
     solutions.close();
     query.close();
     conn.close();
+    myDS.close();
   }
   
   public static void testQuery2() throws Exception {
@@ -58,6 +59,7 @@ public class SparqlQuery {
     solutions.close();
     query.close();
     conn.close();
+    myDS.close();
   }
   
   static int iterateResults(Solutions s) {

@@ -107,4 +107,9 @@ public class SHPDataSource implements DataSource {
     return new SHPConnection(this);
   }
 
+  @Override
+  public void close() {
+    // This data source just wraps the connection parameters; nothing to close.
+  }
+
 }
