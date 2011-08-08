@@ -46,6 +46,7 @@
 
   <properties>
     <sherpa-version>${project.version}</sherpa-version>
+    <slf4j-version>1.6.1</slf4j-version>
   </properties>
 
   <dependencies>
@@ -81,6 +82,12 @@
       <artifactId>swank-clojure</artifactId>
       <version>1.2.1</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.slf4j</groupId>
+    	<artifactId>slf4j-log4j12</artifactId>
+    	<version>${slf4j-version}</version>
+    	<scope>provided</scope>
     </dependency>
   </dependencies>
 
