@@ -18,8 +18,10 @@ package spark.protocol;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
 import java.util.concurrent.CountDownLatch;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import spark.api.Command;
 import spark.api.Connection;
@@ -36,6 +38,8 @@ import spark.api.credentials.NoCredentials;
  */
 public class SparqlTimeouts {
 
+  private static final Logger logger = LoggerFactory.getLogger(SparqlTimeouts.class);
+  
   private static final URL url;
   static {
     try {
@@ -48,7 +52,7 @@ public class SparqlTimeouts {
   private static final String query = "SELECT ?class FROM <test:beer> WHERE { ?class a <http://www.w3.org/2002/07/owl#Class> }";
   
   static void log(String s) {
-    System.out.println(new Date() + ": " + s + " in thread: " + Thread.currentThread().getName());
+    logger.debug(s);
   }
   
   static void exec(Command cmd) {

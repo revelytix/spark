@@ -23,12 +23,16 @@ import org.apache.avro.ipc.Transceiver;
 import org.apache.avro.ipc.specific.SpecificRequestor;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sherpa.protocol.SherpaServer;
 import sherpa.server.DummySherpaServer;
 
 public class TestQueryProtocolIterator {
 
+  private static final Logger logger = LoggerFactory.getLogger(TestQueryProtocolIterator.class);
+  
   public void helpTestProtocolIterator(int resultRows) throws Exception {
     DummySherpaServer server = new DummySherpaServer(resultRows);
     InetSocketAddress serverAddress = server.getAddress();
@@ -47,7 +51,7 @@ public class TestQueryProtocolIterator {
         counter++;
       }
             
-      System.out.println("Read " + counter + " rows");
+      logger.info("Read {} rows", counter);
       Assert.assertEquals(resultRows, counter);
       
     } finally {
@@ -76,7 +80,7 @@ public class TestQueryProtocolIterator {
       SherpaServer queryApi = SpecificRequestor.getClient(SherpaServer.class, requestor);
 
       for(int i=0; i<3; i++) {
-        //System.out.println("\nrunning command " + i);
+        //logger.debug("running command {}", i);
         
         QueryExecution protocol = new QueryExecution(queryApi);
         protocol.query("fake command",null,null);      
@@ -87,7 +91,7 @@ public class TestQueryProtocolIterator {
           counter++;
         }
               
-        //System.out.println("Read " + counter + " rows");
+        //logger.debug("Read {} rows", counter);
         Assert.assertEquals(resultRows, counter);
 
       }

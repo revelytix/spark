@@ -48,6 +48,7 @@
   <properties>
     <http-version>4.0.1</http-version>
     <spark-version>${project.version}</spark-version>
+    <slf4j-version>1.6.1</slf4j-version>
   </properties>
 
   <dependencies>
@@ -87,12 +88,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpmime</artifactId>
-      <version>${http-version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>org.codehaus.woodstox</groupId>
       <artifactId>woodstox-core-asl</artifactId>
       <version>4.1.1</version>
@@ -103,6 +98,17 @@
       <artifactId>junit</artifactId>
       <version>4.8.2</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.slf4j</groupId>
+    	<artifactId>slf4j-api</artifactId>
+    	<version>${slf4j-version}</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.slf4j</groupId>
+    	<artifactId>slf4j-log4j12</artifactId>
+    	<version>${slf4j-version}</version>
+    	<scope>provided</scope>
     </dependency>
   </dependencies>
 

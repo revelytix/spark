@@ -4,3 +4,4 @@
 sherpa-protocol/src/main/avro/sherpa/protocol/sherpa.avpr
 target/
 bin/
+log4j-local.properties

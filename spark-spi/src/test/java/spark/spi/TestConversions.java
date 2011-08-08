@@ -9,6 +9,10 @@ import java.net.URI;
 import java.util.Date;
 
 import junit.framework.TestCase;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import spark.api.rdf.TypedLiteral;
 import spark.api.uris.XsdTypes;
 import spark.spi.rdf.PlainLiteralImpl;
@@ -20,7 +24,7 @@ import spark.spi.rdf.TypedLiteralImpl;
  */
 public class TestConversions extends TestCase {
 
-  private static final boolean DEBUG = false;
+  private static final Logger logger = LoggerFactory.getLogger(TestConversions.class);
   
   public void testInt() {
     String s = "1234";
@@ -142,7 +146,7 @@ public class TestConversions extends TestCase {
       Conversions.toData(l);
       fail("Should have thrown exception converting literal " + l);
     } catch (Exception e) {
-      if (DEBUG) System.out.println(e.getMessage());
+      logger.debug("Conversion exception, message: {}", e.getMessage());
     }
   }
 }

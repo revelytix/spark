@@ -24,6 +24,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import junit.framework.Assert;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import spark.api.Command;
 import spark.api.Connection;
 import spark.api.DataSource;
@@ -35,6 +39,8 @@ import spark.api.credentials.NoCredentials;
  * @created Aug 2, 2011
  */
 public class SparqlConnections {
+  
+  private static final Logger logger = LoggerFactory.getLogger(SparqlConnections.class);
   
   private static final URL TEST_URL;
   static {
@@ -163,9 +169,8 @@ public class SparqlConnections {
     int count = counter.get();
     Assert.assertEquals(NUM_THREADS * REPETITIONS, count);
     long time = timer.longValue();
-    System.out.println(test + " total time (ms):   " + time);
-    System.out.println(test + " average time (ms): " + (double)time / count);
-    System.out.println();
+    logger.debug("{} total time (ms):   {}", test,  time);
+    logger.debug("{} average time (ms): {}\n", test, (double)time / count);
   }
   
   static final DataSourceFactory SIMPLE_FACTORY = new DataSourceFactory() {

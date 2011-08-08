@@ -20,6 +20,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import spark.api.Result;
 import spark.api.Solutions;
@@ -32,6 +34,8 @@ import spark.spi.BaseCommand;
  * A SPARQL API Command for executing commands to the SPARQL endpoint.
  */
 public class ProtocolCommand extends BaseCommand {
+  
+  private static final Logger logger = LoggerFactory.getLogger(ProtocolCommand.class);
   
   /** Enumeration of possible query result types. */
   public enum ResultType {
@@ -135,8 +139,7 @@ public class ProtocolCommand extends BaseCommand {
     
     // Validate the user-supplied MIME type.
     if (mimeType != null && !ResultFactory.supports(mimeType, cmdType)) {
-      System.out.println("Requested MIME content type '" + mimeType + 
-          "' does not support expected response type: " + cmdType);
+      logger.warn("Requested MIME content type '{}' does not support expected response type: {}", mimeType, cmdType);
       mimeType = null;
     }
     
@@ -145,7 +148,23 @@ public class ProtocolCommand extends BaseCommand {
       mimeType = ResultFactory.getDefaultMediaType(cmdType);
     }
     
+    if (logger.isDebugEnabled()) {
+      logRequest(cmdType, mimeType);
+    }
+    
+    try {
+      HttpResponse response = SparqlCall.executeRequest(this, mimeType);
+      return ResultFactory.getResult(this, response, cmdType);
+    } catch (Throwable t) {
+      release();
+      throw SparqlException.convert("Error creating SPARQL result from server response", t);
+    }
+  }
+  
+  /** Log the enpoint URL and request parameters. */
+  private void logRequest(ResultType cmdType, String mimeType) {
     StringBuilder sb = new StringBuilder("Executing SPARQL protocol request ");
+    sb.append("to endpoint <").append(((ProtocolDataSource)getConnection().getDataSource()).getUrl()).append("> ");
     if (mimeType != null) {
       sb.append("for content type '").append(mimeType).append("' ");
     } else {
@@ -156,14 +175,6 @@ public class ProtocolCommand extends BaseCommand {
     } else {
       sb.append("with unknown expected result type.");
     }
-    System.out.println(sb.toString());
-    
-    try {
-      HttpResponse response = SparqlCall.executeRequest(this, mimeType);
-      return ResultFactory.getResult(this, response, cmdType);
-    } catch (Throwable t) {
-      release();
-      throw SparqlException.convert("Error creating SPARQL result from server response", t);
-    }
+    logger.debug(sb.toString());
   }
 }

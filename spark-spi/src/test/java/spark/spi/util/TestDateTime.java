@@ -10,6 +10,8 @@ import java.util.TimeZone;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -18,6 +20,8 @@ import org.junit.Test;
  */
 public class TestDateTime {
 
+  private static final Logger logger = LoggerFactory.getLogger(TestDateTime.class);
+  
   private static final long A_DATE = 1310685769478L;
   private static final String A_NORMAL_STRING = "2011-07-14T23:22:49.478Z";
   private static final TimeZone A_TIMEZONE = TimeZone.getTimeZone("GMT-04:00");
@@ -41,7 +45,7 @@ public class TestDateTime {
   public void testLocalTimezone() {
     Date d = new Date(A_DATE);
     String s = DateTime.format(d, null);
-    //System.out.println(s);
+    logger.debug("Formatted string with local timezone: {}", s);
     Assert.assertNotNull(s);
     Assert.assertFalse(s.isEmpty());
     Assert.assertTrue(Character.isDigit(s.charAt(s.length() - 1))); // No 'Z' indicator
@@ -49,7 +53,7 @@ public class TestDateTime {
     
     d = new Date(A_DATE / 1000 * 1000);
     s = DateTime.format(d, null);
-    //System.out.println(s);
+    logger.debug("Formatted string with local timezone, no milliseconds: {}", s);
     Assert.assertEquals(d, DateTime.parse(s));
   }
   
@@ -152,7 +156,7 @@ public class TestDateTime {
       DateTime.parse(s);
       Assert.fail("Should have thrown parse exception for '" + s + "' with strict parsing.");
     } catch (DateFormatException e) {
-      //System.out.println(e.getMessage());
+      logger.debug("Format exception in strict mode, message: {}", e.getMessage());
       Assert.assertEquals(idx, e.getIndex());
     }
   }
@@ -160,9 +164,9 @@ public class TestDateTime {
   private static void invalid(String s, int idx) {
     try {
       DateTime.parse(s, false);
-      Assert.fail("Should have thrown parse exception for '" + s + "' with strict parsing.");
+      Assert.fail("Should have thrown parse exception for '" + s + "' with lenient parsing.");
     } catch (DateFormatException e) {
-      //System.out.println(e.getMessage());
+      logger.debug("Format exception in lenient mode, message: {}", e.getMessage());
       Assert.assertEquals(idx, e.getIndex());
     }
   }
@@ -172,7 +176,7 @@ public class TestDateTime {
       DateTime.parse(s);
       Assert.fail("Should have thrown overflow exception for '" + s + "'.");
     } catch (ArithmeticException e) {
-      //System.out.println(e.getMessage());
+      logger.debug("Overflow exception parsing date, message: {}", e.getMessage());
     }
   }
   
@@ -181,7 +185,7 @@ public class TestDateTime {
       DateTime.format(d);
       Assert.fail("Should have thrown overflow exception for '" + d + "'.");
     } catch (ArithmeticException e) {
-      //System.out.println(e.getMessage());
+      logger.debug("Overflow exception formatting date, message: {}", e.getMessage());
     }
   }
   

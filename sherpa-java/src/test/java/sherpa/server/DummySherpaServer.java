@@ -24,12 +24,16 @@ import java.util.List;
 import org.apache.avro.ipc.SaslSocketServer;
 import org.apache.avro.ipc.Server;
 import org.apache.avro.ipc.specific.SpecificResponder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sherpa.protocol.SherpaServer;
 import spark.api.exception.SparqlException;
 
 public class DummySherpaServer extends SpecificResponder {
 
+  private static final Logger logger = LoggerFactory.getLogger(DummySherpaServer.class);
+  
   private final Server server;
   
   public DummySherpaServer(int rows) {
@@ -70,7 +74,7 @@ public class DummySherpaServer extends SpecificResponder {
     }
     DummySherpaServer s = new DummySherpaServer(rows);
     InetSocketAddress address = s.getAddress();
-    System.out.println("Started server at: " + address.getHostName() + ":" + address.getPort());    
+    logger.info("Started server at: {}:{}", address.getHostName(), address.getPort());    
     Thread.currentThread().join();
   }
 }

@@ -28,6 +28,8 @@ import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import spark.api.Command;
 import spark.api.Result;
@@ -44,6 +46,8 @@ import spark.protocol.ProtocolCommand.ResultType;
  */
 public class ResultFactory {
 
+  private static final Logger logger = LoggerFactory.getLogger(ResultFactory.class);
+  
   private static final Map<String,ResponseFormat> mimeFormats = new HashMap<String,ResponseFormat>();
   
   /**
@@ -148,21 +152,21 @@ public class ResultFactory {
       mediaType = stripParams(mediaType);
       format = mimeFormats.get(mediaType);
       if (format == null) {
-        System.out.println("Unrecognized media type: " + mediaType);
+        logger.warn("Unrecognized media type ({}) in SPARQL server response", mediaType);
       } else {
-        System.out.println("Using result format " + format + " for media type " + mediaType);
+        logger.debug("Using result format {} for media type {}", format, mediaType);
       }
     }
     
     // If MIME type was absent or unrecognized, choose default based on expected result type.
     if (format == null) {
-      System.out.println("Unable to determine result format from media type");
+      logger.debug("Unable to determine result format from media type");
       if (expectedType != null) {
         format = defaultTypeFormats.get(expectedType);
-        System.out.println("Using default format " + format + " for expected result type " + expectedType);
+        logger.debug("Using default format {} for expected result type {}", format, expectedType);
       } else {
         format = DEFAULT_FORMAT;
-        System.out.println("No expected type provided; using default format " + format);
+        logger.debug("No expected type provided; using default format {}", format);
       }
     }
     

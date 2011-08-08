@@ -28,6 +28,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.avro.AvroRemoteException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sherpa.protocol.CancelRequest;
 import sherpa.protocol.CloseRequest;
@@ -46,6 +48,8 @@ import spark.api.exception.SparqlException;
  */
 public class QueryExecution implements Iterable<List<Object>> {
 
+  private static final Logger logger = LoggerFactory.getLogger(QueryExecution.class);
+  
   // Query properties
   public static final String BATCH_SIZE = "batchSize";
   public static final String TIMEOUT = "timeout";
@@ -98,9 +102,9 @@ public class QueryExecution implements Iterable<List<Object>> {
         serverException.setStackTrace(stackTrace);
         return serverException;
       } catch (IOException e2) {
-        System.out.println("IOException reading stackTrace: " + e2);
+        logger.warn("IOException reading stackTrace", e2);
       } catch (ClassNotFoundException e2) {
-        System.out.println("ClassNotFound reading stackTrace: " + e2);
+        logger.warn("ClassNotFoundException reading stackTrace", e2);
       }
     }
     return null;
@@ -137,9 +141,9 @@ public class QueryExecution implements Iterable<List<Object>> {
     request.properties = (props != null) ? sneakyCast(props)
         : new HashMap<CharSequence, CharSequence>();
     try {
-      System.out.println("Client sending query request to server.");
+      logger.debug("Client sending query request to server.");
       QueryResponse response = server.query(request);
-      System.out.println("Client received query response from server.");
+      logger.debug("Client received query response from server.");
       queryId = response.queryId;
       vars = new ArrayList<String>();
       for (CharSequence cs : response.vars) {
@@ -165,13 +169,11 @@ public class QueryExecution implements Iterable<List<Object>> {
       moreRequest.queryId = queryId;
       moreRequest.startRow = startRow;
       moreRequest.maxSize = maxBatchSize;
-      System.out.println("Client requesting " + startRow + " .. "
-          + (startRow + maxBatchSize - 1));
+      logger.debug("Client requesting {} .. {}", startRow, (startRow + maxBatchSize - 1));
 
       DataResponse response = server.data(moreRequest);
-      System.out.println("Client got response " + response.startRow + " .. "
-          + (response.startRow + response.data.size() - 1) + ", more="
-          + response.more);
+      logger.debug("Client got response {} .. {}, more={}",
+          new Object[] { response.startRow, (response.startRow + response.data.size() - 1), response.more });
       nextData.add(new Window(response.data, response.more));
     } catch (AvroRemoteException e) {
       this.nextData.addError(toSparqlException(e));
@@ -191,31 +193,31 @@ public class QueryExecution implements Iterable<List<Object>> {
   }
 
   public synchronized boolean incrementCursor() throws SparqlException {
-    // System.out.println("..incrementCursor(), cursor=" + cursor);
+    // logger.trace("..incrementCursor(), cursor={}", cursor);
     try {
       while (true) {
         if (currentData.inc()) { // Stay in the current batch
-          // System.out.println("....incrementing in currentData");
+          // logger.trace("....incrementing in currentData");
           cursor++;
           return true;
         } else {
           Window nextWindow = nextData.poll(); // non-blocking take, null if empty
           if (nextWindow != null) { // Switch to next batch
-            // System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" +
-            // currentData.data.size());
+            // logger.trace("....switching to next batch, cursor={}, nextData size={}",
+            // cursor, currentData.data.size());
             this.currentData = nextWindow;
             scheduleMoreRequest(cursor + currentData.data.size() + 1);
 
           } else { // Don't have data
             if (!currentData.more) { // Because we're done
-              // System.out.println("....no current data, but we're all done.");
+              // logger.trace("....no current data, but we're all done.");
               cursor++;
               return false;
             } else { // Or we just haven't waited long enough for it
-              // System.out.println("....no current data, no next data, but not done, just wait.");
+              // logger.trace("....no current data, no next data, but not done, just wait.");
               currentData = nextData.take();
-              // System.out.println("....switching to next batch, cursor=" + cursor + ", nextData size=" +
-              // currentData.data.size());
+              // logger.trace("....switching to next batch, cursor={}, nextData size={}",
+              // cursor, currentData.data.size());
               scheduleMoreRequest(cursor + currentData.data.size() + 1);
             }
           }
@@ -333,7 +335,7 @@ public class QueryExecution implements Iterable<List<Object>> {
     }
 
     List<Object> getData() {
-      // System.out.println("..get row at " + index);
+      // logger.trace("..get row at {}", index);
       return data.get(index);
     }
     

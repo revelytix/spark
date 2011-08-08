@@ -51,6 +51,11 @@
     <module>sherpa-clojure</module>
   </modules>
 
+  <properties>
+    <test.redirect.console>true</test.redirect.console>
+    <test.log.config>log4j.properties</test.log.config>
+  </properties>
+  
   <build>
     <plugins>
       <plugin>
@@ -60,6 +65,17 @@
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.9</version>
+        <configuration>
+          <redirectTestOutputToFile>${test.redirect.console}</redirectTestOutputToFile>
+          <systemPropertyVariables>
+            <log4j.configuration>${test.log.config}</log4j.configuration>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
     </plugins>
@@ -118,6 +134,24 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>debugOut</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <test.redirect.console>false</test.redirect.console>
+      </properties>
+    </profile>
+    <profile>
+      <id>debugConfig</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <test.log.config>log4j-local.properties</test.log.config>
+      </properties>
     </profile>
   </profiles>
     

@@ -35,6 +35,8 @@ import org.apache.avro.AvroRemoteException;
 import org.apache.avro.util.Utf8;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sherpa.protocol.BNode;
 import sherpa.protocol.IRI;
@@ -63,6 +65,8 @@ import spark.spi.util.DateTime;
 
 public class TestSherpaClient {
 
+  private static final Logger logger = LoggerFactory.getLogger(TestSherpaClient.class);
+  
   public Solutions helpExecuteQuery(DummySherpaServer server, int batchSize) {
     InetSocketAddress serverAddress = server.getAddress();
     DataSource ds = new SHPDataSource(serverAddress.getHostName(),
@@ -93,7 +97,7 @@ public class TestSherpaClient {
 
       TestCursor.assertCursor(solutions, AFTER_LAST);
       
-      System.out.println("Read " + counter + " rows");
+      logger.info("Read {} rows", counter);
       Assert.assertEquals(resultRows, counter);
 
     } finally {

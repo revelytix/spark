@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.avro.AvroRemoteException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sherpa.protocol.CancelRequest;
 import sherpa.protocol.CloseRequest;
@@ -37,6 +39,8 @@ import sherpa.protocol.SherpaServer;
 
 public class DummyQueryResponder implements SherpaServer {
 
+  private static final Logger logger = LoggerFactory.getLogger(DummyQueryResponder.class);
+  
   public static final int DEFAULT_WIDTH = 2;
   
   public final int rows;
@@ -76,7 +80,7 @@ public class DummyQueryResponder implements SherpaServer {
   public QueryResponse query(QueryRequest query) throws AvroRemoteException,
       ErrorResponse {
   
-    System.out.println("Server got query request for " + query.sparql);
+    logger.debug("Server got query request for {}", query.sparql);
     
     QueryResponse response = new QueryResponse();
     response.queryId = "1";
@@ -85,7 +89,7 @@ public class DummyQueryResponder implements SherpaServer {
       response.vars.add(Character.toString((char)('a' + i)));
     }
 
-    System.out.println("Server sending query response");
+    logger.debug("Server sending query response");
    
     record("Message", "query", "sparql", query.sparql, "params", query.parameters, "props", query.properties);
     return response;
@@ -99,7 +103,7 @@ public class DummyQueryResponder implements SherpaServer {
   public DataResponse data(DataRequest dataRequest) throws AvroRemoteException,
       ErrorResponse {
     
-    System.out.println("Server got data request for " + dataRequest.startRow);
+    logger.debug("Server got data request for {}", dataRequest.startRow);
     record("Message", "data", "queryId", dataRequest.queryId, 
         "startRow", dataRequest.startRow, 
         "maxSize", dataRequest.maxSize);
@@ -110,7 +114,7 @@ public class DummyQueryResponder implements SherpaServer {
       response.startRow = 1;
       response.more = false;
       response.data = Collections.emptyList();
-      System.out.println("Server sending empty response for 0 row result.");
+      logger.debug("Server sending empty response for 0 row result.");
       return response;
       
     } else if(dataRequest.startRow <= rows) {
@@ -126,7 +130,8 @@ public class DummyQueryResponder implements SherpaServer {
       response.data = batch(dataRequest.startRow, size);
       response.more = (response.startRow + size - 1) < rows;
       
-      System.out.println("Server sending response for " + dataRequest.startRow + ".." + (dataRequest.startRow+response.data.size()-1));
+      logger.debug("Server sending response for {}..{}",
+          dataRequest.startRow, (dataRequest.startRow+response.data.size()-1));
       return response;
       
     } else {
