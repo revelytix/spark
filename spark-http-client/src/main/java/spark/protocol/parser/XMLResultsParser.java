@@ -151,6 +151,9 @@ public final class XMLResultsParser implements ResultParser {
         if (type != null && type != ResultType.ASK) {
           throw new SparqlException("Unexpected result type; expected " + type + " but found ASK.");
         }
+        if (!cols.isEmpty()) {
+          logger.warn("Boolean result contained column definitions in head: {}", cols);
+        }
         return parseBooleanResult(cmd, rdr, md);
       }
 
