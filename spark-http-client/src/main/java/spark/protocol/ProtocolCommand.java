@@ -92,6 +92,7 @@ public class ProtocolCommand extends BaseCommand {
 
   @Override
   public boolean executeAsk() {
+    // Boolean result shouldn't hold a reference to the underlying stream, so should be OK not to close here.
     return ((BooleanResult)execute(ResultType.ASK)).getResult();
   }
 

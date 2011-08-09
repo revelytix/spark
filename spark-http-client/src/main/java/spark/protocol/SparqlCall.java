@@ -17,12 +17,14 @@ package spark.protocol;
 
 import static org.apache.http.protocol.HTTP.UTF_8;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -35,6 +37,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import spark.api.Command;
 import spark.api.exception.SparqlException;
@@ -46,6 +50,8 @@ import spark.api.exception.SparqlException;
  */
 public class SparqlCall {
 
+  private static final Logger logger = LoggerFactory.getLogger(SparqlCall.class);
+  
   // HTTP response codes.
   private static final int SUCCESS_MIN = 200;
   private static final int SUCCESS_MAX = 299;
@@ -72,6 +78,49 @@ public class SparqlCall {
       return URLEncoder.encode(s, UTF_8);
     } catch (UnsupportedEncodingException e) {
       throw new Error("JVM unable to handle UTF-8");
+    }
+  }
+  
+  /** Logs a request, executes it, and dumps the response to the logger. For development use only. */
+  @SuppressWarnings("unused")
+  private static final void dump(HttpClient client, HttpUriRequest req) {
+    if (logger.isTraceEnabled()) {
+      StringBuilder sb = new StringBuilder("\n=== Request ===");
+      sb.append("\n").append(req.getRequestLine());
+      for (Header h : req.getAllHeaders()) {
+        sb.append("\n").append(h.getName()).append(": ").append(h.getValue());
+      }
+      logger.trace(sb.toString());
+      
+      HttpResponse resp = null;
+      try {
+        resp = client.execute(req);
+      } catch (Exception e) {
+        logger.trace("Error executing request", e);
+        return;
+      }
+      
+      sb = new StringBuilder("\n=== Response ===");
+      sb.append("\n").append(resp.getStatusLine());
+      for (Header h : resp.getAllHeaders()) {
+        sb.append("\n").append(h.getName()).append(": ").append(h.getValue());
+      }
+      logger.trace(sb.toString());
+      
+      HttpEntity entity = resp.getEntity();
+      if (entity != null) {
+        sb = new StringBuilder("\n=== Content ===");
+        try {
+          int len = (int) entity.getContentLength();
+          if (len < 0) len = 100;
+          ByteArrayOutputStream baos = new ByteArrayOutputStream(len);
+          entity.writeTo(baos);
+          sb.append("\n").append(baos.toString("UTF-8"));
+          logger.trace(sb.toString());
+        } catch (IOException e) {
+          logger.trace("Error reading content", e);
+        }
+      }
     }
   }
   
@@ -113,6 +162,7 @@ public class SparqlCall {
       // There's a small chance the request could be aborted before it's even executed, we'll have to live with that.
       command.setRequest(req);
       
+      //dump(client, req);
       HttpResponse response = client.execute(req);
       StatusLine status = response.getStatusLine();
       int code = status.getStatusCode();
