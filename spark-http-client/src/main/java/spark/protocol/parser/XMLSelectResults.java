@@ -35,11 +35,15 @@ import java.util.Map;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import spark.api.Command;
 import spark.api.Solutions;
 import spark.api.exception.SparqlException;
 import spark.api.rdf.RDFNode;
 import spark.protocol.ProtocolCommand;
+import spark.protocol.ProtocolResult;
 import spark.protocol.parser.XMLResultsParser.Element;
 import spark.spi.StreamingSolutions;
 import spark.spi.rdf.BlankNodeImpl;
@@ -60,8 +64,10 @@ import spark.spi.rdf.TypedLiteralImpl;
  * 
  * @author Paul Gearon
  */
-public class XMLSelectResults extends StreamingSolutions implements Solutions {
+public class XMLSelectResults extends StreamingSolutions implements Solutions, ProtocolResult {
 
+  private static final Logger logger = LoggerFactory.getLogger(XMLSelectResults.class);
+  
   /** The list of metadata links for this result set. */
   private final List<String> metadata;
 
@@ -211,11 +217,9 @@ public class XMLSelectResults extends StreamingSolutions implements Solutions {
    */
   private void cleanup() throws XMLStreamException {
     if (reader.nextTag() != END_ELEMENT || !reader.getLocalName().equalsIgnoreCase(SPARQL.name())) {
-      // TODO Log a warning here.
-      // errorMsg = "Extra data at end of results";
+      logger.warn("Extra data at end of results");
     } else if (reader.next() != END_DOCUMENT) {
-      // TODO Log a warning here.
-      // errorMsg = "Unexpected data after XML";
+      logger.warn("Unexpected data after XML");
     }
   }
 
