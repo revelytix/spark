@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#"
+        xml:base="http://example.org/boolean-result/">
+  <head>
+    <link href="metadata.rdf"/>
+    <link href="http://bar.com/baz.ttl"/>
+  </head>
+  <boolean>true</boolean>
+</sparql>
