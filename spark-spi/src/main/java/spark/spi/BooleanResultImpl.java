@@ -19,6 +19,8 @@ import spark.api.BooleanResult;
 import spark.api.Command;
 
 /**
+ * Default implementation class for the {@link BooleanResult} interface.
+ * 
  * @author Alex Hall
  * @created Aug 9, 2011
  */
@@ -27,7 +29,9 @@ public class BooleanResultImpl extends BaseResults implements BooleanResult {
   private final boolean result;
   
   /**
-   * @param command
+   * Initializes a boolean result with the given value.
+   * @param command The command that created the result.
+   * @param result The result value.
    */
   public BooleanResultImpl(Command command, boolean result) {
     super(command);
