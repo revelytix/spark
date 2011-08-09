@@ -12,6 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 (ns sherpa.sherpa-client
+  (:require [clojure.tools.logging :as log])
   (:import [java.net InetSocketAddress InetAddress]
            [org.apache.avro.ipc SaslSocketTransceiver]
            [org.apache.avro.ipc.specific SpecificRequestor]
@@ -39,7 +40,7 @@
    connect to, such as :host and :port."
   [connect-map]
   (let [addr (InetSocketAddress. ^InetAddress (InetAddress/getByName (:host connect-map)) ^Integer (:port connect-map))
-        _ (println "client connecting to " addr)
+        _ (log/info "client connecting to " addr)
         transceiver (SaslSocketTransceiver. addr)
         requestor (SpecificRequestor. SherpaServer transceiver)
         query-api (SpecificRequestor/getClient SherpaServer requestor)]
