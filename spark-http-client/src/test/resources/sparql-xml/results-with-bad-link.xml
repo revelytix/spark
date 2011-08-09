@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="x"/>
+    <variable name="y"/>
+    <link href="http://sample.org/metadata.rdf"/>
+    <link/>
+    <link href="service-description.rdf"/>
+  </head>
+  <results>
+    <result>
+      <binding name="x"><uri>http://example.org/foo</uri></binding>
+      <binding name="y"><literal>bar</literal></binding>
+    </result>
+  </results>
+</sparql>
