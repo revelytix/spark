@@ -16,13 +16,11 @@
 package spark.protocol.parser;
 
 import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
-import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 import static spark.protocol.parser.XMLResultsParser.Element.BINDING;
 import static spark.protocol.parser.XMLResultsParser.Element.RESULT;
 import static spark.protocol.parser.XMLResultsParser.Element.RESULTS;
-import static spark.protocol.parser.XMLResultsParser.Element.SPARQL;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,9 +32,6 @@ import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import spark.api.Command;
 import spark.api.Solutions;
@@ -66,8 +61,6 @@ import spark.spi.rdf.TypedLiteralImpl;
  */
 public class XMLSelectResults extends StreamingSolutions implements Solutions, ProtocolResult {
 
-  private static final Logger logger = LoggerFactory.getLogger(XMLSelectResults.class);
-  
   /** The list of metadata links for this result set. */
   private final List<String> metadata;
 
@@ -216,11 +209,7 @@ public class XMLSelectResults extends StreamingSolutions implements Solutions, P
    * @throws XMLStreamException If there was an error accessing the XML.
    */
   private void cleanup() throws XMLStreamException {
-    if (reader.nextTag() != END_ELEMENT || !reader.getLocalName().equalsIgnoreCase(SPARQL.name())) {
-      logger.warn("Extra data at end of results");
-    } else if (reader.next() != END_DOCUMENT) {
-      logger.warn("Unexpected data after XML");
-    }
+    XMLResultsParser.cleanup(reader);
   }
 
   /**

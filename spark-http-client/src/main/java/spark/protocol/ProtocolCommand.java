@@ -92,8 +92,7 @@ public class ProtocolCommand extends BaseCommand {
 
   @Override
   public boolean executeAsk() {
-    // TODO Auto-generated method stub
-    return false;
+    return ((BooleanResult)execute(ResultType.ASK)).getResult();
   }
 
   @Override

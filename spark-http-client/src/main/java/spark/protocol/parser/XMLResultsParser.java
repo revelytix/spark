@@ -15,8 +15,11 @@
  */
 package spark.protocol.parser;
 
+import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
+import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+import static spark.protocol.parser.XMLResultsParser.Element.BOOLEAN;
 import static spark.protocol.parser.XMLResultsParser.Element.HEAD;
 import static spark.protocol.parser.XMLResultsParser.Element.LINK;
 import static spark.protocol.parser.XMLResultsParser.Element.RESULTS;
@@ -41,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import spark.api.Command;
 import spark.api.Result;
 import spark.api.exception.SparqlException;
+import spark.protocol.ProtocolBooleanResult;
 import spark.protocol.ProtocolCommand.ResultType;
 import spark.protocol.ProtocolDataSource;
 
@@ -135,21 +139,46 @@ public final class XMLResultsParser implements ResultParser {
       
       // move the cursor into the results, and read in the first row
       if (rdr.nextTag() != START_ELEMENT) throw new SparqlException("No body to result document");
+      
+      String typeName = rdr.getLocalName();
+      if (typeName.equalsIgnoreCase(RESULTS.toString())) {
+        if (type != null && type != ResultType.SELECT) {
+          throw new SparqlException("Unexpected result type; expected " + type + " but found SELECT.");
+        }
+        return new XMLSelectResults(cmd, rdr, cols, md);
+      }
+      if (typeName.equalsIgnoreCase(BOOLEAN.toString())) {
+        if (type != null && type != ResultType.ASK) {
+          throw new SparqlException("Unexpected result type; expected " + type + " but found ASK.");
+        }
+        return parseBooleanResult(cmd, rdr, md);
+      }
+
+      throw new SparqlException("Unknown element type in result document. Expected <results> or <boolean> but got <" + typeName + ">");
     } catch (XMLStreamException e) {
       throw new SparqlException("Error reading the XML stream", e);
     }
-    String typeName = rdr.getLocalName();
-    if (typeName.equalsIgnoreCase(RESULTS.toString())) {
-      if (type != null && type != ResultType.SELECT) {
-        throw new SparqlException("Unexpected result type; expected " + type + " but found SELECT.");
-      }
-      return new XMLSelectResults(cmd, rdr, cols, md);
-    }
-    //if (typeName.equalsIgnoreCase(BOOLEAN.toString())) return new XMLAskResult(rdr, query, md);
-
-    throw new SparqlException("Unknown element type in result document. Expected <results> or <boolean> but got <" + typeName + ">");
   }
 
+  /**
+   * Parses a boolean result from the reader. The reader is expected to be on the START_ELEMENT
+   * event for the opening <boolean> tag.
+   * @param cmd The command to associate with the result.
+   * @param rdr The XML reader from which to read the result.
+   * @param metadata The metadata to include in the result.
+   * @return The parsed result.
+   */
+  static private Result parseBooleanResult(Command cmd, XMLStreamReader rdr, 
+      List<String> metadata) throws XMLStreamException, SparqlException {
+    if (rdr.next() != CHARACTERS) {
+      throw new SparqlException("Unexpected data in Boolean result: " + rdr.getEventType());
+    }
+    boolean result = Boolean.parseBoolean(rdr.getText());
+    testClose(rdr, rdr.nextTag(), BOOLEAN, "Bad close of boolean element");
+    cleanup(rdr);
+    return new ProtocolBooleanResult(cmd, result, metadata);
+  }
+  
   /**
    * Parse the &lt;head&gt; element with the variables and metadata.
    * @param base The base URI, initialized to the endpoint URL if known.
@@ -262,6 +291,23 @@ public final class XMLResultsParser implements ResultParser {
    */
   static final void testClose(XMLStreamReader rdr, int type, Element elt, String message) throws SparqlException {
     if (type != END_ELEMENT || !nameIs(rdr, elt)) throw new SparqlException(message);
+  }
+  
+  /**
+   * Cleans up the stream reader. This method is expected to be called just before the final </sparql>
+   * end element, which should be the last event in the document. Also closes the stream since
+   * there's nothing more to read rather than wait for the client to do so.
+   * @param reader The reader
+   * @throws XMLStreamException if there was an error accessing the stream.
+   */
+  static final void cleanup(XMLStreamReader reader) throws XMLStreamException {
+    if (reader.nextTag() != END_ELEMENT || !reader.getLocalName().equalsIgnoreCase(SPARQL.name())) {
+      logger.warn("Extra data at end of results");
+    } else if (reader.next() != END_DOCUMENT) {
+      logger.warn("Unexpected data after XML");
+    }
+    logger.debug("End of input detected, closing reader...");
+    reader.close();
   }
 
 }
