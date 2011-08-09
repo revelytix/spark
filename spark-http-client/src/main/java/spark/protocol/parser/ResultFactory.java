@@ -196,7 +196,18 @@ public class ResultFactory {
     Header header = entity.getContentType();
     String mediaType = (header != null) ? header.getValue() : null;
     
-    ResultParser parser = findParser(mediaType, expectedType);
+    ResultParser parser = null; 
+    try {
+      parser = findParser(mediaType, expectedType);
+    } catch (SparqlException e) {
+      logger.debug("Couldn't find parser to use for protocol response; cleaning up.");
+      try {
+        entity.getContent().close();
+      } catch (IOException ioe) {
+        logger.warn("Error cleaning up response for failed protocol command", e);
+      }
+      throw e;
+    }
     assert parser != null:"Could not find result parser";
     
     Result result = null;
@@ -214,6 +225,11 @@ public class ResultFactory {
     // Should never happen because the result format should have been validated against the expected
     // class when selecting the format to use for parsing, but check anyways.
     if (expectedType != null && !expectedType.getResultClass().isInstance(result)) {
+      try {
+        result.close();
+      } catch (IOException e) {
+        logger.warn("Error closing result of incorrect type", e);
+      }
       throw new IllegalStateException("Result parsed from server response (" +
           result.getClass().getName() + ") does not match expected result type (" + expectedType + ")");
     }

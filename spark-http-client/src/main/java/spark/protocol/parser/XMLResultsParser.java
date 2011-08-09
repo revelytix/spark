@@ -23,6 +23,7 @@ import static spark.protocol.parser.XMLResultsParser.Element.RESULTS;
 import static spark.protocol.parser.XMLResultsParser.Element.SPARQL;
 import static spark.protocol.parser.XMLResultsParser.Element.VARIABLE;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,6 +34,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.codehaus.stax2.XMLInputFactory2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,19 +75,41 @@ public final class XMLResultsParser implements ResultParser {
   /** Parses the input stream as either XML select or ask results. */
   @Override
   public Result parse(Command cmd, InputStream input, ResultType type) {
-    return createResults(cmd, input, type);
+    return parseResults(cmd, input, type);
   }
 
   /**
-   * Constructs an XMLResults object based on the contents of the given stream.
+   * Parses an XMLResults object based on the contents of the given stream.
+   * @param cmd The command that originated the request.
    * @param stream The input stream containing raw XML.
    * @param query The query used to generate the stream.
    * @return A new XMLResults object. Either variable bindings, or a boolean result.
    * @throws SparqlException If the data stream was not valid.
    */
-  public static Result createResults(Command cmd, InputStream stream, ResultType type) throws SparqlException {
+  public static Result parseResults(Command cmd, InputStream input, ResultType type) throws SparqlException {
+    try {
+      return createResults(cmd, input, type);
+    } catch (Throwable t) {
+      logger.debug("Error parsing results from stream, cleaning up.");
+      try {
+        input.close();
+      } catch (IOException e) {
+        logger.warn("Error closing input stream from failed protocol response", e);
+      }
+      throw SparqlException.convert("Error parsing SPARQL protocol results from stream", t);
+    }
+  }
+  
+  /** Sets up an XML parser for the input, and creates the appropriate result type based on the parsed XML. */
+  private static Result createResults(Command cmd, InputStream stream, ResultType type) throws SparqlException {
     XMLInputFactory xmlStreamFactory = XMLInputFactory.newInstance();
+    
+    // Tell the factory to combine adjacent character blocks into a single event, so we don't have to do it ourselves.
     xmlStreamFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
+    
+    // Tell the factory to create a reader that will close the underlying stream when done.
+    xmlStreamFactory.setProperty(XMLInputFactory2.P_AUTO_CLOSE_INPUT, true);
+    
     XMLStreamReader rdr;
     try {
       rdr = xmlStreamFactory.createXMLStreamReader(stream, "UTF-8");

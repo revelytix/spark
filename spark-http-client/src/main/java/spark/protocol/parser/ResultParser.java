@@ -15,11 +15,11 @@
  */
 package spark.protocol.parser;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import spark.api.Command;
 import spark.api.Result;
+import spark.api.exception.SparqlException;
 import spark.protocol.ProtocolCommand.ResultType;
 
 /**
@@ -39,7 +39,7 @@ public interface ResultParser {
    *        result type found in the input and throw an exception if it doesn't. This is relevant e.g.
    *        for distinguishing between SELECT and ASK results in formats which support both.
    * @return The parsed SPARQL query result.
-   * @throws IOException if an error occurred reading from the server input stream.
+   * @throws SparqlException if an error occurred reading from the server input stream.
    */
-  Result parse(Command cmd, InputStream input, ResultType expectedType) throws IOException;
+  Result parse(Command cmd, InputStream input, ResultType expectedType) throws SparqlException;
 }

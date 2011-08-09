@@ -54,7 +54,7 @@ public class TestXMLSelectResults extends TestCase {
   
   private static Solutions getTestData(Command cmd, String testName) throws Exception {
     String fn = TEST_DIR + testName + FILE_EXT;
-    return (Solutions) XMLResultsParser.createResults(cmd, new FileInputStream(fn), null);
+    return (Solutions) XMLResultsParser.parseResults(cmd, new FileInputStream(fn), null);
   }
   
   private static Solutions getTestData(String testName) throws Exception {
