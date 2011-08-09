@@ -22,6 +22,7 @@ import spark.api.Command;
 import spark.api.Connection;
 import spark.api.Result;
 import spark.api.Solutions;
+import spark.api.Triples;
 import spark.spi.BaseCommand;
 
 public class SHPCommand extends BaseCommand implements Command {
@@ -45,6 +46,12 @@ public class SHPCommand extends BaseCommand implements Command {
 
   @Override
   public Result execute() {    
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Triples executeGraph() {
     // TODO Auto-generated method stub
     return null;
   }

@@ -23,6 +23,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import spark.api.BooleanResult;
 import spark.api.Result;
 import spark.api.Solutions;
 import spark.api.Triples;
@@ -42,7 +43,7 @@ public class ProtocolCommand extends BaseCommand {
     /** SPARQL SELECT query results. */
     SELECT(Solutions.class),
     /** SPARQL ASK query results. */
-    ASK(Result.class), // TODO change this when a BooleanResult is added.
+    ASK(BooleanResult.class),
     /** SPARQL DESCRIBE or CONSTRUCT query results (both return graphs). */
     GRAPH(Triples.class);
     
@@ -93,6 +94,12 @@ public class ProtocolCommand extends BaseCommand {
   public boolean executeAsk() {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public Triples executeGraph() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override

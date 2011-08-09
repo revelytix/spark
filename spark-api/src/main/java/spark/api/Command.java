@@ -104,6 +104,12 @@ public interface Command extends Closeable {
   Solutions executeQuery();
   
   /**
+   * Execute a CONSTRUCT or DESCRIBE query and return a Triples result.
+   * @return The result triples.
+   */
+  Triples executeGraph();
+  
+  /**
    * Execute an ASK query and return either true or false.
    * @return The result of the ASK
    */
