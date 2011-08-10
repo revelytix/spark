@@ -1,5 +1,6 @@
 target
 sherpa-protocol/src/main/avro/sherpa/protocol/sherpa.avpr
+sherpa-clojure/logs
 \.project$
 \.classpath$
 \.settings$

@@ -12,6 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 (ns sherpa.sherpa-server
+  (:require [clojure.tools.logging :as log])
   (:use [sherpa.avro-utils :only (to-avro from-avro)])
   (:import [org.apache.avro.ipc SaslSocketServer]
            [org.apache.avro AvroRemoteException]
@@ -36,7 +37,7 @@
 
 (defmacro add-rpc [msg return-type]
   `(defmethod sherpa-rpc ~msg [m# listener# avro-request#]
-     (println "query rpc, msg=" ~msg ", avro-req=" avro-request#)
+     (log/debug "query rpc, msg=" ~msg ", avro-req=" avro-request#)
      (let [request# (from-avro avro-request# PROTOCOL)
            protocol-fn# ~(resolve (symbol msg))
            response# (protocol-fn# listener# request#)
@@ -113,7 +114,7 @@
         address (InetSocketAddress. host port)
         responder (responder listener)
         server (SaslSocketServer. responder address)]
-    (println "Starting sherpa server on " address)
+    (log/info "Starting sherpa server on " address)
     (.start server)
     (when (:join? options true)
       (.join server))

@@ -1,4 +1,5 @@
 (ns sherpa.dummy-server
+  (:require [clojure.tools.logging :as log])
   (:use [sherpa.sherpa-server]
         [clojure.test]
         [sherpa.avro-utils :only (to-avro from-avro)]))
@@ -26,17 +27,17 @@
 (defn query-call
   "Handle a query protocol call"
   [request]
-  (println "Server got query request for " (:sparql request))
-  (println "Server sending query response")
+  (log/info "Server got query request for " (:sparql request))
+  (log/info "Server sending query response")
   {:sherpa-type "QueryResponse" :queryId "1" :vars ["x" "y"]})
 
 (defn data-call
   "Handle a data protocol call where rows is the total number of rows in the dummy result set."
   [{:keys (startRow queryId maxSize) :as request} rows]
-  (println "Server got data request for" request "and" rows)
+  (log/info "Server got data request for" request "and" rows)
   (if (zero? rows)
     (do 
-      (println "Server sending empty response for 0 rows.")
+      (log/info "Server sending empty response for 0 rows.")
       {:sherpa-type "QueryResponse"
        :queryId queryId
        :startRow 1
@@ -49,7 +50,7 @@
             size (if (> last rows)
                    (+ (- rows startRow) 1)
                    size)]
-        ;;(println "size=" size "last=" last)
+        ;;(log/info size "last=" last)
         
         {:sherpa-type "DataResponse"
          :queryId queryId
