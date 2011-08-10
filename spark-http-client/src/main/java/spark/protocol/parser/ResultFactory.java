@@ -58,7 +58,8 @@ public class ResultFactory {
     SPARQL_XML(new XMLResultsParser(), EnumSet.of(SELECT, ASK), "application/sparql-results+xml"),
     SPARQL_JSON(new UnsupportedFormatParser("SPARQL JSON results"), EnumSet.of(SELECT, ASK), "application/sparql-results+json"),
     RDF_XML(new UnsupportedFormatParser("RDF/XML"), EnumSet.of(GRAPH), "application/rdf+xml"),
-    RDF_TURTLE(new UnsupportedFormatParser("RDF Turtle"), EnumSet.of(GRAPH), "text/turtle", "text/n3", "text/rdf+n3", "application/n3");
+    RDF_TURTLE(new UnsupportedFormatParser("RDF Turtle"), EnumSet.of(GRAPH), "text/turtle", "text/n3", "text/rdf+n3", "application/n3"),
+    TEXT_HTML(new HTMLParser(), EnumSet.of(ASK), "text/html");
     
     private final ResultParser parser;
     private final EnumSet<ResultType> resultTypes;
@@ -133,6 +134,11 @@ public class ResultFactory {
    */
   public static String getDefaultMediaType(ResultType expectedType) {
     ResponseFormat format = (expectedType != null) ? defaultTypeFormats.get(expectedType) : null;
+    
+    // If the expected type is unknown, we should let the server decide, otherwise we could
+    // wind up requesting a response type that doesn't match the actual resuts (e.g. xml with CONSTRUCT).
+    // TODO: We could include multiple media types in the Accept: field, but that assumes that the
+    // server has proper support for content negotiation. Many servers only look at the first value.
     return (format != null) ? format.mimeText : null;
   }
   
