@@ -23,9 +23,11 @@ import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import spark.api.BooleanResult;
 import spark.api.Command;
 import spark.api.Connection;
 import spark.api.DataSource;
+import spark.api.Result;
 import spark.api.Solutions;
 import spark.api.credentials.NoCredentials;
 import spark.api.rdf.RDFNode;
@@ -34,12 +36,19 @@ public class SparqlQuery {
 
   private static final Logger logger = LoggerFactory.getLogger(SparqlQuery.class);
   
+  private static void showMetadata(Result r) {
+    if (r instanceof ProtocolResult) {
+      logger.debug("metadata = {}", ((ProtocolResult)r).getMetadata());
+    }
+  }
+  
   public static void testQuery() throws Exception {
     DataSource myDS = new ProtocolDataSource("http://DBpedia.org/sparql");
     Connection conn = myDS.getConnection(NoCredentials.INSTANCE);
     Command query = conn.createCommand("SELECT ?p ?o WHERE { <http://dbpedia.org/resource/Terry_Gilliam> ?p ?o }");    
     Solutions solutions = query.executeQuery();
     
+    showMetadata(solutions);
     logger.debug("vars = {}", solutions.getVariables());
     int row = 0;
     while(solutions.next()) {
@@ -57,12 +66,40 @@ public class SparqlQuery {
     Command query = conn.createCommand("SELECT ?p ?o WHERE { <http://dbpedia.org/resource/Terry_Gilliam> ?p ?o }");    
     Solutions solutions = query.executeQuery();
     
+    showMetadata(solutions);
     logger.debug("vars = {}", solutions.getVariables());
     int row = 0;
     for(Map<String, RDFNode> solution : solutions) {
       logger.debug("Row {}: {}", ++row, solution);
     }
     solutions.close();
+    query.close();
+    conn.close();
+    myDS.close();
+  }
+  
+  public static void testAsk() throws Exception {
+    DataSource myDS = new ProtocolDataSource("http://DBpedia.org/sparql");
+    Connection conn = myDS.getConnection(NoCredentials.INSTANCE);
+    Command query = conn.createCommand("ASK { <http://dbpedia.org/resource/Terry_Gilliam> ?p ?o }");    
+    
+    Result r = query.execute();
+    showMetadata(r);
+    logger.debug("result = {}", ((BooleanResult)r).getResult());
+    
+    r.close();
+    query.close();
+    conn.close();
+    myDS.close();
+  }
+  
+  public static void testAsk2() throws Exception {
+    DataSource myDS = new ProtocolDataSource("http://DBpedia.org/sparql");
+    Connection conn = myDS.getConnection(NoCredentials.INSTANCE);
+    Command query = conn.createCommand("ASK { <http://dbpedia.org/resource/Terry_Gilliam> ?p ?o }");    
+    
+    logger.debug("result = {}", query.executeAsk());
+    
     query.close();
     conn.close();
     myDS.close();
@@ -82,5 +119,7 @@ public class SparqlQuery {
   public static void main(String arg[]) throws Exception {
     testQuery();
     testQuery2();
+    testAsk();
+    testAsk2();
   }
 }
