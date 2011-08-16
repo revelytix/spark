@@ -45,7 +45,7 @@
   </licenses>
 
   <properties>
-    <avro-version>1.5.1</avro-version>
+    <avro-version>1.5.2</avro-version>
   </properties>
 
   <dependencies>
@@ -160,7 +160,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.apache.avro</groupId>
                     <artifactId>avro-maven-plugin</artifactId>
-                    <versionRange>[1.5.1,)</versionRange>
+                    <versionRange>[1.5.2,)</versionRange>
                     <goals>
                       <goal>protocol</goal>
                     </goals>
