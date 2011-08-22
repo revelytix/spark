@@ -27,8 +27,8 @@ import spark.spi.BaseCommand;
 
 public class SHPCommand extends BaseCommand implements Command {
   
-  private QueryExecution query;
-  private Integer batchSize = null;
+  private final QueryExecution query;
+  private final Map<String, String> props = new HashMap<String, String>();
   
   public SHPCommand(Connection connection, String command, QueryExecution query) {
     super(connection, command);
@@ -36,7 +36,7 @@ public class SHPCommand extends BaseCommand implements Command {
   }
 
   public void setBatchSize(int batchSize) {
-    this.batchSize = Integer.valueOf(batchSize);
+    props.put(QueryExecution.BATCH_SIZE, Integer.toString(batchSize));
   }
   
   @Override
@@ -65,10 +65,11 @@ public class SHPCommand extends BaseCommand implements Command {
   @Override
   public Solutions executeQuery() {
     Map<String,String> params = new HashMap<String,String>();
-    Map<String,String> props = new HashMap<String,String>();
-    if (batchSize != null) props.put(QueryExecution.BATCH_SIZE, batchSize.toString());
-    props.put(QueryExecution.TIMEOUT, "" + getTimeout());
+
+    props.put(QueryExecution.TIMEOUT, Long.toString(getTimeout()));
+
     query.query(getCommand(), params, props);
+
     return new SHPSolutions(this, query);
   }
 
