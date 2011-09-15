@@ -109,7 +109,7 @@
   [listener options]
   (let [host (if-let [host (:host options)]
                (InetAddress/getByName host)
-               (InetAddress/getLocalHost))
+               nil)
         port (or (:port options) DEFAULT-PORT)
         address (InetSocketAddress. host port)
         responder (responder listener)

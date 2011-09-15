@@ -48,7 +48,7 @@ public class DummySherpaServer extends SpecificResponder {
     super(SherpaServer.class, responder);
 
     try {
-      server = new SaslSocketServer(this, new InetSocketAddress(InetAddress.getLocalHost(), 0));
+      server = new SaslSocketServer(this, new InetSocketAddress((InetAddress)null, 0));
       server.start();
     } catch(IOException e) {
       throw new SparqlException("Error starting server.");
@@ -56,11 +56,7 @@ public class DummySherpaServer extends SpecificResponder {
   }
   
   public InetSocketAddress getAddress() {
-    try {
-      return new InetSocketAddress(InetAddress.getLocalHost(), this.server.getPort());
-    } catch(UnknownHostException e) {
-      throw new SparqlException(e);
-    }
+    return new InetSocketAddress((InetAddress)null, this.server.getPort());
   }
   
   public void shutdown() {
