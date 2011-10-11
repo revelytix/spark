@@ -4,7 +4,6 @@
   ;; Project dependencies, resolved via Maven
   ;; Format is: [<groupId>/<artifactId> "version"]
   :dependencies [[org.clojure/clojure "1.2.1"]
-                 [org.clojure/clojure-contrib "1.2.0"]
 
                  ;; revelytix projects
                  [com.revelytix/sherpa-protocol "0.1.3-SNAPSHOT"]
