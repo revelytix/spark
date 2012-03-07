@@ -1,4 +1,5 @@
 (ns sherpa.test-avro-utils
+  (:require [clojure.string :as str])
   (:use [clojure.test]
         [sherpa.avro-utils])
   (:import [java.util Map Collection]
@@ -53,7 +54,10 @@
   (testing "Convert Avro map"
     (let [val (to-avro {:a "foo" :b 1 :c {:sherpa-type :e1 :symbol :b}} example-protocol)]
       (is (instance? Map val))
-      (is (= "{\"c\" #<EnumSymbol b>, \"b\" 1, \"a\" \"foo\"}" (.toString val))))))
+      (is (= {"c" :enum-b
+              "b" 1
+              "a" "foo"}
+             (read-string (str/replace (.toString val) "#<EnumSymbol b>" ":enum-b")))))))
 
 (deftest test-to-avro-sequential
   (testing "Convert to Avro list"

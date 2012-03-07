@@ -40,7 +40,7 @@
       (log/info "Server sending empty response for 0 rows.")
       {:sherpa-type "QueryResponse"
        :queryId queryId
-       :startRow 1
+       :startRow (Integer. 1)
        :data []
        :more false})
     
@@ -66,8 +66,8 @@
   "Implement a dummy Sherpa server that returns a fixed result set of size rows."
   [rows]
   (reify SherpaListener
-         (query [server request] (query-call request))
-         (data [server request] (data-call request rows))
-         (cancel [server request] {:sherpa-type :CloseResponse :queryId (:queryId request)})
-         (close [server request] {:sherpa-type :CloseResponse :queryId (:queryId request)})))
+    (query [server request] (query-call request))
+    (data [server request] (data-call request rows))
+    (cancel [server request] {:sherpa-type :CloseResponse :queryId (:queryId request)})
+    (close [server request] {:sherpa-type :CloseResponse :queryId (:queryId request)})))
 
