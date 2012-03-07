@@ -21,8 +21,4 @@
   :target-dir "target"
   :compile-path "target/classes"
 
-  :omit-default-repositories true
-
-  :repositories {"rev-repo" {:url "https://build.knoodel.net/maven-repo/content/groups/public"
-                             :username "revelytix-deploy"
-                             :password "f9uUejDk"}})
+  :omit-default-repositories true)
